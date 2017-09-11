@@ -9,4 +9,4 @@ products:
           arch: amd64
 
       version-var: github.com/palantir/bouncer/cmd.version
-group-id: com.palantir.arch
+group-id: com.palantir.bouncer
