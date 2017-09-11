@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+# If your TF env has multiple simultaneous bouncer invocations, you're in a race condition
+# for downloading the binary, so that's why we handle a lockfile
+lockfile='.bouncer_download_lock'
+fd='200'
+lock_timeout='30'
+
+lock() {
+  echo "Attempting to lock ${lockfile}"
+  eval "exec ${fd}>${lockfile}"
+
+  flock -w ${lock_timeout} ${fd}
+
+  if [[ "$?" == "0" ]]; then
+    echo "Lock acquired"
+    return 0
+  else
+    echo "Timed-out waiting for lock"
+    return 1
+  fi
+}
+
+unlock() {
+  echo "Releasing lock on ${lockfile}"
+  flock -u ${fd}
+
+  if [[ "$?" == "0" ]]; then
+    echo "Lock released"
+    return 0
+  else
+    echo "Error releasing log"
+    return 1
+  fi
+}
+
+download() {
+  if [ "${BOUNCER_VERSION}" == "" ]; then
+    echo "BOUNCER_VERSION is not set. Looking for the latest bouncer release..."
+    # Terraform Enterprise environment doesn't have jq, replace with this once it does:
+    # export BOUNCER_VERSION=$(curl -s "https://api.bintray.com/packages/palantir/releases/bouncer" | jq -r '.latest_version')
+    export BOUNCER_VERSION=$(curl -s "https://api.bintray.com/packages/palantir/releases/bouncer" | egrep -oh '"latest_version":"\S*?"' | cut -d ':' -f 2 | sed 's/"//g')
+  fi
+  echo "Installing bouncer version ${BOUNCER_VERSION}"
+  #wget -q -O ./bouncer "${BASE_URL}/${BOUNCER_VERSION}/bouncer-${BOUNCER_VERSION}-linux-amd64.tgz!bouncer"
+  wget -q -O bouncer.tgz https://palantir.bintray.com/releases/com/palantir/bouncer/bouncer/${BOUNCER_VERSION}/bouncer-${BOUNCER_VERSION}.tgz
+  tar -xzf bouncer.tgz
+  chmod 755 ./bouncer
+}
+
+lock || exit 1
+if [ ! -f ./bouncer ]; then
+  download || exit 1
+else
+  echo "Bouncer already installed, using local copy"
+fi
+unlock || exit 1
+
+./bouncer "$@"
