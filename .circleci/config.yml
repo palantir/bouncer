@@ -1,0 +1,89 @@
+# The circleCI golang:1.9 docker image doesn't have darwing standard library installed
+darwin-linux-no-cgo: &darwin-linux-no-cgo
+  working_directory: /go/src/github.com/palantir/bouncer
+  docker:
+    - image: nmiyake/go:go-darwin-linux-no-cgo-1.9-t112
+      environment:
+        CGO_ENABLED: 0
+
+# Shared tasks
+define-artifact-dir: &define-artifacts-dir
+  run: echo "export ARTIFACT_STORE=/tmp/artifacts/${CIRCLE_PROJECT_REPONAME}-${TAG_NAME}-tests" >> $BASH_ENV
+
+mkdir-artifacts-dir: &mkdir-artifacts-dir
+  run: mkdir -p "${ARTIFACT_STORE}"
+
+store-test-results: &store-test-results
+  type: test-results-store
+  path: /tmp/artifacts
+
+store-artifacts: &store-artifacts
+  type: artifacts-store
+  path: /tmp/artifacts
+
+version: 2
+jobs:
+  build:
+    <<: *darwin-linux-no-cgo
+
+    steps:
+      - checkout
+      - *define-artifacts-dir
+      - *mkdir-artifacts-dir
+
+      - run: go version
+      - run: ./godelw version
+      - run: go install $(./godelw packages)
+
+      - run: ./godelw verify --apply=false --junit-output="${ARTIFACT_STORE}/tests.xml"
+      - run: ./godelw dist
+      - run: sha256sum dist/*.tgz
+
+      - save_cache:
+          key: dist-{{ .Environment.CIRCLE_SHA1 }}-v1
+          paths:
+            - dist
+
+      - *store-test-results
+
+  # Only generate a changelog for master builds, use generated changelog as git release tag message
+  changelog:
+    machine: true
+
+    steps:
+      - checkout
+      - *define-artifacts-dir
+      - *mkdir-artifacts-dir
+      - run: git log `git describe --tags --abbrev=0`..HEAD --pretty="### %s%n%b%n" > /tmp/artifacts/changelog.md
+      - *store-artifacts
+
+  publish:
+    <<: *darwin-linux-no-cgo
+
+    steps:
+      - restore_cache:
+          keys:
+            - dist-{{ .Environment.CIRCLE_SHA1 }}-v1
+      - run: ./godelw publish bintray --url https://api.bintray.com --subject palantir --repository releases --user "$BINTRAY_USER" --password "$BINTRAY_PASSWORD" --publish --downloads-list bouncer
+
+workflows:
+  version: 2
+  build-publish:
+    jobs:
+      - build
+      - publish:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
+      - changelog:
+          requires:
+            - build
+          filters:
+            tags:
+              ignore: /.*/
+            branches:
+              only: master
