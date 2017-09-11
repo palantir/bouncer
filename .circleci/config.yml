@@ -1,0 +1,46 @@
+version: 2
+jobs:
+  build:
+    working_directory: /go/src/github.com/palantir/bouncer
+
+    docker:
+      # https://hub.docker.com/r/circleci/golang/
+      - image: circleci/golang:1.9
+
+    environment:
+      TEST_RESULTS: /tmp/test-results
+  
+    steps:
+      - checkout
+      - run: mkdir -p ${TEST_RESULTS}
+
+      - run: go version
+      - run: ./godelw version
+      - run: go install $(./godelw packages)
+
+      - run: ./godelw verify --apply=false --junit-output="${TEST_RESULTS}/tests.xml"
+      - run: ./godelw dist
+      - run: sha256sum dist/*.tgz
+
+      - store_artifacts:
+          path: ${TEST_RESULTS}
+          destination: raw-test-output
+
+      - store-test-results:
+          path: ${TEST_RESULTS}
+  
+  publish:
+    steps:
+      - run: ./godelw publish bintray --url https://api.bintray.com --subject palantir --repository releases --user "$BINTRAY_USER" --password "$BINTRAY_PASSWORD" --publish --downloads-list bouncer
+
+workflows:
+  version: 2
+  build-publish:
+    jobs:
+      - publish:
+          requires: build
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
