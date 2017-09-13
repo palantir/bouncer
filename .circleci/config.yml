@@ -40,8 +40,9 @@ jobs:
       - run: sha256sum dist/*.tgz
 
       - save_cache:
-          key: dist-{{ .Environment.CIRCLE_SHA1 }}-v1
+          key: build-{{ .Environment.CIRCLE_SHA1 }}-v1
           paths:
+            - build
             - dist
 
       - *store-test-results
@@ -64,7 +65,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - dist-{{ .Environment.CIRCLE_SHA1 }}-v1
+            - build-{{ .Environment.CIRCLE_SHA1 }}-v1
       - run: ./godelw publish bintray --url https://api.bintray.com --subject palantir --repository releases --user "$BINTRAY_USERNAME" --password "$BINTRAY_PASSWORD" --publish --downloads-list bouncer
 
 workflows:
