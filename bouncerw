@@ -39,11 +39,10 @@ download() {
     echo "BOUNCER_VERSION is not set. Looking for the latest bouncer release..."
     # Terraform Enterprise environment doesn't have jq, replace with this once it does:
     # export BOUNCER_VERSION=$(curl -s "https://api.bintray.com/packages/palantir/releases/bouncer" | jq -r '.latest_version')
-    export BOUNCER_VERSION=$(curl -s "https://api.bintray.com/packages/palantir/releases/bouncer" | egrep -oh '"latest_version":"\S*?"' | cut -d ':' -f 2 | sed 's/"//g')
+    export BOUNCER_VERSION=$(curl -s "https://api.bintray.com/packages/palantir/releases/bouncer" | egrep -oh '"latest_version":"\S*?"' | cut -d ':' -f 2 | cut -d ',' -f 1 | sed 's/"//g')
   fi
   echo "Installing bouncer version ${BOUNCER_VERSION}"
-  #wget -q -O ./bouncer "${BASE_URL}/${BOUNCER_VERSION}/bouncer-${BOUNCER_VERSION}-linux-amd64.tgz!bouncer"
-  wget -q -O bouncer.tgz https://palantir.bintray.com/releases/com/palantir/bouncer/bouncer/${BOUNCER_VERSION}/bouncer-${BOUNCER_VERSION}.tgz
+  wget -q -O bouncer.tgz https://palantir.bintray.com/releases/com/palantir/bouncer/bouncer/${BOUNCER_VERSION}/bouncer-${BOUNCER_VERSION}-linux-amd64.tgz
   tar -xzf bouncer.tgz
   chmod 755 ./bouncer
 }
