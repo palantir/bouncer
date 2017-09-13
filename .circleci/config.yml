@@ -37,13 +37,6 @@ jobs:
 
       - run: ./godelw verify --apply=false --junit-output="${ARTIFACT_STORE}/tests.xml"
       - run: ./godelw dist
-      - run: sha256sum dist/*.tgz
-
-      - save_cache:
-          key: build-{{ .Environment.CIRCLE_SHA1 }}-v1
-          paths:
-            - build
-            - dist
 
       - *store-test-results
 
@@ -63,10 +56,8 @@ jobs:
 
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - build-{{ .Environment.CIRCLE_SHA1 }}-v1
       - run: ./godelw publish bintray --url https://api.bintray.com --subject palantir --repository releases --user "$BINTRAY_USERNAME" --password "$BINTRAY_PASSWORD" --publish --downloads-list bouncer
+      - run: sha256sum dist/*.tgz
 
 workflows:
   version: 2
