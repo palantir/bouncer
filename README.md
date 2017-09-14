@@ -1,16 +1,10 @@
-# bouncer
+# bouncer [![Download](https://api.bintray.com/packages/palantir/releases/bouncer/images/download.svg)](https://bintray.com/palantir/releases/bouncer/_latestVersion)
 
 Bouncer rebuilds your running infrastructure to make sure it matches the infrastructure you've defined in code.
 
 This tool inspects AWS [auto-scaling groups](https://aws.amazon.com/documentation/autoscaling/), and terminates, in a controlled fashion, any nodes whose launch configurations don't match the one currently configured on the ASG it was launched from.  It currently supports two termination methods, `serial` and `canary`; read more about them below.
 
 Although the examples for invoking this from code below are written in Terraform, and it's convenient to be executed from within a Terraform environment, there is nothing Terraform-specific about this tool whatsoever.
-
-## Downloads
-
-For running bouncer inside Terraform Enterprise (including auto-discovery of the latest version of bouncer), use [bouncerw](bouncerw), usage detailed below.
-
-For installing and running bouncer by hand, releases are published to [bintray](https://bintray.com/palantir/releases/bouncer).
 
 ## Serial
 
