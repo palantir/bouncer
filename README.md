@@ -6,6 +6,12 @@ This tool inspects AWS [auto-scaling groups](https://aws.amazon.com/documentatio
 
 Although the examples for invoking this from code below are written in Terraform, and it's convenient to be executed from within a Terraform environment, there is nothing Terraform-specific about this tool whatsoever.
 
+## Downloads
+
+For running bouncer inside Terraform Enterprise (including auto-discovery of the latest version of bouncer), use [bouncerw](bouncerw), usage detailed below.
+
+For installing and running bouncer by hand, releases are published to [bintray](https://bintray.com/palantir/releases/bouncer).
+
 ## Serial
 
 Made for bouncing nodes in ASGs of size 1 but which form a logical set.  `./bouncer serial --help` for all available options.  Ex:
