@@ -4,8 +4,28 @@ products:
       main-pkg: ./main
       os-archs:
         - os: darwin
+          arch: 386
+        - os: darwin
+          arch: amd64
+        - os: freebsd
+          arch: 386
+        - os: freebsd
+          arch: amd64
+        - os: freebsd
+          arch: arm
+        - os: linux
+          arch: 386
+        - os: linux
           arch: amd64
         - os: linux
+          arch: arm
+        - os: linux
+          arch: arm64
+        #- os: solaris
+        #  arch: amd64
+        - os: windows
+          arch: 386
+        - os: windows
           arch: amd64
 
       version-var: github.com/palantir/bouncer/cmd.version
