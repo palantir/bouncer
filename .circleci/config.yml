@@ -1,8 +1,8 @@
-# The circleCI golang:1.9 docker image doesn't have darwing standard library installed
-darwin-linux-no-cgo: &darwin-linux-no-cgo
+# The circleCI golang:1.9 docker image doesn't have other archs installed
+docker-golang: &docker-golang
   working_directory: /go/src/github.com/palantir/bouncer
   docker:
-    - image: nmiyake/go:go-darwin-linux-no-cgo-1.9-t112
+    - image: golang:1.9
       environment:
         CGO_ENABLED: 0
 
@@ -24,7 +24,7 @@ store-artifacts: &store-artifacts
 version: 2
 jobs:
   build:
-    <<: *darwin-linux-no-cgo
+    <<: *docker-golang
 
     steps:
       - checkout
@@ -52,7 +52,7 @@ jobs:
       - *store-artifacts
 
   publish:
-    <<: *darwin-linux-no-cgo
+    <<: *docker-golang
 
     steps:
       - checkout
