@@ -47,12 +47,9 @@ func GetAWSClients() (*Clients, error) {
 		return nil, errors.Errorf("Your AWS Credentials are expired")
 	}
 
-	region := os.Getenv("AWS_REGION")
+	region := os.Getenv("AWS_DEFAULT_REGION")
 	if region == "" {
-		region = os.Getenv("AWS_DEFAULT_REGION")
-		if region == "" {
-			region = "us-east-1"
-		}
+		region = "us-east-1"
 	}
 
 	awsConf := aws.Config{

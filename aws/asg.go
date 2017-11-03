@@ -73,7 +73,7 @@ func (c *Clients) GetASG(asgName *string) (*autoscaling.Group, error) {
 	}
 
 	if len(asgs) != 1 {
-		return nil, errors.Errorf("ASG Name '%s' matched '%v' ASGs, expecting it to match 1 (looking in region %s, have you set AWS_REGION?)", *asgName, len(asgs), c.ASGClient.SigningRegion)
+		return nil, errors.Errorf("ASG Name '%s' matched '%v' ASGs, expecting it to match 1 (looking in region %s, have you set AWS_DEFAULT_REGION?)", *asgName, len(asgs), c.ASGClient.SigningRegion)
 	}
 
 	return asgs[0], nil
