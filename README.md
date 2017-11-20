@@ -161,6 +161,23 @@ resource "null_resource" "nomad_worker_bouncer" {
 }
 ```
 
+## Required Permissions
+
+In order to run the bouncer, the following permissions are required:
+
+### asg
+DescribeAutoScalingGroups
+DescribeLaunchConfigurations
+CompleteLifecycleAction
+TerminateInstanceInAutoScalingGroup
+SetDesiredCapacity
+
+### ec2
+DescribeInstances
+DescribeInstanceAttribute
+
+Note that several of these permissions could cause service outages if abused.  If this is a concern, scoping the permissions is recommended.
+
 ## Contributing
 
 For general guidelines on contributing the Palantir products, see [this page](https://github.com/palantir/gradle-baseline/blob/develop/docs/best-practices/contributing/readme.md)
