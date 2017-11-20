@@ -70,8 +70,8 @@ func (r *Runner) MustValidatePrereqs() {
 		if *asg.ASG.DesiredCapacity == 0 {
 			log.WithFields(log.Fields{
 				"ASG": *asg.ASG.AutoScalingGroupName,
-			}).Error("ASG desired capacity is 0")
-			os.Exit(1)
+			}).Warn("ASG desired capacity is 0 - nothing to do here")
+			os.Exit(0)
 		}
 
 		if *asg.ASG.DesiredCapacity == *asg.ASG.MinSize {
