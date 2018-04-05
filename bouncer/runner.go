@@ -51,8 +51,8 @@ type BaseRunner struct {
 const (
 	waitBetweenChecks = 15 * time.Second
 	// Sleep time and number of times to retry non-destructive AWS API calls
-	apiRetryCount = 5
-	apiRetrySleep = 1 * time.Second
+	apiRetryCount = 10
+	apiRetrySleep = 3 * time.Second
 
 	asgSeparator        = ","
 	desiredCapSeparator = ":"
