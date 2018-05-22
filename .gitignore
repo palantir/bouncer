@@ -4,3 +4,4 @@ scratch/
 .idea/
 *.iml
 *.ipr
+/out/
