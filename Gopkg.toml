@@ -26,10 +26,6 @@
 
 
 [[constraint]]
-  name = "github.com/palantir/bouncer"
-  version = "0.6.12"
-
-[[constraint]]
   name = "gopkg.in/go-playground/validator.v9"
   version = "9.3.5"
 
