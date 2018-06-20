@@ -56,7 +56,7 @@ jobs:
 
     steps:
       - checkout
-      - run: ./godelw publish bintray --url https://api.bintray.com --subject palantir --repository releases --user "$BINTRAY_USERNAME" --password "$BINTRAY_PASSWORD" --publish --downloads-list bouncer
+      - run: ./godelw publish bintray --url https://api.bintray.com --subject palantir --repository releases --username "$BINTRAY_USERNAME" --password "$BINTRAY_PASSWORD" --publish --downloads-list bouncer
       - run: sha256sum dist/*.tgz
 
 workflows:
