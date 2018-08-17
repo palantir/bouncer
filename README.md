@@ -165,16 +165,15 @@ resource "null_resource" "nomad_worker_bouncer" {
 
 In order to run the bouncer, the following permissions are required:
 
-### asg
-DescribeAutoScalingGroups
-DescribeLaunchConfigurations
-CompleteLifecycleAction
-TerminateInstanceInAutoScalingGroup
-SetDesiredCapacity
-
-### ec2
-DescribeInstances
-DescribeInstanceAttribute
+```
+autoscaling:DescribeAutoScalingGroups
+autoscaling:DescribeLaunchConfigurations
+autoscaling:CompleteLifecycleAction
+autoscaling:TerminateInstanceInAutoScalingGroup
+autoscaling:SetDesiredCapacity
+ec2:DescribeInstances
+ec2:DescribeInstanceAttribute
+```
 
 Note that several of these permissions could cause service outages if abused.  If this is a concern, scoping the permissions is recommended.
 
