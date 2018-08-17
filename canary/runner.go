@@ -85,18 +85,6 @@ func (r *Runner) MustValidatePrereqs() {
 			}).Error("Desired capacity given must be less than or equal to 2x max_size")
 			os.Exit(1)
 		}
-
-		if asgSet.IsNewUnhealthy() {
-			for _, inst := range asgSet.GetUnhealthyNewInstances() {
-				log.WithFields(log.Fields{
-					"ASG":                 *actualAsg.ASG.AutoScalingGroupName,
-					"Instance ID":         *inst.EC2Instance.InstanceId,
-					"EC2 State":           *inst.EC2Instance.State.Name,
-					"ASG Lifecycle State": *inst.ASGInstance.LifecycleState,
-				}).Error("Instance is new and unhealthy")
-			}
-			os.Exit(1)
-		}
 	}
 }
 
