@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -36,28 +35,18 @@ type Clients struct {
 
 // GetAWSClients returns the AWS client objects we'll need
 func GetAWSClients() (*Clients, error) {
-	c := credentials.NewEnvCredentials()
-
-	_, err := c.Get()
-	if err != nil {
-		return nil, errors.Wrap(err, "error getting AWS creds")
-	}
-
-	if c.IsExpired() {
-		return nil, errors.Errorf("Your AWS Credentials are expired")
-	}
-
 	region := os.Getenv("AWS_DEFAULT_REGION")
 	if region == "" {
 		region = "us-east-1"
 	}
 
 	awsConf := aws.Config{
-		Credentials: c,
-		Region:      &region,
+		Region: &region,
 	}
 
-	sess, err := session.NewSession(&awsConf)
+	sess, err := session.NewSessionWithOptions(session.Options{
+		Config: awsConf,
+	})
 	if err != nil {
 		return nil, errors.Wrap(err, "Error opening AWS session")
 	}
