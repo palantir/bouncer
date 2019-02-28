@@ -101,18 +101,6 @@
   revision = "db1efb556f84b25a0a13a04aad883943538ad2e0"
 
 [[projects]]
-  name = "github.com/palantir/bouncer"
-  packages = [
-    "aws",
-    "bouncer",
-    "canary",
-    "cmd",
-    "serial",
-  ]
-  revision = "406ff76721e308772abba94ed5ce7df3e2dd82b1"
-  version = "0.7.0"
-
-[[projects]]
   name = "github.com/pelletier/go-buffruneio"
   packages = ["."]
   revision = "c37440a7cf42ac63b919c752ca73a85067e05992"
@@ -193,6 +181,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1d4f1eb9f444863d20a9a0fec84e2101e4e0ada217530cd069e5ea1e0c804ca4"
+  inputs-digest = "af4b68d7197f6b46e5fc41ecab368ae7b5e2bba0aafb0b0dd624378cda8f5d7d"
   solver-name = "gps-cdcl"
   solver-version = 1
