@@ -43,7 +43,7 @@ func NewInstance(ac *aws.Clients, asg *autoscaling.Group, asgInst *autoscaling.I
 		return
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Error converting ASG Inst to EC2 inst for %s", *asgInst.InstanceId)
+		return nil, errors.Wrapf(err, "error converting ASG Inst to EC2 inst for %s", *asgInst.InstanceId)
 	}
 
 	inst := Instance{
