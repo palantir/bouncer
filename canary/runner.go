@@ -59,7 +59,7 @@ func (r *Runner) MustValidatePrereqs() {
 	for _, actualAsg := range asgSet.ASGs {
 		if actualAsg.DesiredASG.DesiredCapacity != *actualAsg.ASG.DesiredCapacity {
 			log.WithFields(log.Fields{
-				"ASG": *actualAsg.ASG.AutoScalingGroupName,
+				"ASG":                     *actualAsg.ASG.AutoScalingGroupName,
 				"desired_capacity given":  actualAsg.DesiredASG.DesiredCapacity,
 				"desired_capacity actual": *actualAsg.ASG.DesiredCapacity,
 			}).Error("Desired capacity given must be equal to starting desired_capacity of ASG")

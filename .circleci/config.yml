@@ -3,9 +3,6 @@ docker-golang: &docker-golang
   working_directory: /go/src/github.com/palantir/bouncer
   docker:
     - image: golang:1.12-stretch
-      environment:
-        CGO_ENABLED: 0
-        USER: root
 
 # Shared tasks
 define-artifact-dir: &define-artifacts-dir

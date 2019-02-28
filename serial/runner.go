@@ -58,7 +58,7 @@ func (r *Runner) MustValidatePrereqs() {
 	if len(divergedASGs) != 0 {
 		for _, badASG := range divergedASGs {
 			log.WithFields(log.Fields{
-				"ASG": *badASG.ASG.AutoScalingGroupName,
+				"ASG":                     *badASG.ASG.AutoScalingGroupName,
 				"desired_capacity actual": *badASG.ASG.DesiredCapacity,
 				"desired_capacity given":  badASG.DesiredASG.DesiredCapacity,
 			}).Error("ASG desired capacity doesn't match expected starting value")
