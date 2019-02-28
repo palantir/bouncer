@@ -5,6 +5,7 @@ docker-golang: &docker-golang
     - image: golang:1.12-stretch
       environment:
         CGO_ENABLED: 0
+        USER: root
 
 # Shared tasks
 define-artifact-dir: &define-artifacts-dir
@@ -33,7 +34,6 @@ jobs:
 
       - run: go version
       - run: ./godelw version
-      - run: go install $(./godelw packages)
 
       - run: ./godelw verify --apply=false --junit-output="${ARTIFACT_STORE}/tests.xml"
       - run: ./godelw dist
