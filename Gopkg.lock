@@ -9,7 +9,7 @@
   revision = "7f4b1adc791766938c29457bed0703fb9134421a"
 
 [[projects]]
-  digest = "1:c108897cd8dca3f10e225ba639bed09b530c8e55c7fa4cba630d17fc7011cfba"
+  digest = "1:fb555802881b8813c08ae721757fe2842c33752aa3729301c775f60b3005762b"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -43,8 +43,9 @@
     "private/protocol/xml/xmlutil",
     "service/autoscaling",
     "service/ec2",
-    "service/sts"
+    "service/sts",
   ]
+  pruneopts = "UT"
   revision = "3248e106c35aafb9b982f5d086f0150faf24ee4e"
 
 [[projects]]
@@ -59,7 +60,7 @@
   name = "github.com/go-playground/locales"
   packages = [
     ".",
-    "currency"
+    "currency",
   ]
   pruneopts = "UT"
   revision = "1e5f1161c6416a5ff48840eb8724a394e48cc534"
@@ -84,7 +85,7 @@
     "hcl/token",
     "json/parser",
     "json/scanner",
-    "json/token"
+    "json/token",
   ]
   pruneopts = "UT"
   revision = "eb6f65b2d77ed5078887f960ff570fbddbbeb49d"
@@ -98,9 +99,10 @@
   version = "v1.0"
 
 [[projects]]
-  digest = "1:b87714e57a511d88f307aba7d5b63522da12bed0a050889c81272fc50f71100e"
+  digest = "1:bb81097a5b62634f3e9fec1014657855610c82d19b9a40c17612e32651e35dca"
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
+  pruneopts = "UT"
   revision = "c2b33e84"
 
 [[projects]]
@@ -144,7 +146,7 @@
   name = "github.com/spf13/afero"
   packages = [
     ".",
-    "mem"
+    "mem",
   ]
   pruneopts = "UT"
   revision = "9be650865eab0c12963d8753212f4f9c66cdcf12"
@@ -201,7 +203,7 @@
     "internal/ucd",
     "transform",
     "unicode/cldr",
-    "unicode/norm"
+    "unicode/norm",
   ]
   pruneopts = "UT"
   revision = "fc7fa097411d30e6708badff276c4c164425590c"
