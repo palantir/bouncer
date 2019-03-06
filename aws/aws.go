@@ -91,6 +91,11 @@ func (c *Clients) ASGInstToEC2Inst(inst *autoscaling.Instance) (*ec2.Instance, e
 
 // ASGLTplVersionToEC2LTplVersion resolves ASG Template Versions to its actual *int64 ec2LaunchTemplate Version
 func (c Clients) ASGLTplVersionToEC2LTplVersion(asgLaunchTemplate *autoscaling.LaunchTemplateSpecification) (*string, error) {
+	// No launch template, nothing to do here
+	if asgLaunchTemplate == nil {
+		return nil, nil
+	}
+
 	input := &ec2.DescribeLaunchTemplatesInput{
 		LaunchTemplateIds: []*string{
 			asgLaunchTemplate.LaunchTemplateId,
@@ -122,5 +127,5 @@ func (c Clients) ASGLTplVersionToEC2LTplVersion(asgLaunchTemplate *autoscaling.L
 			return &version, nil
 		}
 	}
-	return nil, errors.Wrapf(err, "LaunchTemplate %s not found", asgLaunchTemplate.LaunchTemplateId)
+	return nil, errors.Wrapf(err, "LaunchTemplate %s not found", *asgLaunchTemplate.LaunchTemplateId)
 }
