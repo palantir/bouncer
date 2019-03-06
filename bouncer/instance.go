@@ -52,7 +52,7 @@ func NewInstance(ac *aws.Clients, asg *autoscaling.Group, asgInst *autoscaling.I
 		return
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Error resolving LaunchTemplate %s Version to actual version number", asgLTpl.LaunchTemplateId)
+		return nil, errors.Wrapf(err, "Error resolving LaunchTemplate %s Version to actual version number", *asgLTpl.LaunchTemplateId)
 	}
 
 	inst := Instance{
