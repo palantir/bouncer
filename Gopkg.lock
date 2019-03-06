@@ -40,7 +40,7 @@
     "private/protocol/xml/xmlutil",
     "service/autoscaling",
     "service/ec2",
-    "service/sts"
+    "service/sts",
   ]
   revision = "3248e106c35aafb9b982f5d086f0150faf24ee4e"
 
@@ -53,7 +53,7 @@
   name = "github.com/go-playground/locales"
   packages = [
     ".",
-    "currency"
+    "currency",
   ]
   revision = "1e5f1161c6416a5ff48840eb8724a394e48cc534"
 
@@ -74,7 +74,7 @@
     "hcl/token",
     "json/parser",
     "json/scanner",
-    "json/token"
+    "json/token",
   ]
   revision = "eb6f65b2d77ed5078887f960ff570fbddbbeb49d"
 
@@ -100,6 +100,18 @@
   revision = "db1efb556f84b25a0a13a04aad883943538ad2e0"
 
 [[projects]]
+  name = "github.com/palantir/bouncer"
+  packages = [
+    "aws",
+    "bouncer",
+    "canary",
+    "cmd",
+    "serial",
+  ]
+  revision = "406ff76721e308772abba94ed5ce7df3e2dd82b1"
+  version = "0.7.0"
+
+[[projects]]
   name = "github.com/pelletier/go-buffruneio"
   packages = ["."]
   revision = "c37440a7cf42ac63b919c752ca73a85067e05992"
@@ -119,7 +131,7 @@
   name = "github.com/spf13/afero"
   packages = [
     ".",
-    "mem"
+    "mem",
   ]
   revision = "9be650865eab0c12963d8753212f4f9c66cdcf12"
 
@@ -162,7 +174,7 @@
     "internal/ucd",
     "transform",
     "unicode/cldr",
-    "unicode/norm"
+    "unicode/norm",
   ]
   revision = "fc7fa097411d30e6708badff276c4c164425590c"
 
@@ -180,6 +192,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "af4b68d7197f6b46e5fc41ecab368ae7b5e2bba0aafb0b0dd624378cda8f5d7d"
+  inputs-digest = "1d4f1eb9f444863d20a9a0fec84e2101e4e0ada217530cd069e5ea1e0c804ca4"
   solver-name = "gps-cdcl"
   solver-version = 1
