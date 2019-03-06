@@ -45,6 +45,7 @@
     "service/ec2",
     "service/sts"
   ]
+  revision = "3248e106c35aafb9b982f5d086f0150faf24ee4e"
 
 [[projects]]
   digest = "1:bbc989ded6eb5bacd3af5d98569730b84ec05d3764ddd72b4b701484cb1d7b7c"
