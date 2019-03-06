@@ -1,0 +1,6 @@
+names:
+  - "\\..+"
+  - "vendor"
+  - "socks"
+paths:
+  - "godel"

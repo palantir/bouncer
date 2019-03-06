@@ -2,11 +2,14 @@
 
 
 [[projects]]
+  digest = "1:76f1ad2d0bbfaa399400f9e43bd59a3a2342eb9b46314aca559e85fecf2a771b"
   name = "github.com/Sirupsen/logrus"
   packages = ["."]
+  pruneopts = "UT"
   revision = "7f4b1adc791766938c29457bed0703fb9134421a"
 
 [[projects]]
+  digest = "1:fb555802881b8813c08ae721757fe2842c33752aa3729301c775f60b3005762b"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -40,30 +43,38 @@
     "private/protocol/xml/xmlutil",
     "service/autoscaling",
     "service/ec2",
-    "service/sts"
+    "service/sts",
   ]
+  pruneopts = "UT"
   revision = "3248e106c35aafb9b982f5d086f0150faf24ee4e"
 
 [[projects]]
+  digest = "1:bbc989ded6eb5bacd3af5d98569730b84ec05d3764ddd72b4b701484cb1d7b7c"
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
+  pruneopts = "UT"
   revision = "ff7bc41d4007f67e5456703c34342df4e0113f64"
 
 [[projects]]
+  digest = "1:be97a7b83aa1637986b9e1a44ccf6d972d8e0c0b483846cfab880bb8f292bd86"
   name = "github.com/go-playground/locales"
   packages = [
     ".",
-    "currency"
+    "currency",
   ]
+  pruneopts = "UT"
   revision = "1e5f1161c6416a5ff48840eb8724a394e48cc534"
 
 [[projects]]
   branch = "master"
+  digest = "1:eb758dc813fc3fdf7194c82883b734a8419b1cd6eee3e184d3f6777e248ef9ce"
   name = "github.com/go-playground/universal-translator"
   packages = ["."]
+  pruneopts = "UT"
   revision = "71201497bace774495daed26a3874fd339e0b538"
 
 [[projects]]
+  digest = "1:3dd1939bb7cf68cdfeb9cd91b278a0d73a8e64e0ed03a40d4a237894e514297b"
   name = "github.com/hashicorp/hcl"
   packages = [
     ".",
@@ -74,87 +85,117 @@
     "hcl/token",
     "json/parser",
     "json/scanner",
-    "json/token"
+    "json/token",
   ]
+  pruneopts = "UT"
   revision = "eb6f65b2d77ed5078887f960ff570fbddbbeb49d"
 
 [[projects]]
+  digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
+  pruneopts = "UT"
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
   version = "v1.0"
 
 [[projects]]
+  digest = "1:bb81097a5b62634f3e9fec1014657855610c82d19b9a40c17612e32651e35dca"
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
+  pruneopts = "UT"
   revision = "c2b33e84"
 
 [[projects]]
+  digest = "1:79c55505b38424ce7dc479e8e0813db40245434db95a5d2e3390bfa24047b43c"
   name = "github.com/magiconair/properties"
   packages = ["."]
+  pruneopts = "UT"
   revision = "51463bfca2576e06c62a8504b5c0f06d61312647"
 
 [[projects]]
+  digest = "1:ce8a529f61eb119be5e84417a77e71fe380d09ddcd8b69b1372d9261a27f9539"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
+  pruneopts = "UT"
   revision = "db1efb556f84b25a0a13a04aad883943538ad2e0"
 
 [[projects]]
+  digest = "1:b2ee62e09bec113cf086d2ce0769efcc7bf79481aba8373fd8f7884e94df3462"
   name = "github.com/pelletier/go-buffruneio"
   packages = ["."]
+  pruneopts = "UT"
   revision = "c37440a7cf42ac63b919c752ca73a85067e05992"
   version = "v0.2.0"
 
 [[projects]]
+  digest = "1:db497f6e99b37582caff6dea62294d77ff5e8257f1268734be21f21e1afd36fc"
   name = "github.com/pelletier/go-toml"
   packages = ["."]
+  pruneopts = "UT"
   revision = "f6e7596e8daafd44dc9e5c208dc73035020c8481"
 
 [[projects]]
+  digest = "1:5c77ec0df6475d5fc9bc636ebd00a2585310c4e44c8a30c83f0f5f0c4b53d717"
   name = "github.com/pkg/errors"
   packages = ["."]
+  pruneopts = "UT"
   revision = "248dadf4e9068a0b3e79f02ed0a610d935de5302"
 
 [[projects]]
+  digest = "1:612c049404353b151a3d9fd779b72a0905df1f799056c29202ad84d4fcb1b748"
   name = "github.com/spf13/afero"
   packages = [
     ".",
-    "mem"
+    "mem",
   ]
+  pruneopts = "UT"
   revision = "9be650865eab0c12963d8753212f4f9c66cdcf12"
 
 [[projects]]
+  digest = "1:16880c4dc9d7482bad0240b0aae055efc194b4ca152187cb553e616a2a4393b1"
   name = "github.com/spf13/cast"
   packages = ["."]
+  pruneopts = "UT"
   revision = "ce135a4ebeee6cfe9a26c93ee0d37825f26113c7"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:58f66c77137ab30204073fb48d9a02c20fe3f0417bf4ff2ac35e443db39ec0ce"
   name = "github.com/spf13/cobra"
   packages = ["."]
+  pruneopts = "UT"
   revision = "7be4beda01ec05d0b93d80b3facd2b6f44080d94"
 
 [[projects]]
+  digest = "1:e86f24714afdc8e08409c02961ed39d74c85556b3965867d699e51564271c6de"
   name = "github.com/spf13/jwalterweatherman"
   packages = ["."]
+  pruneopts = "UT"
   revision = "fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66"
 
 [[projects]]
+  digest = "1:5ac4d474296e3d6a5f0551050e9c65a56e791fe192f239543fd787dd635f519e"
   name = "github.com/spf13/pflag"
   packages = ["."]
+  pruneopts = "UT"
   revision = "d16db1e50e33dff1b6cdf37596cef36742128670"
 
 [[projects]]
+  digest = "1:3d39d9cc40ed600491458167be83bd490821a62c3d95f5ef3b4c021a0609fa07"
   name = "github.com/spf13/viper"
   packages = ["."]
+  pruneopts = "UT"
   revision = "84f94806c67f59dd7ae87bc5351f7a9c94a4558d"
 
 [[projects]]
+  digest = "1:0ab7dce31f3a686ea482c832ffff4a3093a9864e100d47a6759196a03a98eba9"
   name = "golang.org/x/sys"
   packages = ["unix"]
+  pruneopts = "UT"
   revision = "afadfcc7779c1f4db0f6f6438afcb108d9c9c7cd"
 
 [[projects]]
+  digest = "1:99341ec146598d7a60c98375ea4aa60d71c7e84a37d261f3b566e4a66c195738"
   name = "golang.org/x/text"
   packages = [
     "internal/gen",
@@ -162,24 +203,39 @@
     "internal/ucd",
     "transform",
     "unicode/cldr",
-    "unicode/norm"
+    "unicode/norm",
   ]
+  pruneopts = "UT"
   revision = "fc7fa097411d30e6708badff276c4c164425590c"
 
 [[projects]]
+  digest = "1:8c25776bf8ae7599f002ea8e0c14691b7c192fe083c049c0828e037438fef956"
   name = "gopkg.in/go-playground/validator.v9"
   packages = ["."]
+  pruneopts = "UT"
   revision = "4bd19358521c53f09639f21e2a9d6883d6890f24"
   version = "v9.3.5"
 
 [[projects]]
+  digest = "1:cacb98d52c60c337c2ce95a7af83ba0313a93ce5e73fa9e99a96aff70776b9d3"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
+  pruneopts = "UT"
   revision = "a5b47d31c556af34a302ce5d659e6fea44d90de0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "af4b68d7197f6b46e5fc41ecab368ae7b5e2bba0aafb0b0dd624378cda8f5d7d"
+  input-imports = [
+    "github.com/Sirupsen/logrus",
+    "github.com/aws/aws-sdk-go/aws",
+    "github.com/aws/aws-sdk-go/aws/session",
+    "github.com/aws/aws-sdk-go/service/autoscaling",
+    "github.com/aws/aws-sdk-go/service/ec2",
+    "github.com/pkg/errors",
+    "github.com/spf13/cobra",
+    "github.com/spf13/viper",
+    "gopkg.in/go-playground/validator.v9",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
