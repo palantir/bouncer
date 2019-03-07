@@ -40,7 +40,7 @@ func NewASG(ac *aws.Clients, desASG *DesiredASG, force bool, startTime time.Time
 	var instances []*Instance
 
 	for _, asgInst := range awsAsg.Instances {
-		inst, err := NewInstance(ac, awsAsg, asgInst, awsAsg.LaunchConfigurationName, force, startTime, desASG.PreTerminateCmd)
+		inst, err := NewInstance(ac, awsAsg, asgInst, force, startTime, desASG.PreTerminateCmd)
 		if err != nil {
 			return nil, errors.Wrapf(err, "error generating bouncer.instance for %s", *asgInst.InstanceId)
 		}

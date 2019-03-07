@@ -15,7 +15,9 @@
 package aws
 
 import (
+	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -85,4 +87,45 @@ func (c *Clients) ASGInstToEC2Inst(inst *autoscaling.Instance) (*ec2.Instance, e
 	}
 
 	return nil, errors.Errorf("No instances found for %s", *inst.InstanceId)
+}
+
+// ASGLTplVersionToEC2LTplVersion resolves ASG Template Versions to its actual *int64 ec2LaunchTemplate Version
+func (c Clients) ASGLTplVersionToEC2LTplVersion(asgLaunchTemplate *autoscaling.LaunchTemplateSpecification) (*string, error) {
+	// No launch template, nothing to do here
+	if asgLaunchTemplate == nil {
+		return nil, nil
+	}
+
+	input := &ec2.DescribeLaunchTemplatesInput{
+		LaunchTemplateIds: []*string{
+			asgLaunchTemplate.LaunchTemplateId,
+		},
+	}
+
+	res, err := c.EC2Client.DescribeLaunchTemplates(input)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Error describing LaunchTemplate %s", *asgLaunchTemplate.LaunchTemplateId)
+	}
+
+	if len(res.LaunchTemplates) > 1 {
+		return nil, errors.New("More than 1 LaunchTemplate found somehow")
+	}
+
+	for _, ec2LaunchTemplate := range res.LaunchTemplates {
+		switch version := *asgLaunchTemplate.Version; version {
+		case "$Latest":
+			s := strconv.FormatInt(*ec2LaunchTemplate.LatestVersionNumber, 10)
+			return &s, nil
+		case "$Default":
+			s := strconv.FormatInt(*ec2LaunchTemplate.DefaultVersionNumber, 10)
+			return &s, nil
+		default:
+			_, err := strconv.ParseInt(version, 10, 64)
+			if err != nil {
+				return nil, fmt.Errorf("Unexpected TemplateVersion %q conversion to Int64 failed", version)
+			}
+			return &version, nil
+		}
+	}
+	return nil, errors.Wrapf(err, "LaunchTemplate %s not found", *asgLaunchTemplate.LaunchTemplateId)
 }
