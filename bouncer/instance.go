@@ -36,7 +36,7 @@ type Instance struct {
 }
 
 // NewInstance returns a new bouncer.Instance object
-func NewInstance(ac *aws.Clients, asg *autoscaling.Group, asgInst *autoscaling.Instance, launchConfigName *string, asgLTpl *autoscaling.LaunchTemplateSpecification, force bool, startTime time.Time, preTerminateCmd *string) (*Instance, error) {
+func NewInstance(ac *aws.Clients, asg *autoscaling.Group, asgInst *autoscaling.Instance, force bool, startTime time.Time, preTerminateCmd *string) (*Instance, error) {
 	var ec2Inst *ec2.Instance
 	err := retry(apiRetryCount, apiRetrySleep, func() (err error) {
 		ec2Inst, err = ac.ASGInstToEC2Inst(asgInst)
@@ -48,18 +48,18 @@ func NewInstance(ac *aws.Clients, asg *autoscaling.Group, asgInst *autoscaling.I
 
 	var ec2LTplVersion *string
 	err = retry(apiRetryCount, apiRetrySleep, func() (err error) {
-		ec2LTplVersion, err = ac.ASGLTplVersionToEC2LTplVersion(asgLTpl)
+		ec2LTplVersion, err = ac.ASGLTplVersionToEC2LTplVersion(asg.LaunchTemplate)
 		return
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Error resolving LaunchTemplate %s Version to actual version number", *asgLTpl.LaunchTemplateId)
+		return nil, errors.Wrapf(err, "Error resolving LaunchTemplate %s Version to actual version number", *asg.LaunchTemplate.LaunchTemplateId)
 	}
 
 	inst := Instance{
 		EC2Instance:      ec2Inst,
 		ASGInstance:      asgInst,
 		AutoscalingGroup: asg,
-		IsOld:            isInstanceOld(asgInst, ec2Inst, launchConfigName, asgLTpl, ec2LTplVersion, force, startTime),
+		IsOld:            isInstanceOld(asgInst, ec2Inst, asg.LaunchConfigurationName, asg.LaunchTemplate, ec2LTplVersion, force, startTime),
 		IsHealthy:        isInstanceHealthy(asgInst, ec2Inst),
 		PreTerminateCmd:  preTerminateCmd,
 	}
@@ -68,33 +68,52 @@ func NewInstance(ac *aws.Clients, asg *autoscaling.Group, asgInst *autoscaling.I
 }
 
 func isInstanceOld(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance, launchConfigName *string, launchTemplate *autoscaling.LaunchTemplateSpecification, launchTemplateVersion *string, force bool, startTime time.Time) bool {
-	if asgInst.LaunchConfigurationName == nil && asgInst.LaunchTemplate == nil {
-		log.WithFields(log.Fields{
-			"InstanceID": *asgInst.InstanceId,
-		}).Debug("Instance marked as old because launch config and launch template are both nil")
-		return true
-	}
+	if asgInst.LaunchTemplate == nil {
+		// This machine is using LaunchConfigs
 
-	if asgInst.LaunchConfigurationName != nil && *asgInst.LaunchConfigurationName != *launchConfigName {
-		log.WithFields(log.Fields{
-			"InstanceID":           *asgInst.InstanceId,
-			"InstanceLaunchConfig": *asgInst.LaunchConfigurationName,
-			"GroupLaunchConfig":    *launchConfigName,
-		}).Debug("Instance marked as old because of launch config")
-		return true
-	}
+		if asgInst.LaunchConfigurationName == nil {
+			log.WithFields(log.Fields{
+				"InstanceID": *asgInst.InstanceId,
+			}).Debug("Instance marked as old because launch config instance was using has been deleted")
 
-	if asgInst.LaunchTemplate != nil && *asgInst.LaunchTemplate.Version != *launchTemplateVersion {
-		log.WithFields(log.Fields{
-			"InstanceID":                    *asgInst.InstanceId,
-			"InstanceLaunchTemplateId":      *asgInst.LaunchTemplate.LaunchTemplateId,
-			"InstanceLaunchTemplateName":    *asgInst.LaunchTemplate.LaunchTemplateName,
-			"InstanceLaunchTemplateVersion": *asgInst.LaunchTemplate.Version,
-			"GroupLaunchTemplateId":         *launchTemplate.LaunchTemplateId,
-			"GroupLaunchTemplateName":       *launchTemplate.LaunchTemplateName,
-			"GroupLaunchTemplateVersion":    *launchTemplate.Version,
-		}).Debug("Instance marked as old because of launchTemplate Version")
-		return true
+			return true
+		} else if *asgInst.LaunchConfigurationName != *launchConfigName {
+			log.WithFields(log.Fields{
+				"InstanceID":           *asgInst.InstanceId,
+				"InstanceLaunchConfig": *asgInst.LaunchConfigurationName,
+				"GroupLaunchConfig":    *launchConfigName,
+			}).Debug("Instance marked as old because launch config differs from that of its ASG")
+
+			return true
+		}
+	} else {
+		// This machine is using LaunchTemplates
+
+		if *asgInst.LaunchTemplate.Version != *launchTemplateVersion {
+			log.WithFields(log.Fields{
+				"InstanceID":                    *asgInst.InstanceId,
+				"InstanceLaunchTemplateId":      *asgInst.LaunchTemplate.LaunchTemplateId,
+				"InstanceLaunchTemplateName":    *asgInst.LaunchTemplate.LaunchTemplateName,
+				"InstanceLaunchTemplateVersion": *asgInst.LaunchTemplate.Version,
+				"GroupLaunchTemplateId":         *launchTemplate.LaunchTemplateId,
+				"GroupLaunchTemplateName":       *launchTemplate.LaunchTemplateName,
+				"GroupLaunchTemplateVersion":    *launchTemplate.Version,
+			}).Debug("Instance marked as old because launchTemplate version is old")
+
+			return true
+		} else if *asgInst.LaunchTemplate.LaunchTemplateId != *launchTemplate.LaunchTemplateId {
+			log.WithFields(log.Fields{
+				"InstanceID":                    *asgInst.InstanceId,
+				"InstanceLaunchTemplateId":      *asgInst.LaunchTemplate.LaunchTemplateId,
+				"InstanceLaunchTemplateName":    *asgInst.LaunchTemplate.LaunchTemplateName,
+				"InstanceLaunchTemplateVersion": *asgInst.LaunchTemplate.Version,
+				"GroupLaunchTemplateId":         *launchTemplate.LaunchTemplateId,
+				"GroupLaunchTemplateName":       *launchTemplate.LaunchTemplateName,
+				"GroupLaunchTemplateVersion":    *launchTemplate.Version,
+			}).Debug("Instance marked as old because launchTemplate differs from that of its ASG")
+
+			return true
+		}
 	}
 
 	// In force mode, mark any node that was launched before this runner was started as old
@@ -104,6 +123,7 @@ func isInstanceOld(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance, launchC
 				"InstanceID": *asgInst.InstanceId,
 				"LaunchTime": *ec2Inst.LaunchTime,
 			}).Debug("Instance marked as old because of launch time (force mode)")
+
 			return true
 		}
 	}
