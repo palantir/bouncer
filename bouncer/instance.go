@@ -74,7 +74,7 @@ func isInstanceOld(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance, launchC
 		if asgInst.LaunchConfigurationName == nil {
 			log.WithFields(log.Fields{
 				"InstanceID": *asgInst.InstanceId,
-			}).Debug("Instance marked as old because launch config instance was using has been deleted")
+			}).Debug("Instance marked as old because launch config has been deleted")
 
 			return true
 		} else if *asgInst.LaunchConfigurationName != *launchConfigName {
@@ -91,13 +91,14 @@ func isInstanceOld(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance, launchC
 
 		if *asgInst.LaunchTemplate.Version != *launchTemplateVersion {
 			log.WithFields(log.Fields{
-				"InstanceID":                    *asgInst.InstanceId,
-				"InstanceLaunchTemplateId":      *asgInst.LaunchTemplate.LaunchTemplateId,
-				"InstanceLaunchTemplateName":    *asgInst.LaunchTemplate.LaunchTemplateName,
-				"InstanceLaunchTemplateVersion": *asgInst.LaunchTemplate.Version,
-				"GroupLaunchTemplateId":         *launchTemplate.LaunchTemplateId,
-				"GroupLaunchTemplateName":       *launchTemplate.LaunchTemplateName,
-				"GroupLaunchTemplateVersion":    *launchTemplate.Version,
+				"InstanceID":                         *asgInst.InstanceId,
+				"InstanceLaunchTemplateId":           *asgInst.LaunchTemplate.LaunchTemplateId,
+				"InstanceLaunchTemplateName":         *asgInst.LaunchTemplate.LaunchTemplateName,
+				"InstanceLaunchTemplateVersion":      *asgInst.LaunchTemplate.Version,
+				"GroupLaunchTemplateId":              *launchTemplate.LaunchTemplateId,
+				"GroupLaunchTemplateName":            *launchTemplate.LaunchTemplateName,
+				"GroupLaunchTemplateVersion":         *launchTemplate.Version,
+				"ResovledGroupLaunchTemplateVersion": *launchTemplateVersion,
 			}).Debug("Instance marked as old because launchTemplate version is old")
 
 			return true
