@@ -2,7 +2,7 @@
 
 Bouncer rebuilds your running infrastructure to make sure it matches the infrastructure you've defined in code.
 
-This tool inspects AWS [auto-scaling groups](https://aws.amazon.com/documentation/autoscaling/), and terminates, in a controlled fashion, any nodes whose launch configurations don't match the one currently configured on the ASG it was launched from.  It currently supports two termination methods, `serial` and `canary`; read more about them below.
+This tool inspects AWS [auto-scaling groups](https://aws.amazon.com/documentation/autoscaling/), and terminates, in a controlled fashion, any nodes whose launch templates or launch configurations don't match the one currently configured on the ASG it was launched from.  It currently supports two termination methods, `serial` and `canary`; read more about them below.
 
 Although the examples for invoking this from code below are written in Terraform, and it's convenient to be executed from within a Terraform environment, there is nothing Terraform-specific about this tool whatsoever.
 
@@ -55,7 +55,7 @@ Only accepts 1 ASG.  In this example, the ASG must, at start time of bouncer, ha
 
 ## Force bouncing all nodes
 
-By default, the bouncer will ignore any nodes which are running the same launch configuration that's set on their ASG.  If you've made a change external to the launch configuration and want the bouncer to start over bouncing all nodes regardless of launch config "oldness", you can add the `-f` flag to any of the run types.  This flag marks any node whose launch time is older than the start time of the current bouncer invocation as "out of date", thus bouncing all nodes.
+By default, the bouncer will ignore any nodes which are running the same launch template version (or same launch configuration) that's set on their ASG.  If you've made a change external to the launch configuration / template and want the bouncer to start over bouncing all nodes regardless of launch config / template "oldness", you can add the `-f` flag to any of the run types.  This flag marks any node whose launch time is older than the start time of the current bouncer invocation as "out of date", thus bouncing all nodes.
 
 ## Running the bouncer in Terraform
 
@@ -64,13 +64,12 @@ By default, the bouncer will ignore any nodes which are running the same launch 
   * Terraform modules should _not_ need to include this wrapper, and instead each caller of modules should have one copy of the wrapper at its top-level, and all modules or top-level code should use it automatically when invoked with `./bouncerw`.
 * For each logical set of ASGs you'd like cycled in this way, add a `null_resource` block to call this wrapper script and pass-in the ASG(s) in question.
   * For more information about the `null_resource` provisioner, see [the Terraform docs](https://www.terraform.io/docs/provisioners/null_resource.html).
-* For example, to cycle a group of ASGs whose Terraform variable is `consul_server`, create a `null_resource` which triggers on a change to the any of the associated launch configurations:
+* For an example of using this in Terraform with Launch templates, you need to set your bouncer `null_resource` to trigger based on a new version of your launch template:
 
 ```terraform
 resource "null_resource" "consul_server_bouncer" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers {
-    lc_change = "${join(",", aws_autoscaling_group.consul_server.*.launch_configuration)}"
+    lt_change = "${join(",", aws_launch_template.consul_server.*.latest_version)}"
   }
 
   provisioner "local-exec" {
@@ -84,13 +83,39 @@ resource "null_resource" "consul_server_bouncer" {
 
 ```terraform
 resource "null_resource" "nomad_worker_bouncer" {
-  # Changes to any instance of the cluster requires re-provisioning
+  triggers {
+    lt_change = "${aws_launch_template.nomad_worker.latest_version}"
+  }
+
+  provisioner "local-exec" {
+    command = "./bouncerw canary -a '${aws_autoscaling_group.nomad_worker.name}:${var.worker_count}'"
+  }
+}
+```
+
+* If you're using launch configs instead, to cycle a group of ASGs using launch configs whose Terraform variable is `consul_server`, create a `null_resource` which triggers on a change to the any of the associated launch configurations:
+
+```terraform
+resource "null_resource" "consul_server_bouncer" {
+  triggers {
+    lc_change = "${join(",", aws_autoscaling_group.consul_server.*.launch_configuration)}"
+  }
+
+  provisioner "local-exec" {
+    command = "./bouncerw serial -a '${join(",", aws_autoscaling_group.consul_server.*.name)}'"
+  }
+}
+```
+
+* For an example on using bouncer in canary mode:
+
+```terraform
+resource "null_resource" "nomad_worker_bouncer" {
   triggers {
     lc_change = "${aws_autoscaling_group.nomad_worker.launch_configuration}"
   }
 
   provisioner "local-exec" {
-    # Bounce all nodes in this ASG using the canary method
     command = "./bouncerw canary -a '${aws_autoscaling_group.nomad_worker.name}:${var.worker_count}'"
   }
 }
@@ -110,32 +135,26 @@ These should be used sparingly, as most logic should be baked into your AMIs ter
 
 ## Chaining bouncers together
 
-If there are multiple ASGs in your repo which need to be bounced in a particular order, chain their associated `null_resource`s together.  Here I'm bouncing the Consul servers, then the Vault servers, and finally the Nomad workers, in order, using both forms of the bouncer.
-
-Ex: I want all Vault nodes to be cycled after all server nodes have been cycled:
+If there are multiple ASGs in your repo which need to be bounced in a particular order, chain their associated `null_resource`s together.  Here I'm bouncing the Consul servers, then the Vault servers, and finally the Nomad workers, in order.
 
 ```terraform
 resource "null_resource" "consul_server_bouncer" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers {
-    lc_change = "${join(",", aws_autoscaling_group.consul_server.*.launch_configuration)}"
+    trigger = "..."
   }
 
   provisioner "local-exec" {
-    # Redeploy all nodes in these ASGs
-    command = "./bouncerw serial -a '${join(",", aws_autoscaling_group.consul_server.*.name)}'"
+    command = "..."
   }
 }
 
 resource "null_resource" "vault_server_bouncer" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers {
-    lc_change = "${join(",", aws_autoscaling_group.vault_server_individual.*.launch_configuration)}"
+    trigger = "..."
   }
 
   provisioner "local-exec" {
-    # Redeploy all nodes in these ASGs
-    command = "./bouncerw serial -a '${join(",", aws_autoscaling_group.vault_server_individual.*.name)}' -p '${join(",", formatlist("./%s/vault-step-down.sh %s %s.%s", path.module, aws_autoscaling_group.vault_server_individual.*.name, var.vault_dns_name, var.zone_name))}'"
+    command = "..."
   }
 
   depends_on = [
@@ -144,14 +163,12 @@ resource "null_resource" "vault_server_bouncer" {
 }
 
 resource "null_resource" "nomad_worker_bouncer" {
-  # Changes to any instance of the cluster requires re-provisioning
   triggers {
-    lc_change = "${aws_autoscaling_group.nomad_worker.launch_configuration}"
+    trigger = "..."
   }
 
   provisioner "local-exec" {
-    # Bounce all nodes in this ASG using the canary method
-    command = "./bouncerw canary -a '${aws_autoscaling_group.nomad_worker.name}:${var.worker_count}'"
+    command = "..."
   }
 
   depends_on = [
@@ -163,11 +180,11 @@ resource "null_resource" "nomad_worker_bouncer" {
 
 ## Required Permissions
 
-In order to run the bouncer, the following permissions are required:
+In order to run the bouncer with launch templates, the following permissions are required:
 
 ```
 autoscaling:DescribeAutoScalingGroups
-autoscaling:DescribeLaunchConfigurations
+autoscaling:DescribeLaunch*
 autoscaling:CompleteLifecycleAction
 autoscaling:TerminateInstanceInAutoScalingGroup
 autoscaling:SetDesiredCapacity
