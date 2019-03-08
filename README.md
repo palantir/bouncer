@@ -64,59 +64,58 @@ By default, the bouncer will ignore any nodes which are running the same launch 
   * Terraform modules should _not_ need to include this wrapper, and instead each caller of modules should have one copy of the wrapper at its top-level, and all modules or top-level code should use it automatically when invoked with `./bouncerw`.
 * For each logical set of ASGs you'd like cycled in this way, add a `null_resource` block to call this wrapper script and pass-in the ASG(s) in question.
   * For more information about the `null_resource` provisioner, see [the Terraform docs](https://www.terraform.io/docs/provisioners/null_resource.html).
-* For an example of using this in Terraform with Launch templates, you need to set your bouncer `null_resource` to trigger based on a new version of your launch template:
+* For example, if you're using launch tamplates, to cycle an ASG in canary mode, create a `null_resource` which triggers on a change to the launch template:
 
 ```terraform
-resource "null_resource" "consul_server_bouncer" {
+resource "null_resource" "server_canary_bouncer" {
   triggers {
-    lt_change = "${join(",", aws_launch_template.consul_server.*.latest_version)}"
+    trigger = "${aws_launch_template.server.latest_version}"
   }
 
   provisioner "local-exec" {
-    # Redeploy all nodes in these ASGs
-    command = "./bouncerw serial -a '${join(",", aws_autoscaling_group.consul_server.*.name)}'"
+    command = "./bouncerw canary -a '${aws_autoscaling_group.server.name}:${var.worker_count}'"
   }
 }
 ```
 
-* For an example on using bouncer in canary mode:
+* If you need to use serial mode across multiple ASGs, something like this can work:
 
 ```terraform
-resource "null_resource" "nomad_worker_bouncer" {
+resource "null_resource" "server_serial_bouncer" {
   triggers {
-    lt_change = "${aws_launch_template.nomad_worker.latest_version}"
+    trigger = "${join(",", aws_launch_template.server.*.latest_version)}"
   }
 
   provisioner "local-exec" {
-    command = "./bouncerw canary -a '${aws_autoscaling_group.nomad_worker.name}:${var.worker_count}'"
+    command = "./bouncerw serial -a '${join(",", aws_autoscaling_group.server.*.name)}'"
   }
 }
 ```
 
-* If you're using launch configs instead, to cycle a group of ASGs using launch configs whose Terraform variable is `consul_server`, create a `null_resource` which triggers on a change to the any of the associated launch configurations:
+* If you're using launch configs instead, it's similar, but the trigger needs to be the LC:
 
 ```terraform
-resource "null_resource" "consul_server_bouncer" {
+resource "null_resource" "server_bouncer" {
   triggers {
-    lc_change = "${join(",", aws_autoscaling_group.consul_server.*.launch_configuration)}"
+    trigger = "${aws_autoscaling_group.server.launch_configuration}"
   }
 
   provisioner "local-exec" {
-    command = "./bouncerw serial -a '${join(",", aws_autoscaling_group.consul_server.*.name)}'"
+    command = "./bouncerw canary -a '${aws_autoscaling_group.server.name}:${var.server_count}'"
   }
 }
 ```
 
-* For an example on using bouncer in canary mode:
+* And of course the similar example in serial mode w/ multiple ASGs:
 
 ```terraform
-resource "null_resource" "nomad_worker_bouncer" {
+resource "null_resource" "server_canary_bouncer" {
   triggers {
-    lc_change = "${aws_autoscaling_group.nomad_worker.launch_configuration}"
+    trigger = "${join(",", aws_autoscaling_group.server.*.launch_configuration)}"
   }
 
   provisioner "local-exec" {
-    command = "./bouncerw canary -a '${aws_autoscaling_group.nomad_worker.name}:${var.worker_count}'"
+    command = "./bouncerw serial -a '${join(",", aws_autoscaling_group.server.*.name)}'"
   }
 }
 ```
@@ -135,7 +134,7 @@ These should be used sparingly, as most logic should be baked into your AMIs ter
 
 ## Chaining bouncers together
 
-If there are multiple ASGs in your repo which need to be bounced in a particular order, chain their associated `null_resource`s together.  Here I'm bouncing the Consul servers, then the Vault servers, and finally the Nomad workers, in order.
+If there are multiple ASGs in your repo which need to be bounced in a particular order, chain their associated `null_resource`s together.  Here I'm bouncing the Consul servers, then the Vault servers, then Nomad servers, and finally the Nomad workers, in order.
 
 ```terraform
 resource "null_resource" "consul_server_bouncer" {
@@ -162,6 +161,21 @@ resource "null_resource" "vault_server_bouncer" {
   ]
 }
 
+resource "null_resource" "nomad_server_bouncer" {
+  triggers {
+    trigger = "..."
+  }
+
+  provisioner "local-exec" {
+    command = "..."
+  }
+
+  depends_on = [
+    "null_resource.consul_server_bouncer",
+    "null_resource.vault_server_bouncer",
+  ]
+}
+
 resource "null_resource" "nomad_worker_bouncer" {
   triggers {
     trigger = "..."
@@ -173,6 +187,7 @@ resource "null_resource" "nomad_worker_bouncer" {
 
   depends_on = [
     "null_resource.consul_server_bouncer",
+    "null_resource.nomad_server_bouncer",
     "null_resource.vault_server_bouncer",
   ]
 }
