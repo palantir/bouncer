@@ -199,7 +199,19 @@ In order to run the bouncer with launch templates, the following permissions are
 
 ```
 autoscaling:DescribeAutoScalingGroups
-autoscaling:DescribeLaunch*
+autoscaling:CompleteLifecycleAction
+autoscaling:TerminateInstanceInAutoScalingGroup
+autoscaling:SetDesiredCapacity
+ec2:DescribeInstances
+ec2:DescribeInstanceAttribute
+ec2:DescribeLaunchTemplates
+```
+
+For using bouncer with launch configurations, the required permissions are:
+
+```
+autoscaling:DescribeAutoScalingGroups
+autoscaling:DescribeLaunchConfigurations
 autoscaling:CompleteLifecycleAction
 autoscaling:TerminateInstanceInAutoScalingGroup
 autoscaling:SetDesiredCapacity
