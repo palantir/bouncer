@@ -113,7 +113,7 @@ func (c *Clients) GetLaunchTemplateSpec(asg *autoscaling.Group) *autoscaling.Lau
 	}
 
 	// Otherwise, let's check for a MixedPolicy
-	if asg.MixedInstancesPolicy != nil {
+	if asg.MixedInstancesPolicy != nil && asg.MixedInstancesPolicy.LaunchTemplate != nil {
 		return asg.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification
 	}
 
