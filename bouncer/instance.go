@@ -46,20 +46,22 @@ func NewInstance(ac *aws.Clients, asg *autoscaling.Group, asgInst *autoscaling.I
 		return nil, errors.Wrapf(err, "error converting ASG Inst to EC2 inst for %s", *asgInst.InstanceId)
 	}
 
+	lts := ac.GetLaunchTemplateSpec(asg)
+
 	var ec2LTplVersion *string
 	err = retry(apiRetryCount, apiRetrySleep, func() (err error) {
-		ec2LTplVersion, err = ac.ASGLTplVersionToEC2LTplVersion(asg.LaunchTemplate)
+		ec2LTplVersion, err = ac.ASGLTplVersionToEC2LTplVersion(lts)
 		return
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Error resolving LaunchTemplate %s Version to actual version number", *asg.LaunchTemplate.LaunchTemplateId)
+		return nil, errors.Wrapf(err, "error resolving LaunchTemplate %s Version to actual version number", *lts.LaunchTemplateId)
 	}
 
 	inst := Instance{
 		EC2Instance:      ec2Inst,
 		ASGInstance:      asgInst,
 		AutoscalingGroup: asg,
-		IsOld:            isInstanceOld(asgInst, ec2Inst, asg.LaunchConfigurationName, asg.LaunchTemplate, ec2LTplVersion, force, startTime),
+		IsOld:            isInstanceOld(asgInst, ec2Inst, asg.LaunchConfigurationName, lts, ec2LTplVersion, force, startTime),
 		IsHealthy:        isInstanceHealthy(asgInst, ec2Inst),
 		PreTerminateCmd:  preTerminateCmd,
 	}
@@ -88,6 +90,14 @@ func isInstanceOld(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance, launchC
 		}
 	} else {
 		// This machine is using LaunchTemplates
+
+		if asgInst.LaunchTemplate.Version == nil {
+			log.Debug("asgInst.LaunchTemplate.Version is nil")
+		}
+
+		if launchTemplateVersion == nil {
+			log.Debug("launchTemplateVersion is nil")
+		}
 
 		if *asgInst.LaunchTemplate.Version != *launchTemplateVersion {
 			log.WithFields(log.Fields{

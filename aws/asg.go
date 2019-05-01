@@ -105,6 +105,22 @@ func (c *Clients) GetLaunchConfiguration(asg *autoscaling.Group) (*autoscaling.L
 	return output.LaunchConfigurations[0], nil
 }
 
+// GetLaunchTemplateSpec returns the LT spec for a given ASG, if it has one
+func (c *Clients) GetLaunchTemplateSpec(asg *autoscaling.Group) *autoscaling.LaunchTemplateSpecification {
+	// First, let's check the direct launch template spec property of the ASG
+	if asg.LaunchTemplate != nil {
+		return asg.LaunchTemplate
+	}
+
+	// Otherwise, let's check for a MixedPolicy
+	if asg.MixedInstancesPolicy != nil {
+		return asg.MixedInstancesPolicy.LaunchTemplate.LaunchTemplateSpecification
+	}
+
+	// Otherwise, it looks like we're probably not using LaunchTemplates
+	return nil
+}
+
 // CompleteLifecycleAction calls https://docs.aws.amazon.com/cli/latest/reference/autoscaling/complete-lifecycle-action.html
 func (c *Clients) CompleteLifecycleAction(asgName *string, instID *string, lifecycleHook *string, result *string) error {
 	input := autoscaling.CompleteLifecycleActionInput{
