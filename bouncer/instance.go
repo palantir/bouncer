@@ -91,14 +91,6 @@ func isInstanceOld(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance, launchC
 	} else {
 		// This machine is using LaunchTemplates
 
-		if asgInst.LaunchTemplate.Version == nil {
-			log.Debug("asgInst.LaunchTemplate.Version is nil")
-		}
-
-		if launchTemplateVersion == nil {
-			log.Debug("launchTemplateVersion is nil")
-		}
-
 		if *asgInst.LaunchTemplate.Version != *launchTemplateVersion {
 			log.WithFields(log.Fields{
 				"InstanceID":                         *asgInst.InstanceId,
