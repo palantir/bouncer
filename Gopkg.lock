@@ -120,20 +120,6 @@
   revision = "db1efb556f84b25a0a13a04aad883943538ad2e0"
 
 [[projects]]
-  digest = "1:456d9d75894d9e1d4259490b9d05f063a9bbbd26d318d071d9357e7f942ccbe4"
-  name = "github.com/palantir/bouncer"
-  packages = [
-    "aws",
-    "bouncer",
-    "canary",
-    "cmd",
-    "serial",
-  ]
-  pruneopts = "UT"
-  revision = "4b3c997e9fe0435e74ca2564aa1c01047e5f79b1"
-  version = "0.8.1"
-
-[[projects]]
   digest = "1:b2ee62e09bec113cf086d2ce0769efcc7bf79481aba8373fd8f7884e94df3462"
   name = "github.com/pelletier/go-buffruneio"
   packages = ["."]
@@ -246,11 +232,6 @@
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/autoscaling",
     "github.com/aws/aws-sdk-go/service/ec2",
-    "github.com/palantir/bouncer/aws",
-    "github.com/palantir/bouncer/bouncer",
-    "github.com/palantir/bouncer/canary",
-    "github.com/palantir/bouncer/cmd",
-    "github.com/palantir/bouncer/serial",
     "github.com/pkg/errors",
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
