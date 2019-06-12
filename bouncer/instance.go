@@ -69,8 +69,8 @@ func NewInstance(ac *aws.Clients, asg *autoscaling.Group, asgInst *autoscaling.I
 	return &inst, nil
 }
 
-func isInstanceOld(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance, launchConfigName *string, launchTemplate *autoscaling.LaunchTemplateSpecification, launchTemplateVersion *string, force bool, startTime time.Time) bool {
-	if asgInst.LaunchTemplate == nil {
+func isInstanceOld(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance, asgLCName *string, asgLT *autoscaling.LaunchTemplateSpecification, asgLTVer *string, force bool, startTime time.Time) bool {
+	if asgLCName != nil {
 		// This machine is using LaunchConfigs
 
 		if asgInst.LaunchConfigurationName == nil {
@@ -79,44 +79,52 @@ func isInstanceOld(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance, launchC
 			}).Debug("Instance marked as old because launch config has been deleted")
 
 			return true
-		} else if *asgInst.LaunchConfigurationName != *launchConfigName {
+		} else if *asgInst.LaunchConfigurationName != *asgLCName {
 			log.WithFields(log.Fields{
 				"InstanceID":           *asgInst.InstanceId,
 				"InstanceLaunchConfig": *asgInst.LaunchConfigurationName,
-				"GroupLaunchConfig":    *launchConfigName,
+				"GroupLaunchConfig":    *asgLCName,
 			}).Debug("Instance marked as old because launch config differs from that of its ASG")
 
 			return true
 		}
-	} else {
+	} else if asgInst.LaunchTemplate != nil && asgLT != nil {
 		// This machine is using LaunchTemplates
 
-		if *asgInst.LaunchTemplate.Version != *launchTemplateVersion {
+		if *asgInst.LaunchTemplate.Version != *asgLTVer {
 			log.WithFields(log.Fields{
 				"InstanceID":                         *asgInst.InstanceId,
 				"InstanceLaunchTemplateId":           *asgInst.LaunchTemplate.LaunchTemplateId,
 				"InstanceLaunchTemplateName":         *asgInst.LaunchTemplate.LaunchTemplateName,
 				"InstanceLaunchTemplateVersion":      *asgInst.LaunchTemplate.Version,
-				"GroupLaunchTemplateId":              *launchTemplate.LaunchTemplateId,
-				"GroupLaunchTemplateName":            *launchTemplate.LaunchTemplateName,
-				"GroupLaunchTemplateVersion":         *launchTemplate.Version,
-				"ResovledGroupLaunchTemplateVersion": *launchTemplateVersion,
+				"GroupLaunchTemplateId":              *asgLT.LaunchTemplateId,
+				"GroupLaunchTemplateName":            *asgLT.LaunchTemplateName,
+				"GroupLaunchTemplateVersion":         *asgLT.Version,
+				"ResovledGroupLaunchTemplateVersion": *asgLTVer,
 			}).Debug("Instance marked as old because launchTemplate version is old")
 
 			return true
-		} else if *asgInst.LaunchTemplate.LaunchTemplateId != *launchTemplate.LaunchTemplateId {
+		} else if *asgInst.LaunchTemplate.LaunchTemplateId != *asgLT.LaunchTemplateId {
 			log.WithFields(log.Fields{
 				"InstanceID":                    *asgInst.InstanceId,
 				"InstanceLaunchTemplateId":      *asgInst.LaunchTemplate.LaunchTemplateId,
 				"InstanceLaunchTemplateName":    *asgInst.LaunchTemplate.LaunchTemplateName,
 				"InstanceLaunchTemplateVersion": *asgInst.LaunchTemplate.Version,
-				"GroupLaunchTemplateId":         *launchTemplate.LaunchTemplateId,
-				"GroupLaunchTemplateName":       *launchTemplate.LaunchTemplateName,
-				"GroupLaunchTemplateVersion":    *launchTemplate.Version,
+				"GroupLaunchTemplateId":         *asgLT.LaunchTemplateId,
+				"GroupLaunchTemplateName":       *asgLT.LaunchTemplateName,
+				"GroupLaunchTemplateVersion":    *asgLT.Version,
 			}).Debug("Instance marked as old because launchTemplate differs from that of its ASG")
 
 			return true
 		}
+	} else {
+		// Using neither - seems to only happen as part of a race condition during migrating from LC to LT
+
+		log.WithFields(log.Fields{
+			"InstanceID": *asgInst.InstanceId,
+		}).Debug("Instance marked as old because the ASG has neither LC or LT, it must be being transitioned")
+
+		return true
 	}
 
 	// In force mode, mark any node that was launched before this runner was started as old

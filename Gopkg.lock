@@ -49,6 +49,14 @@
   revision = "3248e106c35aafb9b982f5d086f0150faf24ee4e"
 
 [[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   digest = "1:bbc989ded6eb5bacd3af5d98569730b84ec05d3764ddd72b4b701484cb1d7b7c"
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
@@ -142,6 +150,14 @@
   revision = "248dadf4e9068a0b3e79f02ed0a610d935de5302"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "UT"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:612c049404353b151a3d9fd779b72a0905df1f799056c29202ad84d4fcb1b748"
   name = "github.com/spf13/afero"
   packages = [
@@ -186,6 +202,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "84f94806c67f59dd7ae87bc5351f7a9c94a4558d"
+
+[[projects]]
+  digest = "1:972c2427413d41a1e06ca4897e8528e5a1622894050e2f527b38ddf0f343f759"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  pruneopts = "UT"
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:0ab7dce31f3a686ea482c832ffff4a3093a9864e100d47a6759196a03a98eba9"
@@ -235,6 +259,7 @@
     "github.com/pkg/errors",
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
+    "github.com/stretchr/testify/assert",
     "gopkg.in/go-playground/validator.v9",
   ]
   solver-name = "gps-cdcl"
