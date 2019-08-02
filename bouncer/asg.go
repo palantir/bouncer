@@ -32,7 +32,12 @@ type ASG struct {
 
 // NewASG creates a new ASG object
 func NewASG(ac *aws.Clients, desASG *DesiredASG, force bool, startTime time.Time) (*ASG, error) {
-	awsAsg, err := ac.GetASG(&desASG.AsgName)
+	var awsAsg *autoscaling.Group
+
+	err := retry(apiRetryCount, apiRetrySleep, func() (err error) {
+		awsAsg, err = ac.GetASG(&desASG.AsgName)
+		return
+	})
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting AWS ASG object")
 	}
