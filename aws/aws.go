@@ -107,12 +107,13 @@ func (c Clients) ASGLTplVersionToEC2LTplVersion(asgLaunchTemplate *autoscaling.L
 		return nil, errors.Wrapf(err, "Error describing LaunchTemplate %s", *asgLaunchTemplate.LaunchTemplateId)
 	}
 
-	if len(res.LaunchTemplates) > 1 {
-		return nil, errors.New("More than 1 LaunchTemplate found somehow")
-	}
-
-	if len(res.LaunchTemplates) == 0 {
-		return nil, errors.Wrapf(err, "LaunchTemplate %s not found", *asgLaunchTemplate.LaunchTemplateId)
+	if len(res.LaunchTemplates) != 1 {
+		return nil, errors.Wrapf(err,
+			"Expected exactly one LaunchTemplate returned for launch template id %s, got %d: %v",
+			*asgLaunchTemplate.LaunchTemplateId,
+			len(res.LaunchTemplates),
+			res.LaunchTemplates,
+		)
 	}
 
 	ec2LaunchTemplate := res.LaunchTemplates[0]
