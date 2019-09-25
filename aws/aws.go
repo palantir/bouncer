@@ -107,25 +107,33 @@ func (c Clients) ASGLTplVersionToEC2LTplVersion(asgLaunchTemplate *autoscaling.L
 		return nil, errors.Wrapf(err, "Error describing LaunchTemplate %s", *asgLaunchTemplate.LaunchTemplateId)
 	}
 
-	if len(res.LaunchTemplates) > 1 {
-		return nil, errors.New("More than 1 LaunchTemplate found somehow")
+	if len(res.LaunchTemplates) != 1 {
+		return nil, errors.Wrapf(err,
+			"Expected exactly one LaunchTemplate returned for launch template id %s, got %d: %v",
+			*asgLaunchTemplate.LaunchTemplateId,
+			len(res.LaunchTemplates),
+			res.LaunchTemplates,
+		)
 	}
 
-	for _, ec2LaunchTemplate := range res.LaunchTemplates {
-		switch version := *asgLaunchTemplate.Version; version {
-		case "$Latest":
-			s := strconv.FormatInt(*ec2LaunchTemplate.LatestVersionNumber, 10)
-			return &s, nil
-		case "$Default":
-			s := strconv.FormatInt(*ec2LaunchTemplate.DefaultVersionNumber, 10)
-			return &s, nil
-		default:
-			_, err := strconv.ParseInt(version, 10, 64)
-			if err != nil {
-				return nil, fmt.Errorf("Unexpected TemplateVersion %q conversion to Int64 failed", version)
-			}
-			return &version, nil
+	ec2LaunchTemplate := res.LaunchTemplates[0]
+
+	targetVersion := asgLaunchTemplate.Version
+
+	// Per https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_LaunchTemplateSpecification.html
+	// version is optional and if unspecified should resolve to default.
+	if targetVersion == nil || *targetVersion == "$Default" {
+		s := strconv.FormatInt(*ec2LaunchTemplate.DefaultVersionNumber, 10)
+		return &s, nil
+	} else if *targetVersion == "$Latest" {
+		s := strconv.FormatInt(*ec2LaunchTemplate.LatestVersionNumber, 10)
+		return &s, nil
+	} else {
+		_, err := strconv.ParseInt(*targetVersion, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("Unexpected TemplateVersion %q conversion to Int64 failed", *targetVersion)
 		}
+		return targetVersion, nil
 	}
-	return nil, errors.Wrapf(err, "LaunchTemplate %s not found", *asgLaunchTemplate.LaunchTemplateId)
+
 }
