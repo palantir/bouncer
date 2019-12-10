@@ -21,9 +21,9 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/pkg/errors"
 
-	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/palantir/bouncer/aws"
 )
 
