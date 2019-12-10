@@ -55,7 +55,7 @@ func (a *ASGSet) GetImmutableInstances() []*Instance {
 	var instances []*Instance
 	for _, asg := range a.ASGs {
 		for _, inst := range asg.Instances {
-			if *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStateTerminating || *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStatePending || *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
+			if *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStateTerminating || *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStatePending || *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStateTerminatingProceed {
 				instances = append(instances, inst)
 			}
 		}
