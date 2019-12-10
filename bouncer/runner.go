@@ -23,6 +23,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
 
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/palantir/bouncer/aws"
 )
 
@@ -56,11 +57,6 @@ const (
 
 	asgSeparator        = ","
 	desiredCapSeparator = ":"
-
-	// The state instance is in while waiting for autoscaling:EC2_INSTANCE_LAUNCHING transition hook
-	pendingHookState = "Pending:Wait"
-	// The state instance is in while waiting for autoscaling:EC2_INSTANCE_TERMINATING transition hook
-	terminateHookState = "Terminating:Wait"
 )
 
 func retry(attempts int, sleep time.Duration, callback func() error) (err error) {
@@ -165,11 +161,11 @@ func (r *BaseRunner) KillInstance(inst *Instance) error {
 	}).Info("Picked instance to die next")
 	var hook string
 
-	if *inst.ASGInstance.LifecycleState == pendingHookState {
+	if *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStatePendingWait {
 		hook = r.opts.PendingHook
 	}
 
-	if *inst.ASGInstance.LifecycleState == terminateHookState {
+	if *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
 		hook = r.opts.TerminateHook
 	}
 
