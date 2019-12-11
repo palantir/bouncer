@@ -19,6 +19,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/pkg/errors"
 
 	"github.com/palantir/bouncer/aws"
@@ -54,7 +55,7 @@ func (a *ASGSet) GetImmutableInstances() []*Instance {
 	var instances []*Instance
 	for _, asg := range a.ASGs {
 		for _, inst := range asg.Instances {
-			if *inst.ASGInstance.LifecycleState == "Terminating" || *inst.ASGInstance.LifecycleState == "Pending" || *inst.ASGInstance.LifecycleState == "Terminating:Proceed" {
+			if *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStateTerminating || *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStatePending || *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStateTerminatingProceed {
 				instances = append(instances, inst)
 			}
 		}
@@ -243,11 +244,21 @@ func (a *ASGSet) IsNewUnhealthy() bool {
 
 	newUnhealthy := a.GetUnhealthyNewInstances()
 	for _, inst := range newUnhealthy {
+		state := *inst.ASGInstance.LifecycleState
+		var msg string
+
+		switch state {
+		case autoscaling.LifecycleStateTerminating, autoscaling.LifecycleStateTerminatingProceed, autoscaling.LifecycleStateTerminatingWait:
+			msg = "Waiting for unhealthy new instance to get out of the way"
+		default:
+			msg = "Waiting for new instance to become healthy"
+		}
+
 		log.WithFields(log.Fields{
 			"ASG":        *inst.AutoscalingGroup.AutoScalingGroupName,
 			"InstanceID": *inst.ASGInstance.InstanceId,
-			"State":      *inst.ASGInstance.LifecycleState,
-		}).Info("Waiting for new instance to become healthy")
+			"State":      state,
+		}).Info(msg)
 		isNewUnhealthy = true
 	}
 
