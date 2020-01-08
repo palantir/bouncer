@@ -20,7 +20,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
 
-  "github.com/palantir/bouncer/bouncer"
+	"github.com/palantir/bouncer/bouncer"
 )
 
 // Runner holds data for a particular full run
