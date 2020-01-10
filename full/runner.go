@@ -69,7 +69,7 @@ func (r *Runner) MustValidatePrereqs() {
 			os.Exit(0)
 		}
 
-		if *asg.ASG.MinSize > 0 {
+		if *asg.ASG.MinSize != 0 {
 			log.WithFields(log.Fields{
 				"ASG":      *asg.ASG.AutoScalingGroupName,
 				"min_size": *asg.ASG.MinSize,
