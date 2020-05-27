@@ -20,9 +20,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/pkg/errors"
-
 	"github.com/palantir/bouncer/aws"
+	"github.com/pkg/errors"
 )
 
 // ASGSet has a slice of ASG objects and some functions against them

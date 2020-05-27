@@ -18,9 +18,8 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/pkg/errors"
-
 	"github.com/palantir/bouncer/aws"
+	"github.com/pkg/errors"
 )
 
 // ASG object holds a pointer to an ASG and its Instances

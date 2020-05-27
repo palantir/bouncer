@@ -2,7 +2,7 @@
 docker-golang: &docker-golang
   working_directory: /go/src/github.com/palantir/bouncer
   docker:
-    - image: palantirtechnologies/go:go-darwin-linux-no-cgo-1.13.4-t28
+    - image: palantirtechnologies/go:go-darwin-linux-no-cgo-1.14.3-java-11-t44
 
 # Shared tasks
 define-artifact-dir: &define-artifacts-dir

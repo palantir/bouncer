@@ -20,9 +20,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/pkg/errors"
-
 	"github.com/palantir/bouncer/aws"
+	"github.com/pkg/errors"
 )
 
 // Instance tracks the AWS representations of an EC2 instance as well as the metadata we care about it
