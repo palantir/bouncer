@@ -18,9 +18,8 @@ import (
 	"os"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/pkg/errors"
-
 	"github.com/palantir/bouncer/bouncer"
+	"github.com/pkg/errors"
 )
 
 // Runner holds data for a particular canary run

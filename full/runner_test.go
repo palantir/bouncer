@@ -19,9 +19,8 @@ import (
 	"testing"
 
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/palantir/bouncer/bouncer"
+	"github.com/stretchr/testify/assert"
 )
 
 func asgSliceTestConstructor(len int) []*bouncer.ASG {

@@ -16,12 +16,11 @@ package cmd
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"github.com/palantir/bouncer/bouncer"
+	"github.com/palantir/bouncer/canary"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	"github.com/palantir/bouncer/bouncer"
-	"github.com/palantir/bouncer/canary"
 )
 
 var canaryCmd = &cobra.Command{
