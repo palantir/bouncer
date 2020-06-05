@@ -135,13 +135,10 @@ func (c *Clients) CompleteLifecycleAction(asgName *string, instID *string, lifec
 }
 
 // TerminateInstanceInASG calls https://docs.aws.amazon.com/cli/latest/reference/autoscaling/terminate-instance-in-auto-scaling-group.html
-func (c *Clients) TerminateInstanceInASG(instID *string) error {
-	// This call decrements the desired capacity so that we don't get into a race condition
-	// where the replacement starts booting before the node we've told to terminate has terminated
-	dumb := true
+func (c *Clients) TerminateInstanceInASG(instID *string, decrement *bool) error {
 	input := autoscaling.TerminateInstanceInAutoScalingGroupInput{
 		InstanceId:                     instID,
-		ShouldDecrementDesiredCapacity: &dumb,
+		ShouldDecrementDesiredCapacity: decrement,
 	}
 	_, err := c.ASGClient.TerminateInstanceInAutoScalingGroup(&input)
 	return errors.Wrapf(err, "error terminating instance %s", *instID)

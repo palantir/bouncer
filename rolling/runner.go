@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package serial
+package rolling
 
 import (
 	"os"
@@ -22,12 +22,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Runner holds data for a particular serial run
+// Runner holds data for a particular rolling run
 type Runner struct {
 	bouncer.BaseRunner
 }
 
-// NewRunner instantiates a new serial runner
+// NewRunner instantiates a new rolling runner
 func NewRunner(opts *bouncer.RunnerOpts) (*Runner, error) {
 	br, err := bouncer.NewBaseRunner(opts)
 	if err != nil {
@@ -42,7 +42,7 @@ func NewRunner(opts *bouncer.RunnerOpts) (*Runner, error) {
 
 func (r *Runner) killBestOldInstance(asgSet *bouncer.ASGSet) error {
 	bestOld := asgSet.GetBestOldInstance()
-	decrement := true
+	decrement := false
 	err := r.KillInstance(bestOld, &decrement)
 	return errors.Wrap(err, "error killing instance")
 }
@@ -73,15 +73,6 @@ func (r *Runner) MustValidatePrereqs() {
 			}).Warn("ASG desired capacity is 0 - nothing to do here")
 			os.Exit(0)
 		}
-
-		if *asg.ASG.DesiredCapacity == *asg.ASG.MinSize {
-			log.WithFields(log.Fields{
-				"ASG":              *asg.ASG.AutoScalingGroupName,
-				"desired_capacity": *asg.ASG.DesiredCapacity,
-				"min_size":         *asg.ASG.MinSize,
-			}).Error("ASG desired capacity must be at least 1 higher than the min size, but they're equal")
-			os.Exit(1)
-		}
 	}
 }
 
@@ -93,7 +84,7 @@ func (r *Runner) Run() error {
 		}
 
 		// Rebuild the state of the world every iteration of the loop because instance and ASG statuses are changing
-		log.Debug("Beginning new serial run check")
+		log.Debug("Beginning new rolling run check")
 		asgSet, err := r.NewASGSet()
 		if err != nil {
 			return errors.Wrap(err, "error building ASGSet")
@@ -101,20 +92,6 @@ func (r *Runner) Run() error {
 
 		// See if we're still waiting on a change we made previously to finish or settle
 		if asgSet.IsNewUnhealthy() || asgSet.IsTerminating() || asgSet.IsImmutableAutoscalingEvent() || asgSet.IsCountMismatch() {
-			r.Sleep()
-			continue
-		}
-
-		// See if anyone's desired capacity needs to be reset, and fix it if so (then sleep so it propagates)
-		divergedASGs := asgSet.GetDivergedASGs()
-		for _, asg := range divergedASGs {
-			err := r.SetDesiredCapacity(asg, &asg.DesiredASG.DesiredCapacity)
-			if err != nil {
-				return errors.Wrap(err, "error setting desired capacity of ASG")
-			}
-		}
-
-		if len(divergedASGs) != 0 {
 			r.Sleep()
 			continue
 		}

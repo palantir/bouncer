@@ -153,7 +153,7 @@ func (r *BaseRunner) abandonLifecycle(inst *Instance, hook *string) error {
 
 // KillInstance calls TerminateInstanceInAutoscalingGroup, or, if the instance is stuck
 // in a lifecycle hook, issues an ABANDON to it, killing it more forcefully
-func (r *BaseRunner) KillInstance(inst *Instance) error {
+func (r *BaseRunner) KillInstance(inst *Instance, decrement *bool) error {
 	log.WithFields(log.Fields{
 		"ASG":        *inst.AutoscalingGroup.AutoScalingGroupName,
 		"InstanceID": *inst.ASGInstance.InstanceId,
@@ -179,18 +179,18 @@ func (r *BaseRunner) KillInstance(inst *Instance) error {
 			return errors.Wrap(err, "error executing pre-terminate command")
 		}
 	}
-	err := r.terminateInstanceInASG(inst)
+	err := r.terminateInstanceInASG(inst, decrement)
 	return errors.Wrap(err, "error terminating instance")
 }
 
-func (r *BaseRunner) terminateInstanceInASG(inst *Instance) error {
+func (r *BaseRunner) terminateInstanceInASG(inst *Instance, decrement *bool) error {
 	log.WithFields(log.Fields{
 		"ASG":        *inst.AutoscalingGroup.AutoScalingGroupName,
 		"InstanceID": *inst.ASGInstance.InstanceId,
 	}).Info("Terminating instance")
 	r.resetTimeout()
 	r.noopCheck()
-	return r.awsClients.TerminateInstanceInASG(inst.ASGInstance.InstanceId)
+	return r.awsClients.TerminateInstanceInASG(inst.ASGInstance.InstanceId, decrement)
 }
 
 // SetDesiredCapacity Updates desired capacity of ASG

@@ -125,7 +125,8 @@ start:
 			set := asgSetWrapper(asg)
 
 			if set.IsOldInstance() {
-				err := r.KillInstance(set.GetBestOldInstance())
+				decrement := true
+				err := r.KillInstance(set.GetBestOldInstance(), &decrement)
 				if err != nil {
 					return errors.Wrap(err, "failed to kill instance")
 				}
