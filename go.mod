@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/Sirupsen/logrus v0.11.3-0.20170215164324-7f4b1adc7917
-	github.com/aws/aws-sdk-go v1.32.9
+	github.com/aws/aws-sdk-go v1.32.11
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.3-0.20170321125522-ff7bc41d4007 // indirect
 	github.com/go-playground/locales v0.11.2-0.20170327191450-1e5f1161c641 // indirect
