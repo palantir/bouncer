@@ -153,8 +153,9 @@ func (r *Runner) Run() error {
 			// We have the correct number of new instances, we just need
 			// to get rid of the old ones
 			// Let's issue all their terminates right here
+			decrement := true
 			for _, oldInst := range asgSet.GetOldInstances() {
-				err := r.KillInstance(oldInst)
+				err := r.KillInstance(oldInst, &decrement)
 				if err != nil {
 					return errors.Wrap(err, "error killing instance")
 				}

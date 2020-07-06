@@ -28,6 +28,10 @@ If you need to run serial mode against an ASG with an expected `desired_capacity
 ./bouncer serial -a hashi-use1-stag-worker-linux:3,hashi-use1-stag-worker-windows:2
 ```
 
+## Rolling
+
+Rolling is the same as serial, but does not decrement. This means `min_size`, `max_size`, and `desired_capacity` can all be the same value.
+
 ## Canary
 
 Made for bouncing ASGs of arbitrary size where additional nodes and scale in before the old nodes have scaled out.  `./bouncer canary --help` for all available options.  Ex:
