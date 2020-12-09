@@ -1,7 +1,7 @@
 # github.com/Sirupsen/logrus v0.11.3-0.20170215164324-7f4b1adc7917
 ## explicit
 github.com/Sirupsen/logrus
-# github.com/aws/aws-sdk-go v1.35.11
+# github.com/aws/aws-sdk-go v1.36.5
 ## explicit
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
@@ -100,11 +100,10 @@ github.com/spf13/viper
 github.com/stretchr/testify/assert
 # github.com/subosito/gotenv v1.2.0
 github.com/subosito/gotenv
-# golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2
-## explicit
-# golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd
+# golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
+golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.2
+# golang.org/x/text v0.3.3
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
 # gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f
