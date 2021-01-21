@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/Sirupsen/logrus v0.11.3-0.20170215164324-7f4b1adc7917
-	github.com/aws/aws-sdk-go v1.36.19
+	github.com/aws/aws-sdk-go v1.36.30
 	github.com/go-playground/locales v0.11.2-0.20170327191450-1e5f1161c641 // indirect
 	github.com/go-playground/universal-translator v0.16.1-0.20170327191703-71201497bace // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
