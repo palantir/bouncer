@@ -159,8 +159,8 @@ func (r *Runner) Run() error {
 				if err != nil {
 					return errors.Wrap(err, "error killing instance")
 				}
-				r.Sleep()
 			}
+			r.Sleep()
 
 			continue
 		}
