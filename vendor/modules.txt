@@ -1,7 +1,7 @@
 # github.com/Sirupsen/logrus v0.11.3-0.20170215164324-7f4b1adc7917
 ## explicit
 github.com/Sirupsen/logrus
-# github.com/aws/aws-sdk-go v1.37.1
+# github.com/aws/aws-sdk-go v1.38.32
 ## explicit
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
@@ -90,7 +90,7 @@ github.com/spf13/afero
 github.com/spf13/afero/mem
 # github.com/spf13/cast v1.3.0
 github.com/spf13/cast
-# github.com/spf13/cobra v1.1.1
+# github.com/spf13/cobra v1.1.3
 ## explicit
 github.com/spf13/cobra
 # github.com/spf13/jwalterweatherman v1.0.0
@@ -120,5 +120,5 @@ golang.org/x/text/unicode/norm
 gopkg.in/go-playground/validator.v9
 # gopkg.in/ini.v1 v1.51.0
 gopkg.in/ini.v1
-# gopkg.in/yaml.v2 v2.2.8
+# gopkg.in/yaml.v2 v2.4.0
 gopkg.in/yaml.v2
