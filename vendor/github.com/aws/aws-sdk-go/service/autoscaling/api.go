@@ -436,8 +436,7 @@ func (c *AutoScaling) BatchPutScheduledUpdateGroupActionRequest(input *BatchPutS
 // BatchPutScheduledUpdateGroupAction API operation for Auto Scaling.
 //
 // Creates or updates one or more scheduled scaling actions for an Auto Scaling
-// group. If you leave a parameter unspecified when updating a scheduled scaling
-// action, the corresponding value remains unchanged.
+// group.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -531,8 +530,9 @@ func (c *AutoScaling) CancelInstanceRefreshRequest(input *CancelInstanceRefreshI
 // roll back any replacements that have already been completed, but it prevents
 // new replacements from being started.
 //
-// For more information, see Replacing Auto Scaling Instances Based on an Instance
-// Refresh (https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html).
+// For more information, see Replacing Auto Scaling instances based on an instance
+// refresh (https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html)
+// in the Amazon EC2 Auto Scaling User Guide.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -1608,6 +1608,100 @@ func (c *AutoScaling) DeleteTagsWithContext(ctx aws.Context, input *DeleteTagsIn
 	return out, req.Send()
 }
 
+const opDeleteWarmPool = "DeleteWarmPool"
+
+// DeleteWarmPoolRequest generates a "aws/request.Request" representing the
+// client's request for the DeleteWarmPool operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See DeleteWarmPool for more information on using the DeleteWarmPool
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the DeleteWarmPoolRequest method.
+//    req, resp := client.DeleteWarmPoolRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/autoscaling-2011-01-01/DeleteWarmPool
+func (c *AutoScaling) DeleteWarmPoolRequest(input *DeleteWarmPoolInput) (req *request.Request, output *DeleteWarmPoolOutput) {
+	op := &request.Operation{
+		Name:       opDeleteWarmPool,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &DeleteWarmPoolInput{}
+	}
+
+	output = &DeleteWarmPoolOutput{}
+	req = c.newRequest(op, input, output)
+	req.Handlers.Unmarshal.Swap(query.UnmarshalHandler.Name, protocol.UnmarshalDiscardBodyHandler)
+	return
+}
+
+// DeleteWarmPool API operation for Auto Scaling.
+//
+// Deletes the warm pool for the specified Auto Scaling group.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Auto Scaling's
+// API operation DeleteWarmPool for usage and error information.
+//
+// Returned Error Codes:
+//   * ErrCodeLimitExceededFault "LimitExceeded"
+//   You have already reached a limit for your Amazon EC2 Auto Scaling resources
+//   (for example, Auto Scaling groups, launch configurations, or lifecycle hooks).
+//   For more information, see DescribeAccountLimits (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_DescribeAccountLimits.html)
+//   in the Amazon EC2 Auto Scaling API Reference.
+//
+//   * ErrCodeResourceContentionFault "ResourceContention"
+//   You already have a pending update to an Amazon EC2 Auto Scaling resource
+//   (for example, an Auto Scaling group, instance, or load balancer).
+//
+//   * ErrCodeScalingActivityInProgressFault "ScalingActivityInProgress"
+//   The operation can't be performed because there are scaling activities in
+//   progress.
+//
+//   * ErrCodeResourceInUseFault "ResourceInUse"
+//   The operation can't be performed because the resource is in use.
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/autoscaling-2011-01-01/DeleteWarmPool
+func (c *AutoScaling) DeleteWarmPool(input *DeleteWarmPoolInput) (*DeleteWarmPoolOutput, error) {
+	req, out := c.DeleteWarmPoolRequest(input)
+	return out, req.Send()
+}
+
+// DeleteWarmPoolWithContext is the same as DeleteWarmPool with the addition of
+// the ability to pass a context and additional request options.
+//
+// See DeleteWarmPool for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *AutoScaling) DeleteWarmPoolWithContext(ctx aws.Context, input *DeleteWarmPoolInput, opts ...request.Option) (*DeleteWarmPoolOutput, error) {
+	req, out := c.DeleteWarmPoolRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
 const opDescribeAccountLimits = "DescribeAccountLimits"
 
 // DescribeAccountLimitsRequest generates a "aws/request.Request" representing the
@@ -2209,8 +2303,9 @@ func (c *AutoScaling) DescribeInstanceRefreshesRequest(input *DescribeInstanceRe
 //
 //    * Cancelled - The operation is cancelled.
 //
-// For more information, see Replacing Auto Scaling Instances Based on an Instance
-// Refresh (https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html).
+// For more information, see Replacing Auto Scaling instances based on an instance
+// refresh (https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html)
+// in the Amazon EC2 Auto Scaling User Guide.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -3141,6 +3236,12 @@ func (c *AutoScaling) DescribeScalingActivitiesRequest(input *DescribeScalingAct
 //
 // Describes one or more scaling activities for the specified Auto Scaling group.
 //
+// To view the scaling activities from the Amazon EC2 Auto Scaling console,
+// choose the Activity tab of the Auto Scaling group. When scaling events occur,
+// you see scaling activity messages in the Activity history. For more information,
+// see Verifying a scaling activity for an Auto Scaling group (https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-verify-scaling-activity.html)
+// in the Amazon EC2 Auto Scaling User Guide.
+//
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
 // the error.
@@ -3686,6 +3787,95 @@ func (c *AutoScaling) DescribeTerminationPolicyTypes(input *DescribeTerminationP
 // for more information on using Contexts.
 func (c *AutoScaling) DescribeTerminationPolicyTypesWithContext(ctx aws.Context, input *DescribeTerminationPolicyTypesInput, opts ...request.Option) (*DescribeTerminationPolicyTypesOutput, error) {
 	req, out := c.DescribeTerminationPolicyTypesRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
+const opDescribeWarmPool = "DescribeWarmPool"
+
+// DescribeWarmPoolRequest generates a "aws/request.Request" representing the
+// client's request for the DescribeWarmPool operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See DescribeWarmPool for more information on using the DescribeWarmPool
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the DescribeWarmPoolRequest method.
+//    req, resp := client.DescribeWarmPoolRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/autoscaling-2011-01-01/DescribeWarmPool
+func (c *AutoScaling) DescribeWarmPoolRequest(input *DescribeWarmPoolInput) (req *request.Request, output *DescribeWarmPoolOutput) {
+	op := &request.Operation{
+		Name:       opDescribeWarmPool,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &DescribeWarmPoolInput{}
+	}
+
+	output = &DescribeWarmPoolOutput{}
+	req = c.newRequest(op, input, output)
+	return
+}
+
+// DescribeWarmPool API operation for Auto Scaling.
+//
+// Describes a warm pool and its instances.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Auto Scaling's
+// API operation DescribeWarmPool for usage and error information.
+//
+// Returned Error Codes:
+//   * ErrCodeInvalidNextToken "InvalidNextToken"
+//   The NextToken value is not valid.
+//
+//   * ErrCodeLimitExceededFault "LimitExceeded"
+//   You have already reached a limit for your Amazon EC2 Auto Scaling resources
+//   (for example, Auto Scaling groups, launch configurations, or lifecycle hooks).
+//   For more information, see DescribeAccountLimits (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_DescribeAccountLimits.html)
+//   in the Amazon EC2 Auto Scaling API Reference.
+//
+//   * ErrCodeResourceContentionFault "ResourceContention"
+//   You already have a pending update to an Amazon EC2 Auto Scaling resource
+//   (for example, an Auto Scaling group, instance, or load balancer).
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/autoscaling-2011-01-01/DescribeWarmPool
+func (c *AutoScaling) DescribeWarmPool(input *DescribeWarmPoolInput) (*DescribeWarmPoolOutput, error) {
+	req, out := c.DescribeWarmPoolRequest(input)
+	return out, req.Send()
+}
+
+// DescribeWarmPoolWithContext is the same as DescribeWarmPool with the addition of
+// the ability to pass a context and additional request options.
+//
+// See DescribeWarmPool for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *AutoScaling) DescribeWarmPoolWithContext(ctx aws.Context, input *DescribeWarmPoolInput, opts ...request.Option) (*DescribeWarmPoolOutput, error) {
+	req, out := c.DescribeWarmPoolRequest(input)
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
@@ -4751,8 +4941,6 @@ func (c *AutoScaling) PutScheduledUpdateGroupActionRequest(input *PutScheduledUp
 // PutScheduledUpdateGroupAction API operation for Auto Scaling.
 //
 // Creates or updates a scheduled scaling action for an Auto Scaling group.
-// If you leave a parameter unspecified when updating a scheduled scaling action,
-// the corresponding value remains unchanged.
 //
 // For more information, see Scheduled scaling (https://docs.aws.amazon.com/autoscaling/ec2/userguide/schedule_time.html)
 // in the Amazon EC2 Auto Scaling User Guide.
@@ -4796,6 +4984,107 @@ func (c *AutoScaling) PutScheduledUpdateGroupAction(input *PutScheduledUpdateGro
 // for more information on using Contexts.
 func (c *AutoScaling) PutScheduledUpdateGroupActionWithContext(ctx aws.Context, input *PutScheduledUpdateGroupActionInput, opts ...request.Option) (*PutScheduledUpdateGroupActionOutput, error) {
 	req, out := c.PutScheduledUpdateGroupActionRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
+const opPutWarmPool = "PutWarmPool"
+
+// PutWarmPoolRequest generates a "aws/request.Request" representing the
+// client's request for the PutWarmPool operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See PutWarmPool for more information on using the PutWarmPool
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the PutWarmPoolRequest method.
+//    req, resp := client.PutWarmPoolRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/autoscaling-2011-01-01/PutWarmPool
+func (c *AutoScaling) PutWarmPoolRequest(input *PutWarmPoolInput) (req *request.Request, output *PutWarmPoolOutput) {
+	op := &request.Operation{
+		Name:       opPutWarmPool,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &PutWarmPoolInput{}
+	}
+
+	output = &PutWarmPoolOutput{}
+	req = c.newRequest(op, input, output)
+	req.Handlers.Unmarshal.Swap(query.UnmarshalHandler.Name, protocol.UnmarshalDiscardBodyHandler)
+	return
+}
+
+// PutWarmPool API operation for Auto Scaling.
+//
+// Adds a warm pool to the specified Auto Scaling group. A warm pool is a pool
+// of pre-initialized EC2 instances that sits alongside the Auto Scaling group.
+// Whenever your application needs to scale out, the Auto Scaling group can
+// draw on the warm pool to meet its new desired capacity. For more information,
+// see Warm pools for Amazon EC2 Auto Scaling (https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html)
+// in the Amazon EC2 Auto Scaling User Guide.
+//
+// This operation must be called from the Region in which the Auto Scaling group
+// was created. This operation cannot be called on an Auto Scaling group that
+// has a mixed instances policy or a launch template or launch configuration
+// that requests Spot Instances.
+//
+// You can view the instances in the warm pool using the DescribeWarmPool API
+// call. If you are no longer using a warm pool, you can delete it by calling
+// the DeleteWarmPool API.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Auto Scaling's
+// API operation PutWarmPool for usage and error information.
+//
+// Returned Error Codes:
+//   * ErrCodeLimitExceededFault "LimitExceeded"
+//   You have already reached a limit for your Amazon EC2 Auto Scaling resources
+//   (for example, Auto Scaling groups, launch configurations, or lifecycle hooks).
+//   For more information, see DescribeAccountLimits (https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_DescribeAccountLimits.html)
+//   in the Amazon EC2 Auto Scaling API Reference.
+//
+//   * ErrCodeResourceContentionFault "ResourceContention"
+//   You already have a pending update to an Amazon EC2 Auto Scaling resource
+//   (for example, an Auto Scaling group, instance, or load balancer).
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/autoscaling-2011-01-01/PutWarmPool
+func (c *AutoScaling) PutWarmPool(input *PutWarmPoolInput) (*PutWarmPoolOutput, error) {
+	req, out := c.PutWarmPoolRequest(input)
+	return out, req.Send()
+}
+
+// PutWarmPoolWithContext is the same as PutWarmPool with the addition of
+// the ability to pass a context and additional request options.
+//
+// See PutWarmPool for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *AutoScaling) PutWarmPoolWithContext(ctx aws.Context, input *PutWarmPoolInput, opts ...request.Option) (*PutWarmPoolOutput, error) {
+	req, out := c.PutWarmPoolRequest(input)
 	req.SetContext(ctx)
 	req.ApplyOptions(opts...)
 	return out, req.Send()
@@ -4869,7 +5158,7 @@ func (c *AutoScaling) RecordLifecycleActionHeartbeatRequest(input *RecordLifecyc
 //
 // If you finish before the timeout period ends, complete the lifecycle action.
 //
-// For more information, see Auto Scaling lifecycle (https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroupLifecycle.html)
+// For more information, see Amazon EC2 Auto Scaling lifecycle hooks (https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html)
 // in the Amazon EC2 Auto Scaling User Guide.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
@@ -5215,7 +5504,8 @@ func (c *AutoScaling) SetInstanceProtectionRequest(input *SetInstanceProtectionI
 
 // SetInstanceProtection API operation for Auto Scaling.
 //
-// Updates the instance protection settings of the specified instances.
+// Updates the instance protection settings of the specified instances. This
+// operation cannot be called on instances in a warm pool.
 //
 // For more information about preventing instances that are part of an Auto
 // Scaling group from terminating on scale in, see Instance scale-in protection
@@ -5310,8 +5600,8 @@ func (c *AutoScaling) StartInstanceRefreshRequest(input *StartInstanceRefreshInp
 // StartInstanceRefresh API operation for Auto Scaling.
 //
 // Starts a new instance refresh operation, which triggers a rolling replacement
-// of all previously launched instances in the Auto Scaling group with a new
-// group of instances.
+// of previously launched instances in the Auto Scaling group with a new group
+// of instances.
 //
 // If successful, this call creates a new instance refresh request with a unique
 // ID that you can use to track its progress. To query its status, call the
@@ -5319,8 +5609,9 @@ func (c *AutoScaling) StartInstanceRefreshRequest(input *StartInstanceRefreshInp
 // already run, call the DescribeInstanceRefreshes API. To cancel an instance
 // refresh operation in progress, use the CancelInstanceRefresh API.
 //
-// For more information, see Replacing Auto Scaling Instances Based on an Instance
-// Refresh (https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html).
+// For more information, see Replacing Auto Scaling instances based on an instance
+// refresh (https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html)
+// in the Amazon EC2 Auto Scaling User Guide.
 //
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
@@ -5503,7 +5794,7 @@ func (c *AutoScaling) TerminateInstanceInAutoScalingGroupRequest(input *Terminat
 // TerminateInstanceInAutoScalingGroup API operation for Auto Scaling.
 //
 // Terminates the specified instance and optionally adjusts the desired group
-// size.
+// size. This operation cannot be called on instances in a warm pool.
 //
 // This call simply makes a termination request. The instance is not terminated
 // immediately. When an instance is terminated, the instance status changes
@@ -5698,10 +5989,16 @@ type Activity struct {
 	// ActivityId is a required field
 	ActivityId *string `type:"string" required:"true"`
 
+	// The Amazon Resource Name (ARN) of the Auto Scaling group.
+	AutoScalingGroupARN *string `min:"1" type:"string"`
+
 	// The name of the Auto Scaling group.
 	//
 	// AutoScalingGroupName is a required field
 	AutoScalingGroupName *string `min:"1" type:"string" required:"true"`
+
+	// The state of the Auto Scaling group, which is either InService or Deleted.
+	AutoScalingGroupState *string `min:"1" type:"string"`
 
 	// The reason the activity began.
 	//
@@ -5750,9 +6047,21 @@ func (s *Activity) SetActivityId(v string) *Activity {
 	return s
 }
 
+// SetAutoScalingGroupARN sets the AutoScalingGroupARN field's value.
+func (s *Activity) SetAutoScalingGroupARN(v string) *Activity {
+	s.AutoScalingGroupARN = &v
+	return s
+}
+
 // SetAutoScalingGroupName sets the AutoScalingGroupName field's value.
 func (s *Activity) SetAutoScalingGroupName(v string) *Activity {
 	s.AutoScalingGroupName = &v
+	return s
+}
+
+// SetAutoScalingGroupState sets the AutoScalingGroupState field's value.
+func (s *Activity) SetAutoScalingGroupState(v string) *Activity {
+	s.AutoScalingGroupState = &v
 	return s
 }
 
@@ -6624,13 +6933,13 @@ type CreateAutoScalingGroupInput struct {
 	MinSize *int64 `type:"integer" required:"true"`
 
 	// An embedded object that specifies a mixed instances policy. The required
-	// parameters must be specified. If optional parameters are unspecified, their
+	// properties must be specified. If optional properties are unspecified, their
 	// default values are used.
 	//
-	// The policy includes parameters that not only define the distribution of On-Demand
+	// The policy includes properties that not only define the distribution of On-Demand
 	// Instances and Spot Instances, the maximum price to pay for Spot Instances,
 	// and how the Auto Scaling group allocates instance types to fulfill On-Demand
-	// and Spot capacities, but also the parameters that specify the instance configuration
+	// and Spot capacities, but also the properties that specify the instance configuration
 	// information—the launch template and instance types. The policy can also
 	// include a weight for each instance type and different launch templates for
 	// individual instance types. For more information, see Auto Scaling groups
@@ -7489,7 +7798,8 @@ type DeleteAutoScalingGroupInput struct {
 
 	// Specifies that the group is to be deleted along with all instances associated
 	// with the group, without waiting for all instances to be terminated. This
-	// parameter also deletes any lifecycle actions associated with the group.
+	// parameter also deletes any outstanding lifecycle actions associated with
+	// the group.
 	ForceDelete *bool `type:"boolean"`
 }
 
@@ -7943,6 +8253,73 @@ func (s DeleteTagsOutput) String() string {
 
 // GoString returns the string representation
 func (s DeleteTagsOutput) GoString() string {
+	return s.String()
+}
+
+type DeleteWarmPoolInput struct {
+	_ struct{} `type:"structure"`
+
+	// The name of the Auto Scaling group.
+	//
+	// AutoScalingGroupName is a required field
+	AutoScalingGroupName *string `min:"1" type:"string" required:"true"`
+
+	// Specifies that the warm pool is to be deleted along with all instances associated
+	// with the warm pool, without waiting for all instances to be terminated. This
+	// parameter also deletes any outstanding lifecycle actions associated with
+	// the warm pool instances.
+	ForceDelete *bool `type:"boolean"`
+}
+
+// String returns the string representation
+func (s DeleteWarmPoolInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s DeleteWarmPoolInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *DeleteWarmPoolInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "DeleteWarmPoolInput"}
+	if s.AutoScalingGroupName == nil {
+		invalidParams.Add(request.NewErrParamRequired("AutoScalingGroupName"))
+	}
+	if s.AutoScalingGroupName != nil && len(*s.AutoScalingGroupName) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("AutoScalingGroupName", 1))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetAutoScalingGroupName sets the AutoScalingGroupName field's value.
+func (s *DeleteWarmPoolInput) SetAutoScalingGroupName(v string) *DeleteWarmPoolInput {
+	s.AutoScalingGroupName = &v
+	return s
+}
+
+// SetForceDelete sets the ForceDelete field's value.
+func (s *DeleteWarmPoolInput) SetForceDelete(v bool) *DeleteWarmPoolInput {
+	s.ForceDelete = &v
+	return s
+}
+
+type DeleteWarmPoolOutput struct {
+	_ struct{} `type:"structure"`
+}
+
+// String returns the string representation
+func (s DeleteWarmPoolOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s DeleteWarmPoolOutput) GoString() string {
 	return s.String()
 }
 
@@ -8991,6 +9368,9 @@ type DescribeScalingActivitiesInput struct {
 	// The name of the Auto Scaling group.
 	AutoScalingGroupName *string `min:"1" type:"string"`
 
+	// Indicates whether to include scaling activity from deleted Auto Scaling groups.
+	IncludeDeletedGroups *bool `type:"boolean"`
+
 	// The maximum number of items to return with this call. The default value is
 	// 100 and the maximum value is 100.
 	MaxRecords *int64 `type:"integer"`
@@ -9032,6 +9412,12 @@ func (s *DescribeScalingActivitiesInput) SetActivityIds(v []*string) *DescribeSc
 // SetAutoScalingGroupName sets the AutoScalingGroupName field's value.
 func (s *DescribeScalingActivitiesInput) SetAutoScalingGroupName(v string) *DescribeScalingActivitiesInput {
 	s.AutoScalingGroupName = &v
+	return s
+}
+
+// SetIncludeDeletedGroups sets the IncludeDeletedGroups field's value.
+func (s *DescribeScalingActivitiesInput) SetIncludeDeletedGroups(v bool) *DescribeScalingActivitiesInput {
+	s.IncludeDeletedGroups = &v
 	return s
 }
 
@@ -9362,6 +9748,109 @@ func (s *DescribeTerminationPolicyTypesOutput) SetTerminationPolicyTypes(v []*st
 	return s
 }
 
+type DescribeWarmPoolInput struct {
+	_ struct{} `type:"structure"`
+
+	// The name of the Auto Scaling group.
+	//
+	// AutoScalingGroupName is a required field
+	AutoScalingGroupName *string `min:"1" type:"string" required:"true"`
+
+	// The maximum number of instances to return with this call. The maximum value
+	// is 50.
+	MaxRecords *int64 `type:"integer"`
+
+	// The token for the next set of instances to return. (You received this token
+	// from a previous call.)
+	NextToken *string `type:"string"`
+}
+
+// String returns the string representation
+func (s DescribeWarmPoolInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s DescribeWarmPoolInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *DescribeWarmPoolInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "DescribeWarmPoolInput"}
+	if s.AutoScalingGroupName == nil {
+		invalidParams.Add(request.NewErrParamRequired("AutoScalingGroupName"))
+	}
+	if s.AutoScalingGroupName != nil && len(*s.AutoScalingGroupName) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("AutoScalingGroupName", 1))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetAutoScalingGroupName sets the AutoScalingGroupName field's value.
+func (s *DescribeWarmPoolInput) SetAutoScalingGroupName(v string) *DescribeWarmPoolInput {
+	s.AutoScalingGroupName = &v
+	return s
+}
+
+// SetMaxRecords sets the MaxRecords field's value.
+func (s *DescribeWarmPoolInput) SetMaxRecords(v int64) *DescribeWarmPoolInput {
+	s.MaxRecords = &v
+	return s
+}
+
+// SetNextToken sets the NextToken field's value.
+func (s *DescribeWarmPoolInput) SetNextToken(v string) *DescribeWarmPoolInput {
+	s.NextToken = &v
+	return s
+}
+
+type DescribeWarmPoolOutput struct {
+	_ struct{} `type:"structure"`
+
+	// The instances that are currently in the warm pool.
+	Instances []*Instance `type:"list"`
+
+	// The token for the next set of items to return. (You received this token from
+	// a previous call.)
+	NextToken *string `type:"string"`
+
+	// The warm pool configuration details.
+	WarmPoolConfiguration *WarmPoolConfiguration `type:"structure"`
+}
+
+// String returns the string representation
+func (s DescribeWarmPoolOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s DescribeWarmPoolOutput) GoString() string {
+	return s.String()
+}
+
+// SetInstances sets the Instances field's value.
+func (s *DescribeWarmPoolOutput) SetInstances(v []*Instance) *DescribeWarmPoolOutput {
+	s.Instances = v
+	return s
+}
+
+// SetNextToken sets the NextToken field's value.
+func (s *DescribeWarmPoolOutput) SetNextToken(v string) *DescribeWarmPoolOutput {
+	s.NextToken = &v
+	return s
+}
+
+// SetWarmPoolConfiguration sets the WarmPoolConfiguration field's value.
+func (s *DescribeWarmPoolOutput) SetWarmPoolConfiguration(v *WarmPoolConfiguration) *DescribeWarmPoolOutput {
+	s.WarmPoolConfiguration = v
+	return s
+}
+
 type DetachInstancesInput struct {
 	_ struct{} `type:"structure"`
 
@@ -9625,6 +10114,20 @@ type DisableMetricsCollectionInput struct {
 	//
 	//    * GroupTotalCapacity
 	//
+	//    * WarmPoolDesiredCapacity
+	//
+	//    * WarmPoolWarmedCapacity
+	//
+	//    * WarmPoolPendingCapacity
+	//
+	//    * WarmPoolTerminatingCapacity
+	//
+	//    * WarmPoolTotalCapacity
+	//
+	//    * GroupAndWarmPoolDesiredCapacity
+	//
+	//    * GroupAndWarmPoolTotalCapacity
+	//
 	// If you omit this parameter, all metrics are disabled.
 	Metrics []*string `type:"list"`
 }
@@ -9865,6 +10368,22 @@ type EnableMetricsCollectionInput struct {
 	//
 	//    * GroupTotalCapacity
 	//
+	// The warm pools feature supports the following additional metrics:
+	//
+	//    * WarmPoolDesiredCapacity
+	//
+	//    * WarmPoolWarmedCapacity
+	//
+	//    * WarmPoolPendingCapacity
+	//
+	//    * WarmPoolTerminatingCapacity
+	//
+	//    * WarmPoolTotalCapacity
+	//
+	//    * GroupAndWarmPoolDesiredCapacity
+	//
+	//    * GroupAndWarmPoolTotalCapacity
+	//
 	// If you omit this parameter, all metrics are enabled.
 	Metrics []*string `type:"list"`
 }
@@ -9967,6 +10486,20 @@ type EnabledMetric struct {
 	//    * GroupTerminatingCapacity
 	//
 	//    * GroupTotalCapacity
+	//
+	//    * WarmPoolDesiredCapacity
+	//
+	//    * WarmPoolWarmedCapacity
+	//
+	//    * WarmPoolPendingCapacity
+	//
+	//    * WarmPoolTerminatingCapacity
+	//
+	//    * WarmPoolTotalCapacity
+	//
+	//    * GroupAndWarmPoolDesiredCapacity
+	//
+	//    * GroupAndWarmPoolTotalCapacity
 	Metric *string `min:"1" type:"string"`
 }
 
@@ -10454,6 +10987,12 @@ type Group struct {
 
 	// One or more subnet IDs, if applicable, separated by commas.
 	VPCZoneIdentifier *string `min:"1" type:"string"`
+
+	// The warm pool for the group.
+	WarmPoolConfiguration *WarmPoolConfiguration `type:"structure"`
+
+	// The current size of the warm pool.
+	WarmPoolSize *int64 `type:"integer"`
 }
 
 // String returns the string representation
@@ -10628,6 +11167,18 @@ func (s *Group) SetVPCZoneIdentifier(v string) *Group {
 	return s
 }
 
+// SetWarmPoolConfiguration sets the WarmPoolConfiguration field's value.
+func (s *Group) SetWarmPoolConfiguration(v *WarmPoolConfiguration) *Group {
+	s.WarmPoolConfiguration = v
+	return s
+}
+
+// SetWarmPoolSize sets the WarmPoolSize field's value.
+func (s *Group) SetWarmPoolSize(v int64) *Group {
+	s.WarmPoolSize = &v
+	return s
+}
+
 // Describes an EC2 instance.
 type Instance struct {
 	_ struct{} `type:"structure"`
@@ -10786,7 +11337,9 @@ type InstanceDetails struct {
 	//
 	// Valid Values: Pending | Pending:Wait | Pending:Proceed | Quarantined | InService
 	// | Terminating | Terminating:Wait | Terminating:Proceed | Terminated | Detaching
-	// | Detached | EnteringStandby | Standby
+	// | Detached | EnteringStandby | Standby | Warmed:Pending | Warmed:Pending:Wait
+	// | Warmed:Pending:Proceed | Warmed:Terminating | Warmed:Terminating:Wait |
+	// Warmed:Terminating:Proceed | Warmed:Terminated | Warmed:Stopped | Warmed:Running
 	//
 	// LifecycleState is a required field
 	LifecycleState *string `min:"1" type:"string" required:"true"`
@@ -10998,6 +11551,9 @@ type InstanceRefresh struct {
 	// added to the percentage complete.
 	PercentageComplete *int64 `type:"integer"`
 
+	// Additional progress details for an Auto Scaling group that has a warm pool.
+	ProgressDetails *InstanceRefreshProgressDetails `type:"structure"`
+
 	// The date and time at which the instance refresh began.
 	StartTime *time.Time `type:"timestamp"`
 
@@ -11063,6 +11619,12 @@ func (s *InstanceRefresh) SetPercentageComplete(v int64) *InstanceRefresh {
 	return s
 }
 
+// SetProgressDetails sets the ProgressDetails field's value.
+func (s *InstanceRefresh) SetProgressDetails(v *InstanceRefreshProgressDetails) *InstanceRefresh {
+	s.ProgressDetails = v
+	return s
+}
+
 // SetStartTime sets the StartTime field's value.
 func (s *InstanceRefresh) SetStartTime(v time.Time) *InstanceRefresh {
 	s.StartTime = &v
@@ -11078,6 +11640,119 @@ func (s *InstanceRefresh) SetStatus(v string) *InstanceRefresh {
 // SetStatusReason sets the StatusReason field's value.
 func (s *InstanceRefresh) SetStatusReason(v string) *InstanceRefresh {
 	s.StatusReason = &v
+	return s
+}
+
+// Reports the progress of an instance fresh on instances that are in the Auto
+// Scaling group.
+type InstanceRefreshLivePoolProgress struct {
+	_ struct{} `type:"structure"`
+
+	// The number of instances remaining to update.
+	InstancesToUpdate *int64 `type:"integer"`
+
+	// The percentage of instances in the Auto Scaling group that have been replaced.
+	// For each instance replacement, Amazon EC2 Auto Scaling tracks the instance's
+	// health status and warm-up time. When the instance's health status changes
+	// to healthy and the specified warm-up time passes, the instance is considered
+	// updated and added to the percentage complete.
+	PercentageComplete *int64 `type:"integer"`
+}
+
+// String returns the string representation
+func (s InstanceRefreshLivePoolProgress) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s InstanceRefreshLivePoolProgress) GoString() string {
+	return s.String()
+}
+
+// SetInstancesToUpdate sets the InstancesToUpdate field's value.
+func (s *InstanceRefreshLivePoolProgress) SetInstancesToUpdate(v int64) *InstanceRefreshLivePoolProgress {
+	s.InstancesToUpdate = &v
+	return s
+}
+
+// SetPercentageComplete sets the PercentageComplete field's value.
+func (s *InstanceRefreshLivePoolProgress) SetPercentageComplete(v int64) *InstanceRefreshLivePoolProgress {
+	s.PercentageComplete = &v
+	return s
+}
+
+// Reports the progress of an instance refresh on an Auto Scaling group that
+// has a warm pool. This includes separate details for instances in the warm
+// pool and instances in the Auto Scaling group (the live pool).
+type InstanceRefreshProgressDetails struct {
+	_ struct{} `type:"structure"`
+
+	// Indicates the progress of an instance fresh on instances that are in the
+	// Auto Scaling group.
+	LivePoolProgress *InstanceRefreshLivePoolProgress `type:"structure"`
+
+	// Indicates the progress of an instance fresh on instances that are in the
+	// warm pool.
+	WarmPoolProgress *InstanceRefreshWarmPoolProgress `type:"structure"`
+}
+
+// String returns the string representation
+func (s InstanceRefreshProgressDetails) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s InstanceRefreshProgressDetails) GoString() string {
+	return s.String()
+}
+
+// SetLivePoolProgress sets the LivePoolProgress field's value.
+func (s *InstanceRefreshProgressDetails) SetLivePoolProgress(v *InstanceRefreshLivePoolProgress) *InstanceRefreshProgressDetails {
+	s.LivePoolProgress = v
+	return s
+}
+
+// SetWarmPoolProgress sets the WarmPoolProgress field's value.
+func (s *InstanceRefreshProgressDetails) SetWarmPoolProgress(v *InstanceRefreshWarmPoolProgress) *InstanceRefreshProgressDetails {
+	s.WarmPoolProgress = v
+	return s
+}
+
+// Reports the progress of an instance fresh on instances that are in the warm
+// pool.
+type InstanceRefreshWarmPoolProgress struct {
+	_ struct{} `type:"structure"`
+
+	// The number of instances remaining to update.
+	InstancesToUpdate *int64 `type:"integer"`
+
+	// The percentage of instances in the warm pool that have been replaced. For
+	// each instance replacement, Amazon EC2 Auto Scaling tracks the instance's
+	// health status and warm-up time. When the instance's health status changes
+	// to healthy and the specified warm-up time passes, the instance is considered
+	// updated and added to the percentage complete.
+	PercentageComplete *int64 `type:"integer"`
+}
+
+// String returns the string representation
+func (s InstanceRefreshWarmPoolProgress) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s InstanceRefreshWarmPoolProgress) GoString() string {
+	return s.String()
+}
+
+// SetInstancesToUpdate sets the InstancesToUpdate field's value.
+func (s *InstanceRefreshWarmPoolProgress) SetInstancesToUpdate(v int64) *InstanceRefreshWarmPoolProgress {
+	s.InstancesToUpdate = &v
+	return s
+}
+
+// SetPercentageComplete sets the PercentageComplete field's value.
+func (s *InstanceRefreshWarmPoolProgress) SetPercentageComplete(v int64) *InstanceRefreshWarmPoolProgress {
+	s.PercentageComplete = &v
 	return s
 }
 
@@ -11100,11 +11775,12 @@ type InstancesDistribution struct {
 
 	// Indicates how to allocate instance types to fulfill On-Demand capacity. The
 	// only valid value is prioritized, which is also the default value. This strategy
-	// uses the order of instance types in the overrides to define the launch priority
-	// of each instance type. The first instance type in the array is prioritized
-	// higher than the last. If all your On-Demand capacity cannot be fulfilled
-	// using your highest priority instance, then the Auto Scaling groups launches
-	// the remaining capacity using the second priority instance type, and so on.
+	// uses the order of instance types in the LaunchTemplateOverrides to define
+	// the launch priority of each instance type. The first instance type in the
+	// array is prioritized higher than the last. If all your On-Demand capacity
+	// cannot be fulfilled using your highest priority instance, then the Auto Scaling
+	// groups launches the remaining capacity using the second priority instance
+	// type, and so on.
 	OnDemandAllocationStrategy *string `type:"string"`
 
 	// The minimum amount of the Auto Scaling group's capacity that must be fulfilled
@@ -11120,13 +11796,20 @@ type InstancesDistribution struct {
 	// to 100 if not specified. If set to 100, only On-Demand Instances are provisioned.
 	OnDemandPercentageAboveBaseCapacity *int64 `type:"integer"`
 
-	// Indicates how to allocate instances across Spot Instance pools. If the allocation
-	// strategy is capacity-optimized (recommended), the Auto Scaling group launches
-	// instances using Spot pools that are optimally chosen based on the available
-	// Spot capacity. If the allocation strategy is lowest-price, the Auto Scaling
-	// group launches instances using the Spot pools with the lowest price, and
-	// evenly allocates your instances across the number of Spot pools that you
-	// specify. Defaults to lowest-price if not specified.
+	// Indicates how to allocate instances across Spot Instance pools.
+	//
+	// If the allocation strategy is lowest-price, the Auto Scaling group launches
+	// instances using the Spot pools with the lowest price, and evenly allocates
+	// your instances across the number of Spot pools that you specify. Defaults
+	// to lowest-price if not specified.
+	//
+	// If the allocation strategy is capacity-optimized (recommended), the Auto
+	// Scaling group launches instances using Spot pools that are optimally chosen
+	// based on the available Spot capacity. Alternatively, you can use capacity-optimized-prioritized
+	// and set the order of instance types in the list of launch template overrides
+	// from highest to lowest priority (from first to last in the list). Amazon
+	// EC2 Auto Scaling honors the instance type priorities on a best-effort basis
+	// but optimizes for capacity first.
 	SpotAllocationStrategy *string `type:"string"`
 
 	// The number of Spot Instance pools across which to allocate your Spot Instances.
@@ -11449,7 +12132,7 @@ func (s *LaunchConfiguration) SetUserData(v string) *LaunchConfiguration {
 
 // Describes a launch template and overrides.
 //
-// You specify these parameters as part of a mixed instances policy.
+// You specify these properties as part of a mixed instances policy.
 //
 // When you update the launch template or overrides, existing Amazon EC2 instances
 // continue to run. When scale out occurs, Amazon EC2 Auto Scaling launches
@@ -11461,7 +12144,7 @@ type LaunchTemplate struct {
 	// The launch template to use.
 	LaunchTemplateSpecification *LaunchTemplateSpecification `type:"structure"`
 
-	// Any parameters that you specify override the same parameters in the launch
+	// Any properties that you specify override the same properties in the launch
 	// template. If not provided, Amazon EC2 Auto Scaling uses the instance type
 	// specified in the launch template when it launches an instance.
 	Overrides []*LaunchTemplateOverrides `type:"list"`
@@ -12095,6 +12778,20 @@ type MetricCollectionType struct {
 	//    * GroupTerminatingCapacity
 	//
 	//    * GroupTotalCapacity
+	//
+	//    * WarmPoolDesiredCapacity
+	//
+	//    * WarmPoolWarmedCapacity
+	//
+	//    * WarmPoolPendingCapacity
+	//
+	//    * WarmPoolTerminatingCapacity
+	//
+	//    * WarmPoolTotalCapacity
+	//
+	//    * GroupAndWarmPoolDesiredCapacity
+	//
+	//    * GroupAndWarmPoolTotalCapacity
 	Metric *string `min:"1" type:"string"`
 }
 
@@ -12200,13 +12897,13 @@ func (s *MetricGranularityType) SetGranularity(v string) *MetricGranularityType 
 //
 // You can create a mixed instances policy for a new Auto Scaling group, or
 // you can create it for an existing group by updating the group to specify
-// MixedInstancesPolicy as the top-level parameter instead of a launch configuration
+// MixedInstancesPolicy as the top-level property instead of a launch configuration
 // or launch template.
 type MixedInstancesPolicy struct {
 	_ struct{} `type:"structure"`
 
 	// Specifies the instances distribution. If not provided, the value for each
-	// parameter in InstancesDistribution uses a default value.
+	// property in InstancesDistribution uses a default value.
 	InstancesDistribution *InstancesDistribution `type:"structure"`
 
 	// Specifies the launch template to use and optionally the instance types (overrides)
@@ -12986,8 +13683,7 @@ type PutScheduledUpdateGroupActionInput struct {
 	// scale beyond this capacity if you add more scaling conditions.
 	DesiredCapacity *int64 `type:"integer"`
 
-	// The date and time for the recurring schedule to end. Amazon EC2 Auto Scaling
-	// does not perform the action after this time.
+	// The date and time for the recurring schedule to end, in UTC.
 	EndTime *time.Time `type:"timestamp"`
 
 	// The maximum size of the Auto Scaling group.
@@ -12996,14 +13692,15 @@ type PutScheduledUpdateGroupActionInput struct {
 	// The minimum size of the Auto Scaling group.
 	MinSize *int64 `type:"integer"`
 
-	// The recurring schedule for this action, in Unix cron syntax format. This
-	// format consists of five fields separated by white spaces: [Minute] [Hour]
-	// [Day_of_Month] [Month_of_Year] [Day_of_Week]. The value must be in quotes
-	// (for example, "30 0 1 1,6,12 *"). For more information about this format,
-	// see Crontab (http://crontab.org).
+	// The recurring schedule for this action. This format consists of five fields
+	// separated by white spaces: [Minute] [Hour] [Day_of_Month] [Month_of_Year]
+	// [Day_of_Week]. The value must be in quotes (for example, "30 0 1 1,6,12 *").
+	// For more information about this format, see Crontab (http://crontab.org).
 	//
 	// When StartTime and EndTime are specified with Recurrence, they form the boundaries
 	// of when the recurring action starts and stops.
+	//
+	// Cron expressions use Universal Coordinated Time (UTC) by default.
 	Recurrence *string `min:"1" type:"string"`
 
 	// The name of this scaling action.
@@ -13024,6 +13721,15 @@ type PutScheduledUpdateGroupActionInput struct {
 
 	// This parameter is no longer used.
 	Time *time.Time `type:"timestamp"`
+
+	// Specifies the time zone for a cron expression. If a time zone is not provided,
+	// UTC is used by default.
+	//
+	// Valid values are the canonical names of the IANA time zones, derived from
+	// the IANA Time Zone Database (such as Etc/GMT+9 or Pacific/Tahiti). For more
+	// information, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+	// (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	TimeZone *string `min:"1" type:"string"`
 }
 
 // String returns the string representation
@@ -13053,6 +13759,9 @@ func (s *PutScheduledUpdateGroupActionInput) Validate() error {
 	}
 	if s.ScheduledActionName != nil && len(*s.ScheduledActionName) < 1 {
 		invalidParams.Add(request.NewErrParamMinLen("ScheduledActionName", 1))
+	}
+	if s.TimeZone != nil && len(*s.TimeZone) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("TimeZone", 1))
 	}
 
 	if invalidParams.Len() > 0 {
@@ -13115,6 +13824,12 @@ func (s *PutScheduledUpdateGroupActionInput) SetTime(v time.Time) *PutScheduledU
 	return s
 }
 
+// SetTimeZone sets the TimeZone field's value.
+func (s *PutScheduledUpdateGroupActionInput) SetTimeZone(v string) *PutScheduledUpdateGroupActionInput {
+	s.TimeZone = &v
+	return s
+}
+
 type PutScheduledUpdateGroupActionOutput struct {
 	_ struct{} `type:"structure"`
 }
@@ -13126,6 +13841,111 @@ func (s PutScheduledUpdateGroupActionOutput) String() string {
 
 // GoString returns the string representation
 func (s PutScheduledUpdateGroupActionOutput) GoString() string {
+	return s.String()
+}
+
+type PutWarmPoolInput struct {
+	_ struct{} `type:"structure"`
+
+	// The name of the Auto Scaling group.
+	//
+	// AutoScalingGroupName is a required field
+	AutoScalingGroupName *string `min:"1" type:"string" required:"true"`
+
+	// Specifies the total maximum number of instances that are allowed to be in
+	// the warm pool or in any state except Terminated for the Auto Scaling group.
+	// This is an optional property. Specify it only if the warm pool size should
+	// not be determined by the difference between the group's maximum capacity
+	// and its desired capacity.
+	//
+	// Amazon EC2 Auto Scaling will launch and maintain either the difference between
+	// the group's maximum capacity and its desired capacity, if a value for MaxGroupPreparedCapacity
+	// is not specified, or the difference between the MaxGroupPreparedCapacity
+	// and the desired capacity, if a value for MaxGroupPreparedCapacity is specified.
+	//
+	// The size of the warm pool is dynamic. Only when MaxGroupPreparedCapacity
+	// and MinSize are set to the same value does the warm pool have an absolute
+	// size.
+	//
+	// If the desired capacity of the Auto Scaling group is higher than the MaxGroupPreparedCapacity,
+	// the capacity of the warm pool is 0. To remove a value that you previously
+	// set, include the property but specify -1 for the value.
+	MaxGroupPreparedCapacity *int64 `type:"integer"`
+
+	// Specifies the minimum number of instances to maintain in the warm pool. This
+	// helps you to ensure that there is always a certain number of warmed instances
+	// available to handle traffic spikes. Defaults to 0 if not specified.
+	MinSize *int64 `type:"integer"`
+
+	// Sets the instance state to transition to after the lifecycle hooks finish.
+	// Valid values are: Stopped (default) or Running.
+	PoolState *string `type:"string" enum:"WarmPoolState"`
+}
+
+// String returns the string representation
+func (s PutWarmPoolInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s PutWarmPoolInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *PutWarmPoolInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "PutWarmPoolInput"}
+	if s.AutoScalingGroupName == nil {
+		invalidParams.Add(request.NewErrParamRequired("AutoScalingGroupName"))
+	}
+	if s.AutoScalingGroupName != nil && len(*s.AutoScalingGroupName) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("AutoScalingGroupName", 1))
+	}
+	if s.MaxGroupPreparedCapacity != nil && *s.MaxGroupPreparedCapacity < -1 {
+		invalidParams.Add(request.NewErrParamMinValue("MaxGroupPreparedCapacity", -1))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetAutoScalingGroupName sets the AutoScalingGroupName field's value.
+func (s *PutWarmPoolInput) SetAutoScalingGroupName(v string) *PutWarmPoolInput {
+	s.AutoScalingGroupName = &v
+	return s
+}
+
+// SetMaxGroupPreparedCapacity sets the MaxGroupPreparedCapacity field's value.
+func (s *PutWarmPoolInput) SetMaxGroupPreparedCapacity(v int64) *PutWarmPoolInput {
+	s.MaxGroupPreparedCapacity = &v
+	return s
+}
+
+// SetMinSize sets the MinSize field's value.
+func (s *PutWarmPoolInput) SetMinSize(v int64) *PutWarmPoolInput {
+	s.MinSize = &v
+	return s
+}
+
+// SetPoolState sets the PoolState field's value.
+func (s *PutWarmPoolInput) SetPoolState(v string) *PutWarmPoolInput {
+	s.PoolState = &v
+	return s
+}
+
+type PutWarmPoolOutput struct {
+	_ struct{} `type:"structure"`
+}
+
+// String returns the string representation
+func (s PutWarmPoolOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s PutWarmPoolOutput) GoString() string {
 	return s.String()
 }
 
@@ -13228,8 +14048,25 @@ func (s RecordLifecycleActionHeartbeatOutput) GoString() string {
 }
 
 // Describes information used to start an instance refresh.
+//
+// All properties are optional. However, if you specify a value for CheckpointDelay,
+// you must also provide a value for CheckpointPercentages.
 type RefreshPreferences struct {
 	_ struct{} `type:"structure"`
+
+	// The amount of time, in seconds, to wait after a checkpoint before continuing.
+	// This property is optional, but if you specify a value for it, you must also
+	// specify a value for CheckpointPercentages. If you specify a value for CheckpointPercentages
+	// and not for CheckpointDelay, the CheckpointDelay defaults to 3600 (1 hour).
+	CheckpointDelay *int64 `type:"integer"`
+
+	// Threshold values for each checkpoint in ascending order. Each number must
+	// be unique. To replace all instances in the Auto Scaling group, the last number
+	// in the array must be 100.
+	//
+	// For usage examples, see Adding checkpoints to an instance refresh (https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-adding-checkpoints-instance-refresh.html)
+	// in the Amazon EC2 Auto Scaling User Guide.
+	CheckpointPercentages []*int64 `type:"list"`
 
 	// The number of seconds until a newly launched instance is configured and ready
 	// to use. During this time, Amazon EC2 Auto Scaling does not immediately move
@@ -13252,6 +14089,18 @@ func (s RefreshPreferences) String() string {
 // GoString returns the string representation
 func (s RefreshPreferences) GoString() string {
 	return s.String()
+}
+
+// SetCheckpointDelay sets the CheckpointDelay field's value.
+func (s *RefreshPreferences) SetCheckpointDelay(v int64) *RefreshPreferences {
+	s.CheckpointDelay = &v
+	return s
+}
+
+// SetCheckpointPercentages sets the CheckpointPercentages field's value.
+func (s *RefreshPreferences) SetCheckpointPercentages(v []*int64) *RefreshPreferences {
+	s.CheckpointPercentages = v
+	return s
 }
 
 // SetInstanceWarmup sets the InstanceWarmup field's value.
@@ -13555,6 +14404,9 @@ type ScheduledUpdateGroupAction struct {
 
 	// This parameter is no longer used.
 	Time *time.Time `type:"timestamp"`
+
+	// The time zone for the cron expression.
+	TimeZone *string `min:"1" type:"string"`
 }
 
 // String returns the string representation
@@ -13627,11 +14479,14 @@ func (s *ScheduledUpdateGroupAction) SetTime(v time.Time) *ScheduledUpdateGroupA
 	return s
 }
 
+// SetTimeZone sets the TimeZone field's value.
+func (s *ScheduledUpdateGroupAction) SetTimeZone(v string) *ScheduledUpdateGroupAction {
+	s.TimeZone = &v
+	return s
+}
+
 // Describes information used for one or more scheduled scaling action updates
 // in a BatchPutScheduledUpdateGroupAction operation.
-//
-// When updating a scheduled scaling action, all optional parameters are left
-// unchanged if not specified.
 type ScheduledUpdateGroupActionRequest struct {
 	_ struct{} `type:"structure"`
 
@@ -13639,8 +14494,7 @@ type ScheduledUpdateGroupActionRequest struct {
 	// the scheduled action runs and the capacity it attempts to maintain.
 	DesiredCapacity *int64 `type:"integer"`
 
-	// The date and time for the recurring schedule to end. Amazon EC2 Auto Scaling
-	// does not perform the action after this time.
+	// The date and time for the recurring schedule to end, in UTC.
 	EndTime *time.Time `type:"timestamp"`
 
 	// The maximum size of the Auto Scaling group.
@@ -13656,6 +14510,8 @@ type ScheduledUpdateGroupActionRequest struct {
 	//
 	// When StartTime and EndTime are specified with Recurrence, they form the boundaries
 	// of when the recurring action starts and stops.
+	//
+	// Cron expressions use Universal Coordinated Time (UTC) by default.
 	Recurrence *string `min:"1" type:"string"`
 
 	// The name of the scaling action.
@@ -13673,6 +14529,15 @@ type ScheduledUpdateGroupActionRequest struct {
 	// If you try to schedule the action in the past, Amazon EC2 Auto Scaling returns
 	// an error message.
 	StartTime *time.Time `type:"timestamp"`
+
+	// Specifies the time zone for a cron expression. If a time zone is not provided,
+	// UTC is used by default.
+	//
+	// Valid values are the canonical names of the IANA time zones, derived from
+	// the IANA Time Zone Database (such as Etc/GMT+9 or Pacific/Tahiti). For more
+	// information, see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+	// (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+	TimeZone *string `min:"1" type:"string"`
 }
 
 // String returns the string representation
@@ -13696,6 +14561,9 @@ func (s *ScheduledUpdateGroupActionRequest) Validate() error {
 	}
 	if s.ScheduledActionName != nil && len(*s.ScheduledActionName) < 1 {
 		invalidParams.Add(request.NewErrParamMinLen("ScheduledActionName", 1))
+	}
+	if s.TimeZone != nil && len(*s.TimeZone) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("TimeZone", 1))
 	}
 
 	if invalidParams.Len() > 0 {
@@ -13743,6 +14611,12 @@ func (s *ScheduledUpdateGroupActionRequest) SetScheduledActionName(v string) *Sc
 // SetStartTime sets the StartTime field's value.
 func (s *ScheduledUpdateGroupActionRequest) SetStartTime(v time.Time) *ScheduledUpdateGroupActionRequest {
 	s.StartTime = &v
+	return s
+}
+
+// SetTimeZone sets the TimeZone field's value.
+func (s *ScheduledUpdateGroupActionRequest) SetTimeZone(v string) *ScheduledUpdateGroupActionRequest {
+	s.TimeZone = &v
 	return s
 }
 
@@ -14622,7 +15496,7 @@ type UpdateAutoScalingGroupInput struct {
 	MinSize *int64 `type:"integer"`
 
 	// An embedded object that specifies a mixed instances policy. When you make
-	// changes to an existing policy, all optional parameters are left unchanged
+	// changes to an existing policy, all optional properties are left unchanged
 	// if not specified. For more information, see Auto Scaling groups with multiple
 	// instance types and purchase options (https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-purchase-options.html)
 	// in the Amazon EC2 Auto Scaling User Guide.
@@ -14833,6 +15707,59 @@ func (s UpdateAutoScalingGroupOutput) GoString() string {
 	return s.String()
 }
 
+// Describes a warm pool configuration.
+type WarmPoolConfiguration struct {
+	_ struct{} `type:"structure"`
+
+	// The total maximum number of instances that are allowed to be in the warm
+	// pool or in any state except Terminated for the Auto Scaling group.
+	MaxGroupPreparedCapacity *int64 `type:"integer"`
+
+	// The minimum number of instances to maintain in the warm pool.
+	MinSize *int64 `type:"integer"`
+
+	// The instance state to transition to after the lifecycle actions are complete:
+	// Stopped or Running.
+	PoolState *string `type:"string" enum:"WarmPoolState"`
+
+	// The status of a warm pool that is marked for deletion.
+	Status *string `type:"string" enum:"WarmPoolStatus"`
+}
+
+// String returns the string representation
+func (s WarmPoolConfiguration) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s WarmPoolConfiguration) GoString() string {
+	return s.String()
+}
+
+// SetMaxGroupPreparedCapacity sets the MaxGroupPreparedCapacity field's value.
+func (s *WarmPoolConfiguration) SetMaxGroupPreparedCapacity(v int64) *WarmPoolConfiguration {
+	s.MaxGroupPreparedCapacity = &v
+	return s
+}
+
+// SetMinSize sets the MinSize field's value.
+func (s *WarmPoolConfiguration) SetMinSize(v int64) *WarmPoolConfiguration {
+	s.MinSize = &v
+	return s
+}
+
+// SetPoolState sets the PoolState field's value.
+func (s *WarmPoolConfiguration) SetPoolState(v string) *WarmPoolConfiguration {
+	s.PoolState = &v
+	return s
+}
+
+// SetStatus sets the Status field's value.
+func (s *WarmPoolConfiguration) SetStatus(v string) *WarmPoolConfiguration {
+	s.Status = &v
+	return s
+}
+
 const (
 	// InstanceMetadataEndpointStateDisabled is a InstanceMetadataEndpointState enum value
 	InstanceMetadataEndpointStateDisabled = "disabled"
@@ -14936,6 +15863,33 @@ const (
 
 	// LifecycleStateStandby is a LifecycleState enum value
 	LifecycleStateStandby = "Standby"
+
+	// LifecycleStateWarmedPending is a LifecycleState enum value
+	LifecycleStateWarmedPending = "Warmed:Pending"
+
+	// LifecycleStateWarmedPendingWait is a LifecycleState enum value
+	LifecycleStateWarmedPendingWait = "Warmed:Pending:Wait"
+
+	// LifecycleStateWarmedPendingProceed is a LifecycleState enum value
+	LifecycleStateWarmedPendingProceed = "Warmed:Pending:Proceed"
+
+	// LifecycleStateWarmedTerminating is a LifecycleState enum value
+	LifecycleStateWarmedTerminating = "Warmed:Terminating"
+
+	// LifecycleStateWarmedTerminatingWait is a LifecycleState enum value
+	LifecycleStateWarmedTerminatingWait = "Warmed:Terminating:Wait"
+
+	// LifecycleStateWarmedTerminatingProceed is a LifecycleState enum value
+	LifecycleStateWarmedTerminatingProceed = "Warmed:Terminating:Proceed"
+
+	// LifecycleStateWarmedTerminated is a LifecycleState enum value
+	LifecycleStateWarmedTerminated = "Warmed:Terminated"
+
+	// LifecycleStateWarmedStopped is a LifecycleState enum value
+	LifecycleStateWarmedStopped = "Warmed:Stopped"
+
+	// LifecycleStateWarmedRunning is a LifecycleState enum value
+	LifecycleStateWarmedRunning = "Warmed:Running"
 )
 
 // LifecycleState_Values returns all elements of the LifecycleState enum
@@ -14954,6 +15908,15 @@ func LifecycleState_Values() []string {
 		LifecycleStateDetached,
 		LifecycleStateEnteringStandby,
 		LifecycleStateStandby,
+		LifecycleStateWarmedPending,
+		LifecycleStateWarmedPendingWait,
+		LifecycleStateWarmedPendingProceed,
+		LifecycleStateWarmedTerminating,
+		LifecycleStateWarmedTerminatingWait,
+		LifecycleStateWarmedTerminatingProceed,
+		LifecycleStateWarmedTerminated,
+		LifecycleStateWarmedStopped,
+		LifecycleStateWarmedRunning,
 	}
 }
 
@@ -15074,5 +16037,33 @@ func ScalingActivityStatusCode_Values() []string {
 		ScalingActivityStatusCodeSuccessful,
 		ScalingActivityStatusCodeFailed,
 		ScalingActivityStatusCodeCancelled,
+	}
+}
+
+const (
+	// WarmPoolStateStopped is a WarmPoolState enum value
+	WarmPoolStateStopped = "Stopped"
+
+	// WarmPoolStateRunning is a WarmPoolState enum value
+	WarmPoolStateRunning = "Running"
+)
+
+// WarmPoolState_Values returns all elements of the WarmPoolState enum
+func WarmPoolState_Values() []string {
+	return []string{
+		WarmPoolStateStopped,
+		WarmPoolStateRunning,
+	}
+}
+
+const (
+	// WarmPoolStatusPendingDelete is a WarmPoolStatus enum value
+	WarmPoolStatusPendingDelete = "PendingDelete"
+)
+
+// WarmPoolStatus_Values returns all elements of the WarmPoolStatus enum
+func WarmPoolStatus_Values() []string {
+	return []string{
+		WarmPoolStatusPendingDelete,
 	}
 }
