@@ -1,7 +1,7 @@
 # github.com/Sirupsen/logrus v0.11.3-0.20170215164324-7f4b1adc7917
 ## explicit
 github.com/Sirupsen/logrus
-# github.com/aws/aws-sdk-go v1.38.32
+# github.com/aws/aws-sdk-go v1.38.35
 ## explicit
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
