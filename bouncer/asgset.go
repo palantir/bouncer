@@ -265,26 +265,19 @@ func (a *ASGSet) IsNewUnhealthy() bool {
 }
 
 func (a *ASGSet) IsTransient() bool {
-	isTransient := false
-
 	// Each of these functions prints matching ASGs in a transient state
 	// so let's call each one rather than letting the logic short-circuit so we get more information printed
 	// i.e. if there's both a node in Pending:Wait and one in Terminating, let's get the prints for both
 
 	// Will print all instances in Terminating, Terminating:Wait, or Terminating:Proceed
-	if a.IsTerminating() {
-		isTransient = true
-	}
+	// Don't return true yet if we got true, wait to see if there are also new unhealthy instances
+	isTerminating := a.IsTerminating()
 
 	// Will print instances that are "new" (latest LC), but any status other than InService
-	// Would technically double report from above if the new instance is in one of the Terminating states, but this is _very_ rare,
-	// and a double print is not so bad
-	if a.IsNewUnhealthy() {
-		isTransient = true
-	}
-
-	// Short-circuit for the rest of the logic here - otherwise the next two checks will pretty regularly double-report new instances
-	if isTransient {
+	// Would technically double report from above if a new instance is in one of the Terminating states, but this is _very_ rare,
+	// and a double print is not _so_ bad
+	if a.IsNewUnhealthy() || isTerminating {
+		// Short-circuit for the rest of the logic here - otherwise the next two checks will pretty regularly double-report new instances
 		return true
 	}
 
