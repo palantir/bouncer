@@ -57,6 +57,27 @@ Only accepts 1 ASG.  In this example, the ASG must, at start time of bouncer, ha
 * If any new nodes exist at bouncer start time, they must be healthy in both the EC2 and ASG, otherwise bouncer will fail immediately.
 * A new node is only canaried if a healthy new node doesn't exist.  That is, if this bouncer is re-run on an ASG which already has a healthy new node, this will only add the additional new nodes to meet your final capacity without doing the entire canary workflow again (this is to reduce churn on re-runs of the script).
 
+## Slow-canary
+
+Similar to canary, but instead of adding a single canary host, waiting for it to become healthy, then adding the remainder, it only adds one new node at a time, destroying an old node as it goes. Can be useful to avoid quorum issues if halving a cluster all at once is too much churn.
+
+Another way to think about it would be it's like serial mode for ASGs with more than 1 instance, where we don't ever want to drop below _desired capacity_ number of nodes in service.
+
+Ex:
+
+```bash
+./bouncer slow-canary -a hashi-use1-stag-server:3
+```
+
+Only accepts 1 ASG. In this example, the ASG must, at start time of bouncer, have `desired_capacity` of 3, and `max_size` of at least 4.  This will
+
+* Bump desired capacity to 4 to create our first "canary" node and wait for this node to become healthy.
+  * So that we will keep the number of active nodes at any given time to either 3 or 4, and not let it get to 2 or 5.
+* Terminates one of the old nodes, NOT decrementing the `desired_capacity` along with it, so that AWS can replace it with a fresh node.
+  * Bouncer calls the [ASG terminate API call](http://docs.aws.amazon.com/cli/latest/reference/autoscaling/terminate-instance-in-auto-scaling-group.html) setting `should-decrement-desired-capacity` to false.
+* Once nodes have settled and we have again 4 healthy nodes, we call terminate on another old node.
+* Once nodes have settled and we have again 4 healthy nodes (3 being new), we call terminate WITH `should-decrement-desired-capacity` to let us go back to our steady-state of 3 nodes.
+
 ## Force bouncing all nodes
 
 By default, the bouncer will ignore any nodes which are running the same launch template version (or same launch configuration) that's set on their ASG.  If you've made a change external to the launch configuration / template and want the bouncer to start over bouncing all nodes regardless of launch config / template "oldness", you can add the `-f` flag to any of the run types.  This flag marks any node whose launch time is older than the start time of the current bouncer invocation as "out of date", thus bouncing all nodes.

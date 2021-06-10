@@ -263,3 +263,33 @@ func (a *ASGSet) IsNewUnhealthy() bool {
 
 	return isNewUnhealthy
 }
+
+// IsTransient returns true if there are any ASGs in the set that have any instances in flight, or are waiting for their capacity to fill the desired
+func (a *ASGSet) IsTransient() bool {
+	// Each of these functions prints matching ASGs in a transient state
+	// so let's call each one rather than letting the logic short-circuit so we get more information printed
+	// i.e. if there's both a node in Pending:Wait and one in Terminating, let's get the prints for both
+
+	// Will print all instances in Terminating, Terminating:Wait, or Terminating:Proceed
+	// Don't return true yet if we got true, wait to see if there are also new unhealthy instances
+	isTerminating := a.IsTerminating()
+
+	// Will print instances that are "new" (latest LC), but any status other than InService
+	// Would technically double report from above if a new instance is in one of the Terminating states, but this is _very_ rare,
+	// and a double print is not _so_ bad
+	if a.IsNewUnhealthy() || isTerminating {
+		// Short-circuit for the rest of the logic here - otherwise the next two checks will pretty regularly double-report new instances
+		return true
+	}
+
+	// Catch a possible edge case from above - namely if we have an _old_ instance, i.e. on the old LC, but in "Pending" state
+	// We can't unhook an instance in an immutable AS state like Pending, so let's check for it explicitly
+	// If this one is true, it will pretty much always fire IsCountMismatch as well, so let's short-circuit that
+	if a.IsImmutableAutoscalingEvent() {
+		return true
+	}
+
+	// Idea here is to catch when the ASG has been set to 4, but currently has 3 nodes in it, and the 4th hasn't even made it to
+	// Pending yet, which would be caught in above IsNewUnhealthy()
+	return a.IsCountMismatch()
+}
