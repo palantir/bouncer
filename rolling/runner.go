@@ -91,7 +91,7 @@ func (r *Runner) Run() error {
 		}
 
 		// See if we're still waiting on a change we made previously to finish or settle
-		if asgSet.IsNewUnhealthy() || asgSet.IsTerminating() || asgSet.IsImmutableAutoscalingEvent() || asgSet.IsCountMismatch() {
+		if asgSet.IsTransient() {
 			r.Sleep()
 			continue
 		}

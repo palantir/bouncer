@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package canary
+package slowcanary
 
 import (
 	"os"
@@ -22,13 +22,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Runner holds data for a particular canary run
-// Note that in the canary case, asgs will always be of length 1
+// Runner holds data for a particular slow-canary run
+// Note that in the slow-canary case, asgs will always be of length 1
 type Runner struct {
 	bouncer.BaseRunner
 }
 
-// NewRunner instantiates a new canary runner
+// NewRunner instantiates a new slow-canary runner
 func NewRunner(opts *bouncer.RunnerOpts) (*Runner, error) {
 	br, err := bouncer.NewBaseRunner(opts)
 	if err != nil {
@@ -51,7 +51,7 @@ func (r *Runner) MustValidatePrereqs() {
 	if len(asgSet.ASGs) > 1 {
 		log.WithFields(log.Fields{
 			"count given": len(asgSet.ASGs),
-		}).Error("Canary mode supports only 1 ASG at a time")
+		}).Error("Slow-canary mode supports only 1 ASG at a time")
 		os.Exit(1)
 	}
 
@@ -75,13 +75,13 @@ func (r *Runner) MustValidatePrereqs() {
 			os.Exit(1)
 		}
 
-		if (actualAsg.DesiredASG.DesiredCapacity * 2) > *actualAsg.ASG.MaxSize {
+		if (actualAsg.DesiredASG.DesiredCapacity + 1) > *actualAsg.ASG.MaxSize {
 			log.WithFields(log.Fields{
 				"ASG":              *actualAsg.ASG.AutoScalingGroupName,
 				"min_size":         *actualAsg.ASG.MinSize,
 				"max_size":         *actualAsg.ASG.MaxSize,
 				"desired_capacity": actualAsg.DesiredASG.DesiredCapacity,
-			}).Error("Desired capacity given must be less than or equal to 2x max_size")
+			}).Error("Max capacity set on ASG must be at least 1 + desired")
 			os.Exit(1)
 		}
 	}
@@ -97,48 +97,43 @@ func (r *Runner) Run() error {
 		}
 
 		// Rebuild the state of the world every iteration of the loop because instance and ASG statuses are changing
-		log.Debug("Beginning new serial run check")
+		log.Debug("Beginning new slow-canary run check")
 		asgSet, err := r.NewASGSet()
 		if err != nil {
 			return errors.Wrap(err, "error building ASGSet")
 		}
 
-		// See if we're still waiting on a change we made previously to finish or settle
 		if asgSet.IsTransient() {
 			r.Sleep()
 			continue
 		}
 
-		// Since we only support one ASG in canary mode
+		// Since we only support one ASG in slow-canary mode
 		asg := asgSet.ASGs[0]
 		curDesiredCapacity := asg.ASG.DesiredCapacity
 		finDesiredCapacity := &asg.DesiredASG.DesiredCapacity
 		newCount := int64(len(asgSet.GetNewInstances()))
 		oldCount := int64(len(asgSet.GetOldInstances()))
 
-		if newCount == *finDesiredCapacity {
-			if *curDesiredCapacity == *finDesiredCapacity {
-				if oldCount == 0 {
-					log.Info("Didn't find any old instances or ASGs - we're done here!")
-					return nil
-				}
-
-				// Only wait for terminating instances to finish terminating once all
-				// terminate commands have been issued
-				if asgSet.IsTerminating() {
-					r.Sleep()
-					continue
-				} else {
-					log.WithFields(log.Fields{
-						"ASG":           *asg.ASG.AutoScalingGroupName,
-						"Old instances": oldCount,
-						"New instances": newCount,
-					}).Error("I have old instances which aren't terminating")
-					return errors.New("old instance mismatch")
-				}
+		if *curDesiredCapacity == *finDesiredCapacity {
+			if oldCount == 0 {
+				log.Info("Didn't find any old instances or ASGs - we're done here!")
+				return nil
 			}
 
-			// Don't think this condition should be reachable, but just in case
+			log.WithFields(log.Fields{
+				"ASG": *asg.ASG.AutoScalingGroupName,
+			}).Info("Adding slow-canary node")
+			newDesiredCapacity = *curDesiredCapacity + 1
+
+			err = r.SetDesiredCapacity(asg, &newDesiredCapacity)
+			if err != nil {
+				return errors.Wrap(err, "error setting desired capacity")
+			}
+
+			r.Sleep()
+			continue
+		} else if *curDesiredCapacity == *finDesiredCapacity+1 {
 			if oldCount == 0 {
 				log.WithFields(log.Fields{
 					"ASG":                    *asg.ASG.AutoScalingGroupName,
@@ -146,61 +141,49 @@ func (r *Runner) Run() error {
 					"New instances":          newCount,
 					"Desired Capacity":       *curDesiredCapacity,
 					"Final Desired Capacity": *finDesiredCapacity,
-				}).Error("Somehow there are no old nodes but new count is off?")
+				}).Error("Somehow there are no old nodes but capacities are mismatched?")
 				return errors.New("capacity mismatch")
 			}
 
-			// We have the correct number of new instances, we just need
-			// to get rid of the old ones
-			// Let's issue all their terminates right here
-			decrement := true
-			for _, oldInst := range asgSet.GetOldInstances() {
-				err := r.KillInstance(oldInst, &decrement)
+			if oldCount == 1 {
+				// Kill our last old instance, decrementing our capacity back to our desired value
+				log.WithFields(log.Fields{
+					"ASG": *asg.ASG.AutoScalingGroupName,
+				}).Info("Killing the last old node, so not letting AWS replace it")
+				decrement := true
+				oldInstances := asgSet.GetOldInstances()
+				err := r.KillInstance(oldInstances[0], &decrement)
 				if err != nil {
 					return errors.Wrap(err, "error killing instance")
 				}
+				r.Sleep()
+
+				continue
+			}
+
+			// Otherwise, we still have more than 1 old instance, so let's terminate w/ replace
+			log.WithFields(log.Fields{
+				"ASG": *asg.ASG.AutoScalingGroupName,
+			}).Info("Killing an old node, and letting AWS replace it")
+			decrement := false
+			oldInstances := asgSet.GetOldInstances()
+			err := r.KillInstance(oldInstances[0], &decrement)
+			if err != nil {
+				return errors.Wrap(err, "error killing instance")
 			}
 			r.Sleep()
 
 			continue
 		}
 
-		// Not sure we'll ever hit the IsTerminating case here, we should only hit that inside above if-block
-		// The IsCountMismatch check is here and not where IsNewUnhealthy is, because we don't want it
-		// to fire when bad nodes are in the process of terminating, since we issue terminates to them one at a time
-		if asgSet.IsTerminating() || asgSet.IsCountMismatch() {
-			r.Sleep()
-			continue
-		}
-
-		if oldCount == 0 {
-			badCounts := asgSet.GetDivergedASGs()
-			if len(badCounts) != 0 {
-				return errors.New("somehow our ASG's desired count isn't the canonical count, but we have all new instances, if this is correct, manually set desired capacity")
-			}
-		}
-
-		if newCount == 0 {
-			// We haven't canaried a new instance yet, so let's do that
-			log.WithFields(log.Fields{
-				"ASG": *asg.ASG.AutoScalingGroupName,
-			}).Info("Adding canary node")
-			newDesiredCapacity = *curDesiredCapacity + 1
-		} else {
-			// Otherwise, we've already canaried successfully, so let's expand out to full size
-			log.WithFields(log.Fields{
-				"ASG": *asg.ASG.AutoScalingGroupName,
-			}).Info("Adding in remainder of new nodes")
-			// Just set des cap to be current + the number of new nodes that we're short
-			newDesiredCapacity = *curDesiredCapacity + (*finDesiredCapacity - newCount)
-		}
-
-		err = r.SetDesiredCapacity(asg, &newDesiredCapacity)
-		if err != nil {
-			return errors.Wrap(err, "error setting desired capacity")
-		}
-
-		r.Sleep()
-		continue
+		// Don't think this condition should be reachable, but just in case
+		log.WithFields(log.Fields{
+			"ASG":                    *asg.ASG.AutoScalingGroupName,
+			"Old instances":          oldCount,
+			"New instances":          newCount,
+			"Desired Capacity":       *curDesiredCapacity,
+			"Final Desired Capacity": *finDesiredCapacity,
+		}).Error("Found capacity mismatch")
+		return errors.New("capacity mismatch")
 	}
 }

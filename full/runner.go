@@ -115,7 +115,7 @@ start:
 		}
 
 		// See if we're still waiting on a change we made previously to finish or settle
-		if asgSet.IsTerminating() || asgSet.IsNewUnhealthy() || asgSet.IsImmutableAutoscalingEvent() || asgSet.IsCountMismatch() {
+		if asgSet.IsTransient() {
 			r.Sleep()
 			continue
 		}
