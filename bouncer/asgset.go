@@ -264,6 +264,7 @@ func (a *ASGSet) IsNewUnhealthy() bool {
 	return isNewUnhealthy
 }
 
+// IsTransient returns true if there are any ASGs in the set that have any instances in flight, or are waiting for their capacity to fill the desired
 func (a *ASGSet) IsTransient() bool {
 	// Each of these functions prints matching ASGs in a transient state
 	// so let's call each one rather than letting the logic short-circuit so we get more information printed
