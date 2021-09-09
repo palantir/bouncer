@@ -1,6 +1,6 @@
 module github.com/palantir/bouncer
 
-go 1.14
+go 1.16
 
 require (
 	github.com/Sirupsen/logrus v0.11.3-0.20170215164324-7f4b1adc7917
