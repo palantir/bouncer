@@ -20,10 +20,10 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/palantir/bouncer/aws"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 // RunnerOpts is user-supplied options to any flavor of runner

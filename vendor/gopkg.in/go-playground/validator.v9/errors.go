@@ -101,7 +101,9 @@ type FieldError interface {
 	// returns the namespace for the field error, with the tag
 	// name taking precedence over the fields actual name.
 	//
-	// eq. JSON name "User.fname" see ActualNamespace for comparison
+	// eg. JSON name "User.fname"
+	//
+	// See StructNamespace() for a version that returns actual names.
 	//
 	// NOTE: this field can be blank when validating a single primitive field
 	// using validate.Field(...) as there is no way to extract it's name
@@ -120,7 +122,7 @@ type FieldError interface {
 	// fields actual name.
 	//
 	// eq. JSON name "fname"
-	// see ActualField for comparison
+	// see StructField for comparison
 	Field() string
 
 	// returns the fields actual name from the struct, when able to determine.
@@ -150,8 +152,8 @@ type FieldError interface {
 	// returns the FieldError's translated error
 	// from the provided 'ut.Translator' and registered 'TranslationFunc'
 	//
-	// NOTE: is not registered translation can be found it returns the same
-	// as calling fe.Error()
+	// NOTE: if no registered translator can be found it returns the same as
+	// calling fe.Error()
 	Translate(ut ut.Translator) string
 }
 
