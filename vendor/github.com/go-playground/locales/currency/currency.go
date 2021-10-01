@@ -70,6 +70,7 @@ const (
 	CLE
 	CLF
 	CLP
+	CNH
 	CNX
 	CNY
 	COP
@@ -175,6 +176,7 @@ const (
 	MNT
 	MOP
 	MRO
+	MRU
 	MTL
 	MTP
 	MUR
@@ -233,6 +235,7 @@ const (
 	SRG
 	SSP
 	STD
+	STN
 	SUR
 	SVC
 	SYP
@@ -260,9 +263,11 @@ const (
 	UYI
 	UYP
 	UYU
+	UYW
 	UZS
 	VEB
 	VEF
+	VES
 	VND
 	VNN
 	VUV
