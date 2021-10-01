@@ -3,7 +3,7 @@
 
 [[projects]]
   digest = "1:76f1ad2d0bbfaa399400f9e43bd59a3a2342eb9b46314aca559e85fecf2a771b"
-  name = "github.com/Sirupsen/logrus"
+  name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
   revision = "7f4b1adc791766938c29457bed0703fb9134421a"
@@ -251,7 +251,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Sirupsen/logrus",
+    "github.com/sirupsen/logrus",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/autoscaling",
