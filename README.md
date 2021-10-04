@@ -1,6 +1,6 @@
-# bouncer [![Download](https://api.bintray.com/packages/palantir/releases/bouncer/images/download.svg)](https://bintray.com/palantir/releases/bouncer/_latestVersion)
+# bouncer
 
-Bouncer rebuilds your running infrastructure to make sure it matches the infrastructure you've defined in code.
+Bouncer rebuilds your running infrastructure to make sure it matches the infrastructure you've defined in code. All releases can be downloaded from [the release page](https://github.com/palantir/bouncer/releases), or automated in your code via bouncerw (see below).
 
 This tool inspects AWS [auto-scaling groups](https://aws.amazon.com/documentation/autoscaling/), and terminates, in a controlled fashion, any nodes whose launch templates or launch configurations don't match the one currently configured on the ASG it was launched from.  It currently supports two termination methods, `serial` and `canary`; read more about them below.
 
