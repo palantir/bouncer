@@ -35,7 +35,7 @@ type Instance struct {
 }
 
 // NewInstance returns a new bouncer.Instance object
-func NewInstance(ac *aws.Clients, asg *at.AutoScalingGroup, asgInst *at.Instance, force bool, startTime time.Time, preTerminateCmd *string) (*Instance, error) {
+func NewInstance(ac *aws.Clients, asg *at.AutoScalingGroup, asgInst at.Instance, force bool, startTime time.Time, preTerminateCmd *string) (*Instance, error) {
 	ec2Inst, err := ac.ASGInstToEC2Inst(asgInst)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error converting ASG Inst to EC2 inst for %s", *asgInst.InstanceId)
@@ -50,10 +50,10 @@ func NewInstance(ac *aws.Clients, asg *at.AutoScalingGroup, asgInst *at.Instance
 
 	inst := Instance{
 		EC2Instance:      ec2Inst,
-		ASGInstance:      asgInst,
+		ASGInstance:      &asgInst,
 		AutoscalingGroup: asg,
-		IsOld:            isInstanceOld(asgInst, ec2Inst, asg.LaunchConfigurationName, lts, ec2LTplVersion, force, startTime),
-		IsHealthy:        isInstanceHealthy(asgInst, ec2Inst),
+		IsOld:            isInstanceOld(&asgInst, ec2Inst, asg.LaunchConfigurationName, lts, ec2LTplVersion, force, startTime),
+		IsHealthy:        isInstanceHealthy(&asgInst, ec2Inst),
 		PreTerminateCmd:  preTerminateCmd,
 	}
 
@@ -130,17 +130,33 @@ func isInstanceOld(asgInst *at.Instance, ec2Inst *et.Instance, asgLCName *string
 		}
 	}
 
+	log.WithFields(log.Fields{
+		"InstanceID": *asgInst.InstanceId,
+	}).Debug("Instance marked as new")
+
 	return false
 }
 
 func isInstanceHealthy(asgInst *at.Instance, ec2Inst *et.Instance) bool {
 	if ec2Inst.State.Name != et.InstanceStateNameRunning {
+		log.WithFields(log.Fields{
+			"InstanceID":     *asgInst.InstanceId,
+			"Instance State": ec2Inst.State.Name,
+		}).Debug("Instance marked as unhealthy because of ec2 instance state")
 		return false
 	}
 
 	if asgInst.LifecycleState != at.LifecycleStateInService {
+		log.WithFields(log.Fields{
+			"InstanceID":      *asgInst.InstanceId,
+			"Lifecycle State": asgInst.LifecycleState,
+		}).Debug("Instance marked as unhealthy because of ASG lifecycle state")
 		return false
 	}
+
+	log.WithFields(log.Fields{
+		"InstanceID": *asgInst.InstanceId,
+	}).Debug("Instance marked as healthy")
 
 	return true
 }
