@@ -15,6 +15,7 @@
 package aws
 
 import (
+	"context"
 	"strings"
 
 	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
@@ -36,13 +37,13 @@ func GetEC2TagValue(ec2 *et.Instance, key string) *string {
 }
 
 // GetUserData returns a pointer to the value of the instance's userdata
-func (c *Clients) GetUserData(inst *at.Instance) (*string, error) {
+func (c *Clients) GetUserData(ctx context.Context, inst *at.Instance) (*string, error) {
 	input := ec2.DescribeInstanceAttributeInput{
 		Attribute:  et.InstanceAttributeNameUserData,
 		InstanceId: inst.InstanceId,
 	}
 
-	output, err := c.EC2Client.DescribeInstanceAttribute(c.ctx, &input)
+	output, err := c.EC2Client.DescribeInstanceAttribute(ctx, &input)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error describing userdata for instance %s", *inst.InstanceId)
 	}

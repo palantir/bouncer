@@ -33,19 +33,16 @@ const apiSleepTime = 200 * time.Millisecond
 
 // Clients holds the clients for this account's invocation of the APIs we'll need
 type Clients struct {
-	ctx       context.Context
 	ASGClient *autoscaling.Client
 	EC2Client *ec2.Client
 }
 
 // GetAWSClients returns the AWS client objects we'll need
-func GetAWSClients() (*Clients, error) {
+func GetAWSClients(ctx context.Context) (*Clients, error) {
 	region := os.Getenv("AWS_DEFAULT_REGION")
 	if region == "" {
 		region = "us-east-1"
 	}
-
-	ctx := context.Background()
 
 	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
 	if err != nil {
@@ -56,7 +53,6 @@ func GetAWSClients() (*Clients, error) {
 	ec2 := ec2.NewFromConfig(cfg)
 
 	ac := Clients{
-		ctx:       ctx,
 		ASGClient: asg,
 		EC2Client: ec2,
 	}
@@ -65,11 +61,11 @@ func GetAWSClients() (*Clients, error) {
 }
 
 // ASGInstToEC2Inst converts a *autoscaling.Instance to its corresponding *ec2.Instance
-func (c *Clients) ASGInstToEC2Inst(inst at.Instance) (*et.Instance, error) {
+func (c *Clients) ASGInstToEC2Inst(ctx context.Context, inst at.Instance) (*et.Instance, error) {
 	input := ec2.DescribeInstancesInput{
 		InstanceIds: []string{*inst.InstanceId},
 	}
-	output, err := c.EC2Client.DescribeInstances(c.ctx, &input)
+	output, err := c.EC2Client.DescribeInstances(ctx, &input)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error describing instance %s", *inst.InstanceId)
 	}
@@ -88,7 +84,7 @@ func (c *Clients) ASGInstToEC2Inst(inst at.Instance) (*et.Instance, error) {
 }
 
 // ASGLTplVersionToEC2LTplVersion resolves ASG Template Versions to its actual *int32 ec2LaunchTemplate Version
-func (c Clients) ASGLTplVersionToEC2LTplVersion(asgLaunchTemplate *at.LaunchTemplateSpecification) (*string, error) {
+func (c Clients) ASGLTplVersionToEC2LTplVersion(ctx context.Context, asgLaunchTemplate *at.LaunchTemplateSpecification) (*string, error) {
 	// No launch template, nothing to do here
 	if asgLaunchTemplate == nil {
 		return nil, nil
@@ -100,7 +96,7 @@ func (c Clients) ASGLTplVersionToEC2LTplVersion(asgLaunchTemplate *at.LaunchTemp
 		},
 	}
 
-	res, err := c.EC2Client.DescribeLaunchTemplates(c.ctx, input)
+	res, err := c.EC2Client.DescribeLaunchTemplates(ctx, input)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error describing LaunchTemplate %s", *asgLaunchTemplate.LaunchTemplateId)
 	}

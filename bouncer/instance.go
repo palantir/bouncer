@@ -15,6 +15,7 @@
 package bouncer
 
 import (
+	"context"
 	"time"
 
 	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
@@ -35,15 +36,15 @@ type Instance struct {
 }
 
 // NewInstance returns a new bouncer.Instance object
-func NewInstance(ac *aws.Clients, asg *at.AutoScalingGroup, asgInst at.Instance, force bool, startTime time.Time, preTerminateCmd *string) (*Instance, error) {
-	ec2Inst, err := ac.ASGInstToEC2Inst(asgInst)
+func NewInstance(ctx context.Context, ac *aws.Clients, asg *at.AutoScalingGroup, asgInst at.Instance, force bool, startTime time.Time, preTerminateCmd *string) (*Instance, error) {
+	ec2Inst, err := ac.ASGInstToEC2Inst(ctx, asgInst)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error converting ASG Inst to EC2 inst for %s", *asgInst.InstanceId)
 	}
 
 	lts := ac.GetLaunchTemplateSpec(asg)
 
-	ec2LTplVersion, err := ac.ASGLTplVersionToEC2LTplVersion(lts)
+	ec2LTplVersion, err := ac.ASGLTplVersionToEC2LTplVersion(ctx, lts)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error resolving LaunchTemplate %s Version to actual version number", *lts.LaunchTemplateId)
 	}

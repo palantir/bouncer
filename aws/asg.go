@@ -15,6 +15,7 @@
 package aws
 
 import (
+	"context"
 	"strings"
 	"time"
 
@@ -24,7 +25,7 @@ import (
 )
 
 // GetAllASGs returns all ASGs visible with your client, with no filters
-func (c *Clients) GetAllASGs() ([]*at.AutoScalingGroup, error) {
+func (c *Clients) GetAllASGs(ctx context.Context) ([]*at.AutoScalingGroup, error) {
 	var nexttoken *string
 	var asgs []*at.AutoScalingGroup
 	var input *autoscaling.DescribeAutoScalingGroupsInput
@@ -36,7 +37,7 @@ func (c *Clients) GetAllASGs() ([]*at.AutoScalingGroup, error) {
 			NextToken: nexttoken,
 		}
 
-		output, err = c.ASGClient.DescribeAutoScalingGroups(c.ctx, input)
+		output, err = c.ASGClient.DescribeAutoScalingGroups(ctx, input)
 		if err != nil {
 			return nil, errors.Wrap(err, "Error describing ASGs")
 		}
@@ -57,14 +58,14 @@ func (c *Clients) GetAllASGs() ([]*at.AutoScalingGroup, error) {
 }
 
 // GetASG gets the *autoscaling.Group that matches for the name given
-func (c *Clients) GetASG(asgName string) (*at.AutoScalingGroup, error) {
+func (c *Clients) GetASG(ctx context.Context, asgName string) (*at.AutoScalingGroup, error) {
 	var asgs []*at.AutoScalingGroup
 
 	input := &autoscaling.DescribeAutoScalingGroupsInput{
 		AutoScalingGroupNames: []string{asgName},
 	}
 
-	output, err := c.ASGClient.DescribeAutoScalingGroups(c.ctx, input)
+	output, err := c.ASGClient.DescribeAutoScalingGroups(ctx, input)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error describing ASGs")
 	}
@@ -93,13 +94,13 @@ func GetASGTagValue(asg *at.AutoScalingGroup, key string) *string {
 }
 
 // GetLaunchConfiguration returns the LC object of the given ASG
-func (c *Clients) GetLaunchConfiguration(asg *at.AutoScalingGroup) (*at.LaunchConfiguration, error) {
+func (c *Clients) GetLaunchConfiguration(ctx context.Context, asg *at.AutoScalingGroup) (*at.LaunchConfiguration, error) {
 	var lcs []string
 	lcs = append(lcs, *asg.LaunchConfigurationName)
 	input := autoscaling.DescribeLaunchConfigurationsInput{
 		LaunchConfigurationNames: lcs,
 	}
-	output, err := c.ASGClient.DescribeLaunchConfigurations(c.ctx, &input)
+	output, err := c.ASGClient.DescribeLaunchConfigurations(ctx, &input)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error describing launch configuration %s for ASG %s", *asg.LaunchConfigurationName, *asg.AutoScalingGroupName)
 	}
@@ -123,7 +124,7 @@ func (c *Clients) GetLaunchTemplateSpec(asg *at.AutoScalingGroup) *at.LaunchTemp
 }
 
 // CompleteLifecycleAction calls https://docs.aws.amazon.com/cli/latest/reference/autoscaling/complete-lifecycle-action.html
-func (c *Clients) CompleteLifecycleAction(asgName *string, instID *string, lifecycleHook *string, result *string) error {
+func (c *Clients) CompleteLifecycleAction(ctx context.Context, asgName *string, instID *string, lifecycleHook *string, result *string) error {
 	input := autoscaling.CompleteLifecycleActionInput{
 		AutoScalingGroupName:  asgName,
 		InstanceId:            instID,
@@ -131,26 +132,26 @@ func (c *Clients) CompleteLifecycleAction(asgName *string, instID *string, lifec
 		LifecycleHookName:     lifecycleHook,
 	}
 
-	_, err := c.ASGClient.CompleteLifecycleAction(c.ctx, &input)
+	_, err := c.ASGClient.CompleteLifecycleAction(ctx, &input)
 	return errors.Wrapf(err, "error completing lifecycle hook %s for instance %s", *lifecycleHook, *instID)
 }
 
 // TerminateInstanceInASG calls https://docs.aws.amazon.com/cli/latest/reference/autoscaling/terminate-instance-in-auto-scaling-group.html
-func (c *Clients) TerminateInstanceInASG(instID *string, decrement *bool) error {
+func (c *Clients) TerminateInstanceInASG(ctx context.Context, instID *string, decrement *bool) error {
 	input := autoscaling.TerminateInstanceInAutoScalingGroupInput{
 		InstanceId:                     instID,
 		ShouldDecrementDesiredCapacity: decrement,
 	}
-	_, err := c.ASGClient.TerminateInstanceInAutoScalingGroup(c.ctx, &input)
+	_, err := c.ASGClient.TerminateInstanceInAutoScalingGroup(ctx, &input)
 	return errors.Wrapf(err, "error terminating instance %s", *instID)
 }
 
 // SetDesiredCapacity sets the desired capacity of given ASG to given value
-func (c *Clients) SetDesiredCapacity(asg *at.AutoScalingGroup, desiredCapacity *int32) error {
+func (c *Clients) SetDesiredCapacity(ctx context.Context, asg *at.AutoScalingGroup, desiredCapacity *int32) error {
 	input := autoscaling.SetDesiredCapacityInput{
 		AutoScalingGroupName: asg.AutoScalingGroupName,
 		DesiredCapacity:      desiredCapacity,
 	}
-	_, err := c.ASGClient.SetDesiredCapacity(c.ctx, &input)
+	_, err := c.ASGClient.SetDesiredCapacity(ctx, &input)
 	return errors.Wrapf(err, "error setting desired capacity for %s", *asg.AutoScalingGroupName)
 }

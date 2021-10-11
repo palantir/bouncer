@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/palantir/bouncer/bouncer"
 	"github.com/palantir/bouncer/canary"
 	"github.com/pkg/errors"
@@ -63,14 +65,16 @@ var canaryCmd = &cobra.Command{
 			ItemTimeout:     timeout,
 		}
 
-		r, err := canary.NewRunner(&opts)
+		ctx := context.TODO()
+
+		r, err := canary.NewRunner(ctx, &opts)
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "error initializing runner"))
 		}
 
-		r.MustValidatePrereqs()
+		r.MustValidatePrereqs(ctx)
 
-		err = r.Run()
+		err = r.Run(ctx)
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "error in run"))
 		}

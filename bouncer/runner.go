@@ -15,6 +15,7 @@
 package bouncer
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -56,8 +57,8 @@ const (
 )
 
 // NewBaseRunner instantiates a BaseRunner
-func NewBaseRunner(opts *RunnerOpts) (*BaseRunner, error) {
-	awsClients, err := aws.GetAWSClients()
+func NewBaseRunner(ctx context.Context, opts *RunnerOpts) (*BaseRunner, error) {
+	awsClients, err := aws.GetAWSClients(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting AWS Creds")
 	}
@@ -117,7 +118,7 @@ func (r *BaseRunner) noopCheck() {
 	}
 }
 
-func (r *BaseRunner) abandonLifecycle(inst *Instance, hook *string) error {
+func (r *BaseRunner) abandonLifecycle(ctx context.Context, inst *Instance, hook *string) error {
 	log.WithFields(log.Fields{
 		"InstanceID":     *inst.ASGInstance.InstanceId,
 		"Hook":           *hook,
@@ -126,13 +127,13 @@ func (r *BaseRunner) abandonLifecycle(inst *Instance, hook *string) error {
 	result := "ABANDON"
 	r.resetTimeout()
 	r.noopCheck()
-	err := r.awsClients.CompleteLifecycleAction(inst.AutoscalingGroup.AutoScalingGroupName, inst.ASGInstance.InstanceId, hook, &result)
+	err := r.awsClients.CompleteLifecycleAction(ctx, inst.AutoscalingGroup.AutoScalingGroupName, inst.ASGInstance.InstanceId, hook, &result)
 	return errors.Wrap(err, "error completing lifecycle action")
 }
 
 // KillInstance calls TerminateInstanceInAutoscalingGroup, or, if the instance is stuck
 // in a lifecycle hook, issues an ABANDON to it, killing it more forcefully
-func (r *BaseRunner) KillInstance(inst *Instance, decrement *bool) error {
+func (r *BaseRunner) KillInstance(ctx context.Context, inst *Instance, decrement *bool) error {
 	log.WithFields(log.Fields{
 		"ASG":        *inst.AutoscalingGroup.AutoScalingGroupName,
 		"InstanceID": *inst.ASGInstance.InstanceId,
@@ -148,7 +149,7 @@ func (r *BaseRunner) KillInstance(inst *Instance, decrement *bool) error {
 	}
 
 	if hook != "" {
-		err := r.abandonLifecycle(inst, &hook)
+		err := r.abandonLifecycle(ctx, inst, &hook)
 		return errors.Wrapf(err, "error abandoning hook %s", hook)
 	}
 
@@ -158,11 +159,11 @@ func (r *BaseRunner) KillInstance(inst *Instance, decrement *bool) error {
 			return errors.Wrap(err, "error executing pre-terminate command")
 		}
 	}
-	err := r.terminateInstanceInASG(inst, decrement)
+	err := r.terminateInstanceInASG(ctx, inst, decrement)
 	return errors.Wrap(err, "error terminating instance")
 }
 
-func (r *BaseRunner) terminateInstanceInASG(inst *Instance, decrement *bool) error {
+func (r *BaseRunner) terminateInstanceInASG(ctx context.Context, inst *Instance, decrement *bool) error {
 	log.WithFields(log.Fields{
 		"ASG":        *inst.AutoscalingGroup.AutoScalingGroupName,
 		"InstanceID": *inst.ASGInstance.InstanceId,
@@ -170,7 +171,7 @@ func (r *BaseRunner) terminateInstanceInASG(inst *Instance, decrement *bool) err
 	r.resetTimeout()
 	r.noopCheck()
 
-	err := r.awsClients.TerminateInstanceInASG(inst.ASGInstance.InstanceId, decrement)
+	err := r.awsClients.TerminateInstanceInASG(ctx, inst.ASGInstance.InstanceId, decrement)
 
 	return err
 }
@@ -179,7 +180,7 @@ func (r *BaseRunner) terminateInstanceInASG(inst *Instance, decrement *bool) err
 // This function should only be used to increase desired cap, not decrease, since AWS
 // will _always_ remove instances based on AZ before any other criteria
 // http://docs.aws.amazon.com/autoscaling/latest/userguide/as-instance-termination.html
-func (r *BaseRunner) SetDesiredCapacity(asg *ASG, desiredCapacity *int32) error {
+func (r *BaseRunner) SetDesiredCapacity(ctx context.Context, asg *ASG, desiredCapacity *int32) error {
 
 	log.WithFields(log.Fields{
 		"ASG":           *asg.ASG.AutoScalingGroupName,
@@ -190,7 +191,7 @@ func (r *BaseRunner) SetDesiredCapacity(asg *ASG, desiredCapacity *int32) error 
 
 	r.resetTimeout()
 
-	err := r.awsClients.SetDesiredCapacity(asg.ASG, desiredCapacity)
+	err := r.awsClients.SetDesiredCapacity(ctx, asg.ASG, desiredCapacity)
 
 	return errors.Wrapf(err, "error setting desired capacity of ASG")
 }
@@ -235,6 +236,6 @@ func (r *BaseRunner) Sleep() {
 }
 
 // NewASGSet returns an ASGSet pointer
-func (r *BaseRunner) NewASGSet() (*ASGSet, error) {
-	return newASGSet(r.awsClients, r.asgs, r.opts.Force, r.startTime)
+func (r *BaseRunner) NewASGSet(ctx context.Context) (*ASGSet, error) {
+	return newASGSet(ctx, r.awsClients, r.asgs, r.opts.Force, r.startTime)
 }

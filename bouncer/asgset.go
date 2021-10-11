@@ -15,6 +15,7 @@
 package bouncer
 
 import (
+	"context"
 	"time"
 
 	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
@@ -29,11 +30,11 @@ type ASGSet struct {
 	ASGs []*ASG
 }
 
-func newASGSet(ac *aws.Clients, desiredASGs []*DesiredASG, force bool, startTime time.Time) (*ASGSet, error) {
+func newASGSet(ctx context.Context, ac *aws.Clients, desiredASGs []*DesiredASG, force bool, startTime time.Time) (*ASGSet, error) {
 	var asgs []*ASG
 
 	for _, desASG := range desiredASGs {
-		asg, err := NewASG(ac, desASG, force, startTime)
+		asg, err := NewASG(ctx, ac, desASG, force, startTime)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Error getting information for ASG %s", desASG.AsgName)
 		}

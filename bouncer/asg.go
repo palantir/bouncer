@@ -15,6 +15,7 @@
 package bouncer
 
 import (
+	"context"
 	"time"
 
 	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
@@ -30,8 +31,8 @@ type ASG struct {
 }
 
 // NewASG creates a new ASG object
-func NewASG(ac *aws.Clients, desASG *DesiredASG, force bool, startTime time.Time) (*ASG, error) {
-	awsAsg, err := ac.GetASG(desASG.AsgName)
+func NewASG(ctx context.Context, ac *aws.Clients, desASG *DesiredASG, force bool, startTime time.Time) (*ASG, error) {
+	awsAsg, err := ac.GetASG(ctx, desASG.AsgName)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting AWS ASG object")
 	}
@@ -39,7 +40,7 @@ func NewASG(ac *aws.Clients, desASG *DesiredASG, force bool, startTime time.Time
 	var instances []*Instance
 
 	for _, asgInst := range awsAsg.Instances {
-		inst, err := NewInstance(ac, awsAsg, asgInst, force, startTime, desASG.PreTerminateCmd)
+		inst, err := NewInstance(ctx, ac, awsAsg, asgInst, force, startTime, desASG.PreTerminateCmd)
 		if err != nil {
 			return nil, errors.Wrapf(err, "error generating bouncer.instance for %s", *asgInst.InstanceId)
 		}
