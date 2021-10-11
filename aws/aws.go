@@ -65,11 +65,9 @@ func GetAWSClients() (*Clients, error) {
 }
 
 // ASGInstToEC2Inst converts a *autoscaling.Instance to its corresponding *ec2.Instance
-func (c *Clients) ASGInstToEC2Inst(inst *at.Instance) (*et.Instance, error) {
-	var instIDs []string
-	instIDs = append(instIDs, *inst.InstanceId)
+func (c *Clients) ASGInstToEC2Inst(inst at.Instance) (*et.Instance, error) {
 	input := ec2.DescribeInstancesInput{
-		InstanceIds: instIDs,
+		InstanceIds: []string{*inst.InstanceId},
 	}
 	output, err := c.EC2Client.DescribeInstances(c.ctx, &input)
 	if err != nil {

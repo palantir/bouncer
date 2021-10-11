@@ -97,7 +97,7 @@ func (r *Runner) Run() error {
 		}
 
 		// Rebuild the state of the world every iteration of the loop because instance and ASG statuses are changing
-		log.Debug("Beginning new serial run check")
+		log.Debug("Beginning new canary run check")
 		asgSet, err := r.NewASGSet()
 		if err != nil {
 			return errors.Wrap(err, "error building ASGSet")
