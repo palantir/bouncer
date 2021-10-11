@@ -16,7 +16,6 @@ package rolling
 
 import (
 	"context"
-	"os"
 
 	"github.com/palantir/bouncer/bouncer"
 	"github.com/pkg/errors"
@@ -48,11 +47,11 @@ func (r *Runner) killBestOldInstance(ctx context.Context, asgSet *bouncer.ASGSet
 	return errors.Wrap(err, "error killing instance")
 }
 
-// MustValidatePrereqs checks that the batch runner is safe to proceed
-func (r *Runner) MustValidatePrereqs(ctx context.Context) {
+// ValidatePrereqs checks that the batch runner is safe to proceed
+func (r *Runner) ValidatePrereqs(ctx context.Context) error {
 	asgSet, err := r.NewASGSet(ctx)
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "error building ASGSet"))
+		return errors.Wrap(err, "error building ASGSet")
 	}
 
 	divergedASGs := asgSet.GetDivergedASGs()
@@ -64,7 +63,7 @@ func (r *Runner) MustValidatePrereqs(ctx context.Context) {
 				"desired_capacity given":  badASG.DesiredASG.DesiredCapacity,
 			}).Error("ASG desired capacity doesn't match expected starting value")
 		}
-		os.Exit(1)
+		return errors.New("error validating initial ASG state")
 	}
 
 	for _, asg := range asgSet.ASGs {
@@ -72,9 +71,11 @@ func (r *Runner) MustValidatePrereqs(ctx context.Context) {
 			log.WithFields(log.Fields{
 				"ASG": *asg.ASG.AutoScalingGroupName,
 			}).Warn("ASG desired capacity is 0 - nothing to do here")
-			os.Exit(0)
+			return errors.New("error validating initial ASG state")
 		}
 	}
+
+	return nil
 }
 
 // Run has the meat of the batch job

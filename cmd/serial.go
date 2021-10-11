@@ -54,8 +54,7 @@ var serialCmd = &cobra.Command{
 
 		log.Info("Beginning bouncer serial run")
 
-		var defCap int32
-		defCap = 1
+		var defCap int32 = 1
 		opts := bouncer.RunnerOpts{
 			Noop:            noop,
 			Force:           force,
@@ -67,17 +66,26 @@ var serialCmd = &cobra.Command{
 			ItemTimeout:     timeout,
 		}
 
-		ctx := context.TODO()
+		ctx, cancel := context.WithCancel(context.Background())
+		defer func() {
+			cancel()
+		}()
 
 		r, err := serial.NewRunner(ctx, &opts)
 		if err != nil {
+			cancel()
 			log.Fatal(errors.Wrap(err, "error initializing runner"))
 		}
 
-		r.MustValidatePrereqs(ctx)
+		err = r.ValidatePrereqs(ctx)
+		if err != nil {
+			cancel()
+			log.Fatal(err)
+		}
 
 		err = r.Run(ctx)
 		if err != nil {
+			cancel()
 			log.Fatal(errors.Wrap(err, "error in run"))
 		}
 	},

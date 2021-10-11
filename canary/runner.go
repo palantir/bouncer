@@ -16,7 +16,6 @@ package canary
 
 import (
 	"context"
-	"os"
 
 	"github.com/palantir/bouncer/bouncer"
 	"github.com/pkg/errors"
@@ -42,18 +41,18 @@ func NewRunner(ctx context.Context, opts *bouncer.RunnerOpts) (*Runner, error) {
 	return &r, nil
 }
 
-// MustValidatePrereqs checks that the batch runner is safe to proceed
-func (r *Runner) MustValidatePrereqs(ctx context.Context) {
+// ValidatePrereqs checks that the batch runner is safe to proceed
+func (r *Runner) ValidatePrereqs(ctx context.Context) error {
 	asgSet, err := r.NewASGSet(ctx)
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "error building actualASG"))
+		return errors.Wrap(err, "error building actualASG")
 	}
 
 	if len(asgSet.ASGs) > 1 {
 		log.WithFields(log.Fields{
 			"count given": len(asgSet.ASGs),
 		}).Error("Canary mode supports only 1 ASG at a time")
-		os.Exit(1)
+		return errors.New("error validating ASG input")
 	}
 
 	for _, actualAsg := range asgSet.ASGs {
@@ -63,7 +62,7 @@ func (r *Runner) MustValidatePrereqs(ctx context.Context) {
 				"desired_capacity given":  actualAsg.DesiredASG.DesiredCapacity,
 				"desired_capacity actual": *actualAsg.ASG.DesiredCapacity,
 			}).Error("Desired capacity given must be equal to starting desired_capacity of ASG")
-			os.Exit(1)
+			return errors.New("error validating ASG state")
 		}
 
 		if actualAsg.DesiredASG.DesiredCapacity < *actualAsg.ASG.MinSize {
@@ -73,7 +72,7 @@ func (r *Runner) MustValidatePrereqs(ctx context.Context) {
 				"max_size":         *actualAsg.ASG.MaxSize,
 				"desired_capacity": actualAsg.DesiredASG.DesiredCapacity,
 			}).Error("Desired capacity given must be greater than or equal to min ASG size")
-			os.Exit(1)
+			return errors.New("error validating ASG state")
 		}
 
 		if (actualAsg.DesiredASG.DesiredCapacity * 2) > *actualAsg.ASG.MaxSize {
@@ -83,9 +82,11 @@ func (r *Runner) MustValidatePrereqs(ctx context.Context) {
 				"max_size":         *actualAsg.ASG.MaxSize,
 				"desired_capacity": actualAsg.DesiredASG.DesiredCapacity,
 			}).Error("Desired capacity given must be less than or equal to 2x max_size")
-			os.Exit(1)
+			return errors.New("error validating ASG state")
 		}
 	}
+
+	return nil
 }
 
 // Run has the meat of the batch job

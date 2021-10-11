@@ -16,7 +16,6 @@ package full
 
 import (
 	"context"
-	"os"
 
 	"github.com/palantir/bouncer/bouncer"
 	"github.com/pkg/errors"
@@ -42,11 +41,11 @@ func NewRunner(ctx context.Context, opts *bouncer.RunnerOpts) (*Runner, error) {
 	return &r, nil
 }
 
-// MustValidatePrereqs checks that the batch runner is safe to proceed
-func (r *Runner) MustValidatePrereqs(ctx context.Context) {
+// ValidatePrereqs checks that the batch runner is safe to proceed
+func (r *Runner) ValidatePrereqs(ctx context.Context) error {
 	asgSet, err := r.NewASGSet(ctx)
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "error building ASGSet"))
+		return errors.Wrap(err, "error building ASGSet")
 	}
 
 	divergedASGs := asgSet.GetDivergedASGs()
@@ -58,7 +57,7 @@ func (r *Runner) MustValidatePrereqs(ctx context.Context) {
 				"desired_capacity given":  badASG.DesiredASG.DesiredCapacity,
 			}).Error("ASG desired capacity doesn't match expected starting value")
 		}
-		os.Exit(1)
+		return errors.New("error validating initial ASG state")
 	}
 
 	for _, asg := range asgSet.ASGs {
@@ -66,7 +65,7 @@ func (r *Runner) MustValidatePrereqs(ctx context.Context) {
 			log.WithFields(log.Fields{
 				"ASG": *asg.ASG.AutoScalingGroupName,
 			}).Warn("ASG desired capacity is 0 - nothing to do here")
-			os.Exit(0)
+			return errors.New("error validating initial ASG state")
 		}
 
 		if *asg.ASG.MinSize != 0 {
@@ -74,9 +73,11 @@ func (r *Runner) MustValidatePrereqs(ctx context.Context) {
 				"ASG":      *asg.ASG.AutoScalingGroupName,
 				"min_size": *asg.ASG.MinSize,
 			}).Error("ASG min size must equal 0")
-			os.Exit(1)
+			return errors.New("error validating initial ASG state")
 		}
 	}
+
+	return nil
 }
 
 func reverseASGSetOrder(asg []*bouncer.ASG) []*bouncer.ASG {
