@@ -18,14 +18,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
+	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
 	"github.com/pkg/errors"
 )
 
 // GetAllASGs returns all ASGs visible with your client, with no filters
-func (c *Clients) GetAllASGs() ([]*autoscaling.Group, error) {
+func (c *Clients) GetAllASGs() ([]*at.AutoScalingGroup, error) {
 	var nexttoken *string
-	var asgs []*autoscaling.Group
+	var asgs []*at.AutoScalingGroup
 	var input *autoscaling.DescribeAutoScalingGroupsInput
 	var err error
 	var output *autoscaling.DescribeAutoScalingGroupsOutput
@@ -35,13 +36,13 @@ func (c *Clients) GetAllASGs() ([]*autoscaling.Group, error) {
 			NextToken: nexttoken,
 		}
 
-		output, err = c.ASGClient.DescribeAutoScalingGroups(input)
+		output, err = c.ASGClient.DescribeAutoScalingGroups(c.ctx, input)
 		if err != nil {
 			return nil, errors.Wrap(err, "Error describing ASGs")
 		}
 
 		for _, asg := range output.AutoScalingGroups {
-			asgs = append(asgs, asg)
+			asgs = append(asgs, &asg)
 		}
 		nexttoken = output.NextToken
 
@@ -56,34 +57,34 @@ func (c *Clients) GetAllASGs() ([]*autoscaling.Group, error) {
 }
 
 // GetASG gets the *autoscaling.Group that matches for the name given
-func (c *Clients) GetASG(asgName *string) (*autoscaling.Group, error) {
-	var asgs []*autoscaling.Group
+func (c *Clients) GetASG(asgName string) (*at.AutoScalingGroup, error) {
+	var asgs []*at.AutoScalingGroup
 
 	input := &autoscaling.DescribeAutoScalingGroupsInput{
-		AutoScalingGroupNames: []*string{asgName},
+		AutoScalingGroupNames: []string{asgName},
 	}
 
-	output, err := c.ASGClient.DescribeAutoScalingGroups(input)
+	output, err := c.ASGClient.DescribeAutoScalingGroups(c.ctx, input)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error describing ASGs")
 	}
 
 	for _, asg := range output.AutoScalingGroups {
-		asgs = append(asgs, asg)
+		asgs = append(asgs, &asg)
 	}
 
 	if len(asgs) != 1 {
-		return nil, errors.Errorf("ASG Name '%s' matched '%v' ASGs, expecting it to match 1 (looking in region %s, have you set AWS_DEFAULT_REGION?)", *asgName, len(asgs), c.ASGClient.SigningRegion)
+		return nil, errors.Errorf("ASG Name '%s' matched '%v' ASGs, expecting it to match 1 (have you set AWS_DEFAULT_REGION?)", asgName, len(asgs))
 	}
 
 	return asgs[0], nil
 }
 
 // GetASGTagValue returns a pointer to the value for the given tag key
-func GetASGTagValue(asg *autoscaling.Group, key string) *string {
+func GetASGTagValue(asg *at.AutoScalingGroup, key string) *string {
 	for _, tag := range asg.Tags {
-		if tag != nil {
-			if strings.ToLower(*tag.Key) == strings.ToLower(key) {
+		if tag.Key != nil {
+			if strings.EqualFold(*tag.Key, key) {
 				return tag.Value
 			}
 		}
@@ -92,21 +93,21 @@ func GetASGTagValue(asg *autoscaling.Group, key string) *string {
 }
 
 // GetLaunchConfiguration returns the LC object of the given ASG
-func (c *Clients) GetLaunchConfiguration(asg *autoscaling.Group) (*autoscaling.LaunchConfiguration, error) {
-	var lcs []*string
-	lcs = append(lcs, asg.LaunchConfigurationName)
+func (c *Clients) GetLaunchConfiguration(asg *at.AutoScalingGroup) (*at.LaunchConfiguration, error) {
+	var lcs []string
+	lcs = append(lcs, *asg.LaunchConfigurationName)
 	input := autoscaling.DescribeLaunchConfigurationsInput{
 		LaunchConfigurationNames: lcs,
 	}
-	output, err := c.ASGClient.DescribeLaunchConfigurations(&input)
+	output, err := c.ASGClient.DescribeLaunchConfigurations(c.ctx, &input)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error describing launch configuration %s for ASG %s", *asg.LaunchConfigurationName, *asg.AutoScalingGroupName)
 	}
-	return output.LaunchConfigurations[0], nil
+	return &output.LaunchConfigurations[0], nil
 }
 
 // GetLaunchTemplateSpec returns the LT spec for a given ASG, if it has one
-func (c *Clients) GetLaunchTemplateSpec(asg *autoscaling.Group) *autoscaling.LaunchTemplateSpecification {
+func (c *Clients) GetLaunchTemplateSpec(asg *at.AutoScalingGroup) *at.LaunchTemplateSpecification {
 	// First, let's check the direct launch template spec property of the ASG
 	if asg.LaunchTemplate != nil {
 		return asg.LaunchTemplate
@@ -130,7 +131,7 @@ func (c *Clients) CompleteLifecycleAction(asgName *string, instID *string, lifec
 		LifecycleHookName:     lifecycleHook,
 	}
 
-	_, err := c.ASGClient.CompleteLifecycleAction(&input)
+	_, err := c.ASGClient.CompleteLifecycleAction(c.ctx, &input)
 	return errors.Wrapf(err, "error completing lifecycle hook %s for instance %s", *lifecycleHook, *instID)
 }
 
@@ -140,16 +141,16 @@ func (c *Clients) TerminateInstanceInASG(instID *string, decrement *bool) error 
 		InstanceId:                     instID,
 		ShouldDecrementDesiredCapacity: decrement,
 	}
-	_, err := c.ASGClient.TerminateInstanceInAutoScalingGroup(&input)
+	_, err := c.ASGClient.TerminateInstanceInAutoScalingGroup(c.ctx, &input)
 	return errors.Wrapf(err, "error terminating instance %s", *instID)
 }
 
 // SetDesiredCapacity sets the desired capacity of given ASG to given value
-func (c *Clients) SetDesiredCapacity(asg *autoscaling.Group, desiredCapacity *int64) error {
+func (c *Clients) SetDesiredCapacity(asg *at.AutoScalingGroup, desiredCapacity *int32) error {
 	input := autoscaling.SetDesiredCapacityInput{
 		AutoScalingGroupName: asg.AutoScalingGroupName,
 		DesiredCapacity:      desiredCapacity,
 	}
-	_, err := c.ASGClient.SetDesiredCapacity(&input)
+	_, err := c.ASGClient.SetDesiredCapacity(c.ctx, &input)
 	return errors.Wrapf(err, "error setting desired capacity for %s", *asg.AutoScalingGroupName)
 }

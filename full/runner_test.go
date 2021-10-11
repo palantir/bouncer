@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aws/aws-sdk-go/service/autoscaling"
+	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
 	"github.com/palantir/bouncer/bouncer"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,7 +29,7 @@ func asgSliceTestConstructor(len int) []*bouncer.ASG {
 	for i := 0; i < len; i++ {
 		name := fmt.Sprintf("asg-%v", i)
 		asgs = append(asgs, &bouncer.ASG{
-			ASG: &autoscaling.Group{
+			ASG: &at.AutoScalingGroup{
 				AutoScalingGroupName: &name,
 			},
 		})

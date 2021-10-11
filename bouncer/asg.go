@@ -17,26 +17,21 @@ package bouncer
 import (
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/autoscaling"
+	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
 	"github.com/palantir/bouncer/aws"
 	"github.com/pkg/errors"
 )
 
 // ASG object holds a pointer to an ASG and its Instances
 type ASG struct {
-	ASG        *autoscaling.Group
+	ASG        *at.AutoScalingGroup
 	Instances  []*Instance
 	DesiredASG *DesiredASG
 }
 
 // NewASG creates a new ASG object
 func NewASG(ac *aws.Clients, desASG *DesiredASG, force bool, startTime time.Time) (*ASG, error) {
-	var awsAsg *autoscaling.Group
-
-	err := retry(apiRetryCount, apiRetrySleep, func() (err error) {
-		awsAsg, err = ac.GetASG(&desASG.AsgName)
-		return
-	})
+	awsAsg, err := ac.GetASG(desASG.AsgName)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting AWS ASG object")
 	}
@@ -44,7 +39,7 @@ func NewASG(ac *aws.Clients, desASG *DesiredASG, force bool, startTime time.Time
 	var instances []*Instance
 
 	for _, asgInst := range awsAsg.Instances {
-		inst, err := NewInstance(ac, awsAsg, asgInst, force, startTime, desASG.PreTerminateCmd)
+		inst, err := NewInstance(ac, awsAsg, &asgInst, force, startTime, desASG.PreTerminateCmd)
 		if err != nil {
 			return nil, errors.Wrapf(err, "error generating bouncer.instance for %s", *asgInst.InstanceId)
 		}

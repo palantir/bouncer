@@ -25,24 +25,24 @@ import (
 // the desired capacity, may not _actually_ be.
 type DesiredASG struct {
 	AsgName         string
-	DesiredCapacity int64
+	DesiredCapacity int32
 	// PreTerminateCmd is the external process that needs to be run before terminating an instance in this ASG
 	PreTerminateCmd *string
 }
 
 // extractDesiredASG takes in a separator-separated string of asgname and desired capacity, and returns a DesiredASG pointer
-func extractDesiredASG(asgItem string, separator string, defaultDesired *int64, preTerminateCmd *string) (*DesiredASG, error) {
+func extractDesiredASG(asgItem string, separator string, defaultDesired *int32, preTerminateCmd *string) (*DesiredASG, error) {
 	asgItems := strings.Split(asgItem, separator)
-	var desiredCapacity int64
-	var err error
+	var desiredCapacity int32
 
 	if len(asgItems) > 2 || (defaultDesired == nil && len(asgItems) == 1) {
 		return nil, errors.Errorf("Error parsing '%s'.  Must be in format '%s%s%s'", asgItem, "ASG-NAME", separator, "1")
 	} else if len(asgItems) == 2 {
-		desiredCapacity, err = strconv.ParseInt(asgItems[1], 10, 64)
+		dcraw, err := strconv.ParseInt(asgItems[1], 10, 32)
 		if err != nil {
-			return nil, errors.Errorf("Error parsing '%s' from ASG Item '%s' as int64", asgItems[1], asgItem)
+			return nil, errors.Errorf("Error parsing '%s' from ASG Item '%s' as int32", asgItems[1], asgItem)
 		}
+		desiredCapacity = int32(dcraw)
 	} else {
 		desiredCapacity = *defaultDesired
 	}

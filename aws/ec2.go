@@ -17,15 +17,16 @@ package aws
 import (
 	"strings"
 
-	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/ec2"
+	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	et "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/pkg/errors"
 )
 
 // GetEC2TagValue returns a pointer to the value of the tag with the given key
-func GetEC2TagValue(ec2 *ec2.Instance, key string) *string {
+func GetEC2TagValue(ec2 *et.Instance, key string) *string {
 	for _, tag := range ec2.Tags {
-		if tag != nil {
+		if tag.Key != nil {
 			if strings.ToLower(*tag.Key) == strings.ToLower(key) {
 				return tag.Value
 			}
@@ -35,16 +36,15 @@ func GetEC2TagValue(ec2 *ec2.Instance, key string) *string {
 }
 
 // GetUserData returns a pointer to the value of the instance's userdata
-func (c *Clients) GetUserData(inst *autoscaling.Instance) (*string, error) {
-	attr := "userData"
+func (c *Clients) GetUserData(inst *at.Instance) (*string, error) {
 	input := ec2.DescribeInstanceAttributeInput{
-		Attribute:  &attr,
+		Attribute:  et.InstanceAttributeNameUserData,
 		InstanceId: inst.InstanceId,
 	}
 
-	output, err := c.EC2Client.DescribeInstanceAttribute(&input)
+	output, err := c.EC2Client.DescribeInstanceAttribute(c.ctx, &input)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Error describing attribute %s for instance %s", attr, *inst.InstanceId)
+		return nil, errors.Wrapf(err, "Error describing userdata for instance %s", *inst.InstanceId)
 	}
 
 	return output.UserData.Value, nil

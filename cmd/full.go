@@ -52,7 +52,7 @@ var fullCmd = &cobra.Command{
 
 		log.Info("Beginning bouncer full run")
 
-		var defCap int64
+		var defCap int32
 		defCap = 1
 		opts := bouncer.RunnerOpts{
 			Noop:            noop,

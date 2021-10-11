@@ -15,15 +15,17 @@
 package aws
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
+	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	et "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/pkg/errors"
 )
 
@@ -31,8 +33,9 @@ const apiSleepTime = 200 * time.Millisecond
 
 // Clients holds the clients for this account's invocation of the APIs we'll need
 type Clients struct {
-	ASGClient *autoscaling.AutoScaling
-	EC2Client *ec2.EC2
+	ctx       context.Context
+	ASGClient *autoscaling.Client
+	EC2Client *ec2.Client
 }
 
 // GetAWSClients returns the AWS client objects we'll need
@@ -42,21 +45,18 @@ func GetAWSClients() (*Clients, error) {
 		region = "us-east-1"
 	}
 
-	awsConf := aws.Config{
-		Region: &region,
-	}
+	ctx := context.Background()
 
-	sess, err := session.NewSessionWithOptions(session.Options{
-		Config: awsConf,
-	})
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
 	if err != nil {
-		return nil, errors.Wrap(err, "Error opening AWS session")
+		return nil, errors.Wrap(err, "Error opening default AWS config")
 	}
 
-	asg := autoscaling.New(sess)
-	ec2 := ec2.New(sess)
+	asg := autoscaling.NewFromConfig(cfg)
+	ec2 := ec2.NewFromConfig(cfg)
 
 	ac := Clients{
+		ctx:       ctx,
 		ASGClient: asg,
 		EC2Client: ec2,
 	}
@@ -65,13 +65,13 @@ func GetAWSClients() (*Clients, error) {
 }
 
 // ASGInstToEC2Inst converts a *autoscaling.Instance to its corresponding *ec2.Instance
-func (c *Clients) ASGInstToEC2Inst(inst *autoscaling.Instance) (*ec2.Instance, error) {
-	var instIDs []*string
-	instIDs = append(instIDs, inst.InstanceId)
+func (c *Clients) ASGInstToEC2Inst(inst *at.Instance) (*et.Instance, error) {
+	var instIDs []string
+	instIDs = append(instIDs, *inst.InstanceId)
 	input := ec2.DescribeInstancesInput{
 		InstanceIds: instIDs,
 	}
-	output, err := c.EC2Client.DescribeInstances(&input)
+	output, err := c.EC2Client.DescribeInstances(c.ctx, &input)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error describing instance %s", *inst.InstanceId)
 	}
@@ -82,27 +82,27 @@ func (c *Clients) ASGInstToEC2Inst(inst *autoscaling.Instance) (*ec2.Instance, e
 		}
 
 		for _, ec2Inst := range res.Instances {
-			return ec2Inst, nil
+			return &ec2Inst, nil
 		}
 	}
 
 	return nil, errors.Errorf("No instances found for %s", *inst.InstanceId)
 }
 
-// ASGLTplVersionToEC2LTplVersion resolves ASG Template Versions to its actual *int64 ec2LaunchTemplate Version
-func (c Clients) ASGLTplVersionToEC2LTplVersion(asgLaunchTemplate *autoscaling.LaunchTemplateSpecification) (*string, error) {
+// ASGLTplVersionToEC2LTplVersion resolves ASG Template Versions to its actual *int32 ec2LaunchTemplate Version
+func (c Clients) ASGLTplVersionToEC2LTplVersion(asgLaunchTemplate *at.LaunchTemplateSpecification) (*string, error) {
 	// No launch template, nothing to do here
 	if asgLaunchTemplate == nil {
 		return nil, nil
 	}
 
 	input := &ec2.DescribeLaunchTemplatesInput{
-		LaunchTemplateIds: []*string{
-			asgLaunchTemplate.LaunchTemplateId,
+		LaunchTemplateIds: []string{
+			*asgLaunchTemplate.LaunchTemplateId,
 		},
 	}
 
-	res, err := c.EC2Client.DescribeLaunchTemplates(input)
+	res, err := c.EC2Client.DescribeLaunchTemplates(c.ctx, input)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error describing LaunchTemplate %s", *asgLaunchTemplate.LaunchTemplateId)
 	}

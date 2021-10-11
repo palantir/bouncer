@@ -17,8 +17,8 @@ package bouncer
 import (
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/ec2"
+	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
+	et "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/palantir/bouncer/aws"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -26,32 +26,24 @@ import (
 
 // Instance tracks the AWS representations of an EC2 instance as well as the metadata we care about it
 type Instance struct {
-	EC2Instance      *ec2.Instance
-	ASGInstance      *autoscaling.Instance
-	AutoscalingGroup *autoscaling.Group
+	EC2Instance      *et.Instance
+	ASGInstance      *at.Instance
+	AutoscalingGroup *at.AutoScalingGroup
 	IsOld            bool
 	IsHealthy        bool
 	PreTerminateCmd  *string
 }
 
 // NewInstance returns a new bouncer.Instance object
-func NewInstance(ac *aws.Clients, asg *autoscaling.Group, asgInst *autoscaling.Instance, force bool, startTime time.Time, preTerminateCmd *string) (*Instance, error) {
-	var ec2Inst *ec2.Instance
-	err := retry(apiRetryCount, apiRetrySleep, func() (err error) {
-		ec2Inst, err = ac.ASGInstToEC2Inst(asgInst)
-		return
-	})
+func NewInstance(ac *aws.Clients, asg *at.AutoScalingGroup, asgInst *at.Instance, force bool, startTime time.Time, preTerminateCmd *string) (*Instance, error) {
+	ec2Inst, err := ac.ASGInstToEC2Inst(asgInst)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error converting ASG Inst to EC2 inst for %s", *asgInst.InstanceId)
 	}
 
 	lts := ac.GetLaunchTemplateSpec(asg)
 
-	var ec2LTplVersion *string
-	err = retry(apiRetryCount, apiRetrySleep, func() (err error) {
-		ec2LTplVersion, err = ac.ASGLTplVersionToEC2LTplVersion(lts)
-		return
-	})
+	ec2LTplVersion, err := ac.ASGLTplVersionToEC2LTplVersion(lts)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error resolving LaunchTemplate %s Version to actual version number", *lts.LaunchTemplateId)
 	}
@@ -68,7 +60,7 @@ func NewInstance(ac *aws.Clients, asg *autoscaling.Group, asgInst *autoscaling.I
 	return &inst, nil
 }
 
-func isInstanceOld(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance, asgLCName *string, asgLT *autoscaling.LaunchTemplateSpecification, asgLTVer *string, force bool, startTime time.Time) bool {
+func isInstanceOld(asgInst *at.Instance, ec2Inst *et.Instance, asgLCName *string, asgLT *at.LaunchTemplateSpecification, asgLTVer *string, force bool, startTime time.Time) bool {
 	if asgLCName != nil {
 		// This machine is using LaunchConfigs
 
@@ -141,12 +133,12 @@ func isInstanceOld(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance, asgLCNa
 	return false
 }
 
-func isInstanceHealthy(asgInst *autoscaling.Instance, ec2Inst *ec2.Instance) bool {
-	if *ec2Inst.State.Name != "running" {
+func isInstanceHealthy(asgInst *at.Instance, ec2Inst *et.Instance) bool {
+	if ec2Inst.State.Name != et.InstanceStateNameRunning {
 		return false
 	}
 
-	if *asgInst.LifecycleState != "InService" {
+	if asgInst.LifecycleState != at.LifecycleStateInService {
 		return false
 	}
 

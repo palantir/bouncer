@@ -99,7 +99,7 @@ func asgSetWrapper(asg *bouncer.ASG) *bouncer.ASGSet {
 
 // Run has the meat of the batch job
 func (r *Runner) Run() error {
-	var newDesiredCapacity int64
+	var newDesiredCapacity int32
 
 start:
 	for {

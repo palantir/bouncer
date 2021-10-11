@@ -89,7 +89,7 @@ func (r *Runner) MustValidatePrereqs() {
 
 // Run has the meat of the batch job
 func (r *Runner) Run() error {
-	var newDesiredCapacity int64
+	var newDesiredCapacity int32
 
 	for {
 		if r.TimedOut() {
@@ -113,8 +113,8 @@ func (r *Runner) Run() error {
 		asg := asgSet.ASGs[0]
 		curDesiredCapacity := asg.ASG.DesiredCapacity
 		finDesiredCapacity := &asg.DesiredASG.DesiredCapacity
-		newCount := int64(len(asgSet.GetNewInstances()))
-		oldCount := int64(len(asgSet.GetOldInstances()))
+		newCount := int32(len(asgSet.GetNewInstances()))
+		oldCount := int32(len(asgSet.GetOldInstances()))
 
 		if newCount == *finDesiredCapacity {
 			if *curDesiredCapacity == *finDesiredCapacity {

@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/autoscaling"
+	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
 	"github.com/palantir/bouncer/aws"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -32,7 +32,7 @@ type RunnerOpts struct {
 	Force           bool
 	AsgString       string
 	CommandString   string
-	DefaultCapacity *int64
+	DefaultCapacity *int32
 	TerminateHook   string
 	PendingHook     string
 	ItemTimeout     time.Duration
@@ -50,31 +50,10 @@ type BaseRunner struct {
 
 const (
 	waitBetweenChecks = 15 * time.Second
-	// Sleep time and number of times to retry non-destructive AWS API calls
-	apiRetryCount = 10
-	apiRetrySleep = 10 * time.Second
 
 	asgSeparator        = ","
 	desiredCapSeparator = ":"
 )
-
-func retry(attempts int, sleep time.Duration, callback func() error) (err error) {
-	for i := 0; ; i++ {
-		err = callback()
-		if err == nil {
-			return
-		}
-
-		if i >= (attempts - 1) {
-			break
-		}
-
-		time.Sleep(sleep)
-
-		log.Warn(errors.Wrap(err, "found error, retrying"))
-	}
-	return errors.Wrapf(err, "error persists after %v tries", attempts)
-}
 
 // NewBaseRunner instantiates a BaseRunner
 func NewBaseRunner(opts *RunnerOpts) (*BaseRunner, error) {
@@ -142,7 +121,7 @@ func (r *BaseRunner) abandonLifecycle(inst *Instance, hook *string) error {
 	log.WithFields(log.Fields{
 		"InstanceID":     *inst.ASGInstance.InstanceId,
 		"Hook":           *hook,
-		"LifecycleState": *inst.ASGInstance.LifecycleState,
+		"LifecycleState": inst.ASGInstance.LifecycleState,
 	}).Warn("Issuing ABANDON to hook instead of terminating")
 	result := "ABANDON"
 	r.resetTimeout()
@@ -160,11 +139,11 @@ func (r *BaseRunner) KillInstance(inst *Instance, decrement *bool) error {
 	}).Info("Picked instance to die next")
 	var hook string
 
-	if *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStatePendingWait {
+	if inst.ASGInstance.LifecycleState == at.LifecycleStatePendingWait {
 		hook = r.opts.PendingHook
 	}
 
-	if *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
+	if inst.ASGInstance.LifecycleState == at.LifecycleStateTerminatingWait {
 		hook = r.opts.TerminateHook
 	}
 
@@ -190,14 +169,17 @@ func (r *BaseRunner) terminateInstanceInASG(inst *Instance, decrement *bool) err
 	}).Info("Terminating instance")
 	r.resetTimeout()
 	r.noopCheck()
-	return r.awsClients.TerminateInstanceInASG(inst.ASGInstance.InstanceId, decrement)
+
+	err := r.awsClients.TerminateInstanceInASG(inst.ASGInstance.InstanceId, decrement)
+
+	return err
 }
 
 // SetDesiredCapacity Updates desired capacity of ASG
 // This function should only be used to increase desired cap, not decrease, since AWS
 // will _always_ remove instances based on AZ before any other criteria
 // http://docs.aws.amazon.com/autoscaling/latest/userguide/as-instance-termination.html
-func (r *BaseRunner) SetDesiredCapacity(asg *ASG, desiredCapacity *int64) error {
+func (r *BaseRunner) SetDesiredCapacity(asg *ASG, desiredCapacity *int32) error {
 
 	log.WithFields(log.Fields{
 		"ASG":           *asg.ASG.AutoScalingGroupName,
@@ -207,8 +189,10 @@ func (r *BaseRunner) SetDesiredCapacity(asg *ASG, desiredCapacity *int64) error 
 	r.noopCheck()
 
 	r.resetTimeout()
+
 	err := r.awsClients.SetDesiredCapacity(asg.ASG, desiredCapacity)
-	return errors.Wrap(err, "error setting desired capacity of ASG")
+
+	return errors.Wrapf(err, "error setting desired capacity of ASG")
 }
 
 // TimedOut returns whether we've hit our runner's timeout or not
