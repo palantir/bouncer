@@ -67,9 +67,7 @@ var rollingCmd = &cobra.Command{
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
-		defer func() {
-			cancel()
-		}()
+		defer cancel()
 
 		r, err := rolling.NewRunner(ctx, &opts)
 		if err != nil {

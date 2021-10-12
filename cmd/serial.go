@@ -67,9 +67,7 @@ var serialCmd = &cobra.Command{
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
-		defer func() {
-			cancel()
-		}()
+		defer cancel()
 
 		r, err := serial.NewRunner(ctx, &opts)
 		if err != nil {

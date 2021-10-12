@@ -88,8 +88,8 @@ func (r *Runner) ValidatePrereqs(ctx context.Context) error {
 }
 
 // Run has the meat of the batch job
-func (r *Runner) Run(ctxParent context.Context) error {
-	ctx, cancel := r.NewContext(ctxParent)
+func (r *Runner) Run(ctx context.Context) error {
+	ctx, cancel := r.NewContext(ctx)
 	defer cancel()
 
 	for {
@@ -116,7 +116,7 @@ func (r *Runner) Run(ctxParent context.Context) error {
 		}
 
 		if len(divergedASGs) != 0 {
-			ctx, cancel = r.ResetAndSleep(ctxParent)
+			ctx, cancel = r.ResetAndSleep(ctx)
 			defer cancel()
 
 			continue
@@ -129,7 +129,7 @@ func (r *Runner) Run(ctxParent context.Context) error {
 				return errors.Wrap(err, "error finding or killing best old instance")
 			}
 
-			ctx, cancel = r.ResetAndSleep(ctxParent)
+			ctx, cancel = r.ResetAndSleep(ctx)
 			defer cancel()
 
 			continue

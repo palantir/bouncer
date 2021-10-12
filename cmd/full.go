@@ -67,9 +67,7 @@ var fullCmd = &cobra.Command{
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
-		defer func() {
-			cancel()
-		}()
+		defer cancel()
 
 		r, err := full.NewRunner(ctx, &opts)
 		if err != nil {

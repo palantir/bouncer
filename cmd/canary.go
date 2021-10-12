@@ -66,9 +66,7 @@ var canaryCmd = &cobra.Command{
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
-		defer func() {
-			cancel()
-		}()
+		defer cancel()
 
 		r, err := canary.NewRunner(ctx, &opts)
 		if err != nil {

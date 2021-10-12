@@ -66,9 +66,7 @@ var slowCanaryCmd = &cobra.Command{
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
-		defer func() {
-			cancel()
-		}()
+		defer cancel()
 
 		r, err := slowcanary.NewRunner(ctx, &opts)
 		if err != nil {

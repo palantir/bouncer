@@ -189,15 +189,15 @@ func (r *BaseRunner) SetDesiredCapacity(ctx context.Context, asg *ASG, desiredCa
 }
 
 // NewContext generates a context with the ItemTimeout from the parent context given
-func (r *BaseRunner) NewContext(ctxParent context.Context) (context.Context, context.CancelFunc) {
-	return context.WithTimeout(ctxParent, r.Opts.ItemTimeout)
+func (r *BaseRunner) NewContext(ctx context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(ctx, r.Opts.ItemTimeout)
 }
 
 // ResetAndSleep resets our context timer (because we just performed a mutation action), and then sleeps
-func (r *BaseRunner) ResetAndSleep(ctxParent context.Context) (context.Context, context.CancelFunc) {
+func (r *BaseRunner) ResetAndSleep(ctx context.Context) (context.Context, context.CancelFunc) {
 	log.Debugf("Resetting timer")
 
-	ctx, cancel := r.NewContext(ctxParent)
+	ctx, cancel := r.NewContext(ctx)
 	r.Sleep(ctx)
 
 	return ctx, cancel
