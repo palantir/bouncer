@@ -68,22 +68,20 @@ var serialCmd = &cobra.Command{
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+		log.RegisterExitHandler(cancel)
 
 		r, err := serial.NewRunner(ctx, &opts)
 		if err != nil {
-			cancel()
 			log.Fatal(errors.Wrap(err, "error initializing runner"))
 		}
 
 		err = r.ValidatePrereqs(ctx)
 		if err != nil {
-			cancel()
 			log.Fatal(err)
 		}
 
 		err = r.Run(ctx)
 		if err != nil {
-			cancel()
 			log.Fatal(errors.Wrap(err, "error in run"))
 		}
 	},
