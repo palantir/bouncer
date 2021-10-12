@@ -188,6 +188,7 @@ func (r *BaseRunner) SetDesiredCapacity(ctx context.Context, asg *ASG, desiredCa
 	return errors.Wrapf(err, "error setting desired capacity of ASG")
 }
 
+// NewContext generates a context with the ItemTimeout from the parent context given
 func (r *BaseRunner) NewContext(ctxParent context.Context) (context.Context, context.CancelFunc) {
 	return context.WithTimeout(ctxParent, r.Opts.ItemTimeout)
 }
