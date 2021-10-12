@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/palantir/bouncer/bouncer"
 	"github.com/palantir/bouncer/serial"
 	"github.com/pkg/errors"
@@ -52,8 +54,7 @@ var serialCmd = &cobra.Command{
 
 		log.Info("Beginning bouncer serial run")
 
-		var defCap int64
-		defCap = 1
+		var defCap int32 = 1
 		opts := bouncer.RunnerOpts{
 			Noop:            noop,
 			Force:           force,
@@ -65,14 +66,21 @@ var serialCmd = &cobra.Command{
 			ItemTimeout:     timeout,
 		}
 
-		r, err := serial.NewRunner(&opts)
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		log.RegisterExitHandler(cancel)
+
+		r, err := serial.NewRunner(ctx, &opts)
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "error initializing runner"))
 		}
 
-		r.MustValidatePrereqs()
+		err = r.ValidatePrereqs(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		err = r.Run()
+		err = r.Run(ctx)
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "error in run"))
 		}

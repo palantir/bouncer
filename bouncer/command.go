@@ -16,10 +16,10 @@ package bouncer
 
 import (
 	"bufio"
+	"context"
 	"io"
 	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -75,11 +75,10 @@ func getCmd(command string, args []string) (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-func (r *BaseRunner) executeExternalCommand(fullCommand string) error {
-	tmout := r.opts.ItemTimeout
+func (r *BaseRunner) executeExternalCommand(ctx context.Context, fullCommand string) error {
+	tmout := r.Opts.ItemTimeout
 	command, args := splitCommandString(fullCommand)
 	log.Infof("Executing pre-terminate command '%s' with args '%s'", command, args)
-	r.resetTimeout()
 	r.noopCheck()
 
 	cmd, err := getCmd(command, args)
@@ -98,7 +97,7 @@ func (r *BaseRunner) executeExternalCommand(fullCommand string) error {
 	}()
 
 	select {
-	case <-time.After(tmout):
+	case <-ctx.Done():
 		err = cmd.Process.Kill()
 		if err != nil {
 			return errors.Wrapf(err, "error killing process after timeout of %s", tmout)

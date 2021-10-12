@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/palantir/bouncer/bouncer"
 	"github.com/palantir/bouncer/rolling"
 	"github.com/pkg/errors"
@@ -52,8 +54,7 @@ var rollingCmd = &cobra.Command{
 
 		log.Info("Beginning bouncer rolling run")
 
-		var defCap int64
-		defCap = 1
+		var defCap int32 = 1
 		opts := bouncer.RunnerOpts{
 			Noop:            noop,
 			Force:           force,
@@ -65,14 +66,21 @@ var rollingCmd = &cobra.Command{
 			ItemTimeout:     timeout,
 		}
 
-		r, err := rolling.NewRunner(&opts)
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		log.RegisterExitHandler(cancel)
+
+		r, err := rolling.NewRunner(ctx, &opts)
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "error initializing runner"))
 		}
 
-		r.MustValidatePrereqs()
+		err = r.ValidatePrereqs(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		err = r.Run()
+		err = r.Run(ctx)
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "error in run"))
 		}

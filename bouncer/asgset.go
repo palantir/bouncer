@@ -15,10 +15,10 @@
 package bouncer
 
 import (
-	"strings"
+	"context"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/autoscaling"
+	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
 	"github.com/palantir/bouncer/aws"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -30,11 +30,11 @@ type ASGSet struct {
 	ASGs []*ASG
 }
 
-func newASGSet(ac *aws.Clients, desiredASGs []*DesiredASG, force bool, startTime time.Time) (*ASGSet, error) {
+func newASGSet(ctx context.Context, ac *aws.Clients, desiredASGs []*DesiredASG, force bool, startTime time.Time) (*ASGSet, error) {
 	var asgs []*ASG
 
 	for _, desASG := range desiredASGs {
-		asg, err := NewASG(ac, desASG, force, startTime)
+		asg, err := NewASG(ctx, ac, desASG, force, startTime)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Error getting information for ASG %s", desASG.AsgName)
 		}
@@ -54,7 +54,9 @@ func (a *ASGSet) GetImmutableInstances() []*Instance {
 	var instances []*Instance
 	for _, asg := range a.ASGs {
 		for _, inst := range asg.Instances {
-			if *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStateTerminating || *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStatePending || *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStateTerminatingProceed {
+			if inst.ASGInstance.LifecycleState == at.LifecycleStateTerminating ||
+				inst.ASGInstance.LifecycleState == at.LifecycleStatePending ||
+				inst.ASGInstance.LifecycleState == at.LifecycleStateTerminatingProceed {
 				instances = append(instances, inst)
 			}
 		}
@@ -82,7 +84,9 @@ func (a *ASGSet) GetTerminatingInstances() []*Instance {
 	var terminatingInstances []*Instance
 	for _, asg := range a.ASGs {
 		for _, inst := range asg.Instances {
-			if strings.HasPrefix(*inst.ASGInstance.LifecycleState, "Terminating") {
+			if inst.ASGInstance.LifecycleState == at.LifecycleStateTerminating ||
+				inst.ASGInstance.LifecycleState == at.LifecycleStateTerminatingProceed ||
+				inst.ASGInstance.LifecycleState == at.LifecycleStateTerminatingWait {
 				terminatingInstances = append(terminatingInstances, inst)
 			}
 		}
@@ -136,7 +140,7 @@ func (a *ASGSet) GetBestOldInstance() *Instance {
 func (a *ASGSet) GetActualBadCounts() []*ASG {
 	var badCountASGs []*ASG
 	for _, asg := range a.ASGs {
-		if *asg.ASG.DesiredCapacity != int64(len(asg.Instances)) {
+		if *asg.ASG.DesiredCapacity != int32(len(asg.Instances)) {
 			badCountASGs = append(badCountASGs, asg)
 		}
 	}
@@ -195,7 +199,7 @@ func (a *ASGSet) IsTerminating() bool {
 		log.WithFields(log.Fields{
 			"ASG":        *inst.AutoscalingGroup.AutoScalingGroupName,
 			"InstanceID": *inst.ASGInstance.InstanceId,
-			"State":      *inst.ASGInstance.LifecycleState,
+			"State":      inst.ASGInstance.LifecycleState,
 		}).Info("Waiting for instance to die")
 		isTerminating = true
 	}
@@ -229,7 +233,7 @@ func (a *ASGSet) IsImmutableAutoscalingEvent() bool {
 		log.WithFields(log.Fields{
 			"ASG":        *inst.AutoscalingGroup.AutoScalingGroupName,
 			"InstanceID": *inst.ASGInstance.InstanceId,
-			"State":      *inst.ASGInstance.LifecycleState,
+			"State":      inst.ASGInstance.LifecycleState,
 		}).Info("Instance is in transient state")
 		isEvent = true
 	}
@@ -243,11 +247,11 @@ func (a *ASGSet) IsNewUnhealthy() bool {
 
 	newUnhealthy := a.GetUnhealthyNewInstances()
 	for _, inst := range newUnhealthy {
-		state := *inst.ASGInstance.LifecycleState
+		state := inst.ASGInstance.LifecycleState
 		var msg string
 
 		switch state {
-		case autoscaling.LifecycleStateTerminating, autoscaling.LifecycleStateTerminatingProceed, autoscaling.LifecycleStateTerminatingWait:
+		case at.LifecycleStateTerminating, at.LifecycleStateTerminatingProceed, at.LifecycleStateTerminatingWait:
 			msg = "Waiting for unhealthy new instance to get out of the way"
 		default:
 			msg = "Waiting for new instance to become healthy"

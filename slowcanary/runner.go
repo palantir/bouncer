@@ -15,7 +15,7 @@
 package slowcanary
 
 import (
-	"os"
+	"context"
 
 	"github.com/palantir/bouncer/bouncer"
 	"github.com/pkg/errors"
@@ -29,8 +29,8 @@ type Runner struct {
 }
 
 // NewRunner instantiates a new slow-canary runner
-func NewRunner(opts *bouncer.RunnerOpts) (*Runner, error) {
-	br, err := bouncer.NewBaseRunner(opts)
+func NewRunner(ctx context.Context, opts *bouncer.RunnerOpts) (*Runner, error) {
+	br, err := bouncer.NewBaseRunner(ctx, opts)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting base runner")
 	}
@@ -41,18 +41,18 @@ func NewRunner(opts *bouncer.RunnerOpts) (*Runner, error) {
 	return &r, nil
 }
 
-// MustValidatePrereqs checks that the batch runner is safe to proceed
-func (r *Runner) MustValidatePrereqs() {
-	asgSet, err := r.NewASGSet()
+// ValidatePrereqs checks that the batch runner is safe to proceed
+func (r *Runner) ValidatePrereqs(ctx context.Context) error {
+	asgSet, err := r.NewASGSet(ctx)
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "error building actualASG"))
+		return errors.Wrap(err, "error building actualASG")
 	}
 
 	if len(asgSet.ASGs) > 1 {
 		log.WithFields(log.Fields{
 			"count given": len(asgSet.ASGs),
 		}).Error("Slow-canary mode supports only 1 ASG at a time")
-		os.Exit(1)
+		return errors.New("error validating initial ASG state")
 	}
 
 	for _, actualAsg := range asgSet.ASGs {
@@ -62,7 +62,7 @@ func (r *Runner) MustValidatePrereqs() {
 				"desired_capacity given":  actualAsg.DesiredASG.DesiredCapacity,
 				"desired_capacity actual": *actualAsg.ASG.DesiredCapacity,
 			}).Error("Desired capacity given must be equal to starting desired_capacity of ASG")
-			os.Exit(1)
+			return errors.New("error validating initial ASG state")
 		}
 
 		if actualAsg.DesiredASG.DesiredCapacity < *actualAsg.ASG.MinSize {
@@ -72,7 +72,7 @@ func (r *Runner) MustValidatePrereqs() {
 				"max_size":         *actualAsg.ASG.MaxSize,
 				"desired_capacity": actualAsg.DesiredASG.DesiredCapacity,
 			}).Error("Desired capacity given must be greater than or equal to min ASG size")
-			os.Exit(1)
+			return errors.New("error validating initial ASG state")
 		}
 
 		if (actualAsg.DesiredASG.DesiredCapacity + 1) > *actualAsg.ASG.MaxSize {
@@ -82,29 +82,30 @@ func (r *Runner) MustValidatePrereqs() {
 				"max_size":         *actualAsg.ASG.MaxSize,
 				"desired_capacity": actualAsg.DesiredASG.DesiredCapacity,
 			}).Error("Max capacity set on ASG must be at least 1 + desired")
-			os.Exit(1)
+			return errors.New("error validating initial ASG state")
 		}
 	}
+
+	return nil
 }
 
 // Run has the meat of the batch job
-func (r *Runner) Run() error {
-	var newDesiredCapacity int64
+func (r *Runner) Run(ctx context.Context) error {
+	var newDesiredCapacity int32
+
+	ctx, cancel := r.NewContext(ctx)
+	defer cancel()
 
 	for {
-		if r.TimedOut() {
-			return errors.Errorf("timeout exceeded, something is probably wrong with rollout")
-		}
-
 		// Rebuild the state of the world every iteration of the loop because instance and ASG statuses are changing
 		log.Debug("Beginning new slow-canary run check")
-		asgSet, err := r.NewASGSet()
+		asgSet, err := r.NewASGSet(ctx)
 		if err != nil {
 			return errors.Wrap(err, "error building ASGSet")
 		}
 
 		if asgSet.IsTransient() {
-			r.Sleep()
+			r.Sleep(ctx)
 			continue
 		}
 
@@ -112,8 +113,8 @@ func (r *Runner) Run() error {
 		asg := asgSet.ASGs[0]
 		curDesiredCapacity := asg.ASG.DesiredCapacity
 		finDesiredCapacity := &asg.DesiredASG.DesiredCapacity
-		newCount := int64(len(asgSet.GetNewInstances()))
-		oldCount := int64(len(asgSet.GetOldInstances()))
+		newCount := int32(len(asgSet.GetNewInstances()))
+		oldCount := int32(len(asgSet.GetOldInstances()))
 
 		if *curDesiredCapacity == *finDesiredCapacity {
 			if oldCount == 0 {
@@ -126,12 +127,14 @@ func (r *Runner) Run() error {
 			}).Info("Adding slow-canary node")
 			newDesiredCapacity = *curDesiredCapacity + 1
 
-			err = r.SetDesiredCapacity(asg, &newDesiredCapacity)
+			err = r.SetDesiredCapacity(ctx, asg, &newDesiredCapacity)
 			if err != nil {
 				return errors.Wrap(err, "error setting desired capacity")
 			}
 
-			r.Sleep()
+			ctx, cancel = r.ResetAndSleep(ctx)
+			defer cancel()
+
 			continue
 		} else if *curDesiredCapacity == *finDesiredCapacity+1 {
 			if oldCount == 0 {
@@ -152,11 +155,13 @@ func (r *Runner) Run() error {
 				}).Info("Killing the last old node, so not letting AWS replace it")
 				decrement := true
 				oldInstances := asgSet.GetOldInstances()
-				err := r.KillInstance(oldInstances[0], &decrement)
+				err := r.KillInstance(ctx, oldInstances[0], &decrement)
 				if err != nil {
 					return errors.Wrap(err, "error killing instance")
 				}
-				r.Sleep()
+
+				ctx, cancel = r.ResetAndSleep(ctx)
+				defer cancel()
 
 				continue
 			}
@@ -167,11 +172,13 @@ func (r *Runner) Run() error {
 			}).Info("Killing an old node, and letting AWS replace it")
 			decrement := false
 			oldInstances := asgSet.GetOldInstances()
-			err := r.KillInstance(oldInstances[0], &decrement)
+			err := r.KillInstance(ctx, oldInstances[0], &decrement)
 			if err != nil {
 				return errors.Wrap(err, "error killing instance")
 			}
-			r.Sleep()
+
+			ctx, cancel = r.ResetAndSleep(ctx)
+			defer cancel()
 
 			continue
 		}

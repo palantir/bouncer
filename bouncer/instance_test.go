@@ -18,9 +18,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
+	et "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,21 +29,21 @@ func TestIsOldLogic(t *testing.T) {
 	startTime := time.Now()
 	var isOld bool
 	var zeroTime time.Time
-	var asgInst autoscaling.Instance
+	var asgInst at.Instance
 
-	ec2Inst := &ec2.Instance{
+	ec2Inst := &et.Instance{
 		LaunchTime: &zeroTime,
 	}
 
 	iid := "i-123456789abcdefgh"
-	lts := &autoscaling.LaunchTemplateSpecification{
+	lts := &at.LaunchTemplateSpecification{
 		LaunchTemplateId:   aws.String("lt-123456789abcdefgh"),
 		LaunchTemplateName: aws.String("test-launch-template"),
 		Version:            aws.String("1"),
 	}
 
 	// LT instance
-	asgInst = autoscaling.Instance{
+	asgInst = at.Instance{
 		LaunchConfigurationName: nil,
 		InstanceId:              &iid,
 		LaunchTemplate:          lts,
@@ -66,7 +66,7 @@ func TestIsOldLogic(t *testing.T) {
 	assert.True(t, isOld)
 
 	// LC Instance
-	asgInst = autoscaling.Instance{
+	asgInst = at.Instance{
 		LaunchConfigurationName: aws.String("hi-there-1"),
 		InstanceId:              &iid,
 		LaunchTemplate:          nil,

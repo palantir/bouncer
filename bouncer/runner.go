@@ -15,12 +15,12 @@
 package bouncer
 
 import (
-	"fmt"
+	"context"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/autoscaling"
+	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
 	"github.com/palantir/bouncer/aws"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -32,7 +32,7 @@ type RunnerOpts struct {
 	Force           bool
 	AsgString       string
 	CommandString   string
-	DefaultCapacity *int64
+	DefaultCapacity *int32
 	TerminateHook   string
 	PendingHook     string
 	ItemTimeout     time.Duration
@@ -40,45 +40,22 @@ type RunnerOpts struct {
 
 // BaseRunner is the base struct for any runner
 type BaseRunner struct {
-	opts       *RunnerOpts
+	Opts       *RunnerOpts
 	startTime  time.Time
 	awsClients *aws.Clients
 	asgs       []*DesiredASG
-	// curTimerStart is mutable - it's tracking the most recent API call that we need to time
-	curTimerStart time.Time
 }
 
 const (
 	waitBetweenChecks = 15 * time.Second
-	// Sleep time and number of times to retry non-destructive AWS API calls
-	apiRetryCount = 10
-	apiRetrySleep = 10 * time.Second
 
 	asgSeparator        = ","
 	desiredCapSeparator = ":"
 )
 
-func retry(attempts int, sleep time.Duration, callback func() error) (err error) {
-	for i := 0; ; i++ {
-		err = callback()
-		if err == nil {
-			return
-		}
-
-		if i >= (attempts - 1) {
-			break
-		}
-
-		time.Sleep(sleep)
-
-		log.Warn(errors.Wrap(err, "found error, retrying"))
-	}
-	return errors.Wrapf(err, "error persists after %v tries", attempts)
-}
-
 // NewBaseRunner instantiates a BaseRunner
-func NewBaseRunner(opts *RunnerOpts) (*BaseRunner, error) {
-	awsClients, err := aws.GetAWSClients()
+func NewBaseRunner(ctx context.Context, opts *RunnerOpts) (*BaseRunner, error) {
+	awsClients, err := aws.GetAWSClients(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error getting AWS Creds")
 	}
@@ -89,11 +66,10 @@ func NewBaseRunner(opts *RunnerOpts) (*BaseRunner, error) {
 	}
 
 	r := BaseRunner{
-		opts:          opts,
-		startTime:     time.Now(),
-		awsClients:    awsClients,
-		asgs:          asgs,
-		curTimerStart: time.Now(),
+		Opts:       opts,
+		startTime:  time.Now(),
+		awsClients: awsClients,
+		asgs:       asgs,
 	}
 
 	return &r, nil
@@ -132,72 +108,73 @@ func getASGList(opts *RunnerOpts) ([]*DesiredASG, error) {
 }
 
 func (r *BaseRunner) noopCheck() {
-	if r.opts.Noop {
+	if r.Opts.Noop {
 		log.Warn("NOOP only - not actually performing previous action, and exiting script with success")
 		os.Exit(0)
 	}
 }
 
-func (r *BaseRunner) abandonLifecycle(inst *Instance, hook *string) error {
+func (r *BaseRunner) abandonLifecycle(ctx context.Context, inst *Instance, hook *string) error {
 	log.WithFields(log.Fields{
 		"InstanceID":     *inst.ASGInstance.InstanceId,
 		"Hook":           *hook,
-		"LifecycleState": *inst.ASGInstance.LifecycleState,
+		"LifecycleState": inst.ASGInstance.LifecycleState,
 	}).Warn("Issuing ABANDON to hook instead of terminating")
 	result := "ABANDON"
-	r.resetTimeout()
 	r.noopCheck()
-	err := r.awsClients.CompleteLifecycleAction(inst.AutoscalingGroup.AutoScalingGroupName, inst.ASGInstance.InstanceId, hook, &result)
+	err := r.awsClients.CompleteLifecycleAction(ctx, inst.AutoscalingGroup.AutoScalingGroupName, inst.ASGInstance.InstanceId, hook, &result)
 	return errors.Wrap(err, "error completing lifecycle action")
 }
 
 // KillInstance calls TerminateInstanceInAutoscalingGroup, or, if the instance is stuck
 // in a lifecycle hook, issues an ABANDON to it, killing it more forcefully
-func (r *BaseRunner) KillInstance(inst *Instance, decrement *bool) error {
+func (r *BaseRunner) KillInstance(ctx context.Context, inst *Instance, decrement *bool) error {
 	log.WithFields(log.Fields{
 		"ASG":        *inst.AutoscalingGroup.AutoScalingGroupName,
 		"InstanceID": *inst.ASGInstance.InstanceId,
 	}).Info("Picked instance to die next")
 	var hook string
 
-	if *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStatePendingWait {
-		hook = r.opts.PendingHook
+	if inst.ASGInstance.LifecycleState == at.LifecycleStatePendingWait {
+		hook = r.Opts.PendingHook
 	}
 
-	if *inst.ASGInstance.LifecycleState == autoscaling.LifecycleStateTerminatingWait {
-		hook = r.opts.TerminateHook
+	if inst.ASGInstance.LifecycleState == at.LifecycleStateTerminatingWait {
+		hook = r.Opts.TerminateHook
 	}
 
 	if hook != "" {
-		err := r.abandonLifecycle(inst, &hook)
+		err := r.abandonLifecycle(ctx, inst, &hook)
 		return errors.Wrapf(err, "error abandoning hook %s", hook)
 	}
 
 	if inst.PreTerminateCmd != nil {
-		err := r.executeExternalCommand(*inst.PreTerminateCmd)
+		err := r.executeExternalCommand(ctx, *inst.PreTerminateCmd)
 		if err != nil {
 			return errors.Wrap(err, "error executing pre-terminate command")
 		}
 	}
-	err := r.terminateInstanceInASG(inst, decrement)
+	err := r.terminateInstanceInASG(ctx, inst, decrement)
 	return errors.Wrap(err, "error terminating instance")
 }
 
-func (r *BaseRunner) terminateInstanceInASG(inst *Instance, decrement *bool) error {
+func (r *BaseRunner) terminateInstanceInASG(ctx context.Context, inst *Instance, decrement *bool) error {
 	log.WithFields(log.Fields{
 		"ASG":        *inst.AutoscalingGroup.AutoScalingGroupName,
 		"InstanceID": *inst.ASGInstance.InstanceId,
 	}).Info("Terminating instance")
-	r.resetTimeout()
 	r.noopCheck()
-	return r.awsClients.TerminateInstanceInASG(inst.ASGInstance.InstanceId, decrement)
+
+	err := r.awsClients.TerminateInstanceInASG(ctx, inst.ASGInstance.InstanceId, decrement)
+
+	return err
 }
 
 // SetDesiredCapacity Updates desired capacity of ASG
 // This function should only be used to increase desired cap, not decrease, since AWS
 // will _always_ remove instances based on AZ before any other criteria
 // http://docs.aws.amazon.com/autoscaling/latest/userguide/as-instance-termination.html
-func (r *BaseRunner) SetDesiredCapacity(asg *ASG, desiredCapacity *int64) error {
+func (r *BaseRunner) SetDesiredCapacity(ctx context.Context, asg *ASG, desiredCapacity *int32) error {
 
 	log.WithFields(log.Fields{
 		"ASG":           *asg.ASG.AutoScalingGroupName,
@@ -206,51 +183,39 @@ func (r *BaseRunner) SetDesiredCapacity(asg *ASG, desiredCapacity *int64) error 
 	}).Info("Changing desired capacity")
 	r.noopCheck()
 
-	r.resetTimeout()
-	err := r.awsClients.SetDesiredCapacity(asg.ASG, desiredCapacity)
-	return errors.Wrap(err, "error setting desired capacity of ASG")
+	err := r.awsClients.SetDesiredCapacity(ctx, asg.ASG, desiredCapacity)
+
+	return errors.Wrapf(err, "error setting desired capacity of ASG")
 }
 
-// TimedOut returns whether we've hit our runner's timeout or not
-// This is based on curTimerStart, so call SetcurTimerStart whenever a new call is made
-// that should be timed
-func (r *BaseRunner) TimedOut() bool {
-	curTime := time.Now()
-
-	timeout := r.curTimerStart.Add(r.opts.ItemTimeout)
-
-	log.WithFields(log.Fields{
-		"Current Time": getHumanShortTime(curTime),
-		"Timeout Time": getHumanShortTime(timeout),
-	}).Debug("Checking if we're at timeout")
-
-	return curTime.After(timeout)
+// NewContext generates a context with the ItemTimeout from the parent context given
+func (r *BaseRunner) NewContext(ctx context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(ctx, r.Opts.ItemTimeout)
 }
 
-func getHumanShortTime(t time.Time) string {
-	zonename, _ := t.In(time.Local).Zone()
-	human := fmt.Sprintf("%02v:%02v:%02v %s", t.Hour(), t.Minute(), t.Second(), zonename)
-	return human
-}
+// ResetAndSleep resets our context timer (because we just performed a mutation action), and then sleeps
+func (r *BaseRunner) ResetAndSleep(ctx context.Context) (context.Context, context.CancelFunc) {
+	log.Debugf("Resetting timer")
 
-// resetTimeout sets curTimerStart to the current time, so call this
-// after making a new AWS API call that should restart the timer with respect to the timeout
-func (r *BaseRunner) resetTimeout() {
-	now := time.Now()
-	log.WithFields(log.Fields{
-		"Last timer reset":              getHumanShortTime(r.curTimerStart),
-		"Time elapsed since last reset": now.Sub(r.curTimerStart),
-	}).Debug("Resetting timer")
-	r.curTimerStart = now
+	ctx, cancel := r.NewContext(ctx)
+	r.Sleep(ctx)
+
+	return ctx, cancel
 }
 
 // Sleep makes us sleep for the constant time - call this when waiting for an AWS change
-func (r *BaseRunner) Sleep() {
+func (r *BaseRunner) Sleep(ctx context.Context) {
 	log.Debugf("Sleeping for %v", waitBetweenChecks)
-	time.Sleep(waitBetweenChecks)
+
+	select {
+	case <-time.After(waitBetweenChecks):
+		return
+	case <-ctx.Done():
+		log.Fatal("timeout exceeded, something is probably wrong with the rollout")
+	}
 }
 
 // NewASGSet returns an ASGSet pointer
-func (r *BaseRunner) NewASGSet() (*ASGSet, error) {
-	return newASGSet(r.awsClients, r.asgs, r.opts.Force, r.startTime)
+func (r *BaseRunner) NewASGSet(ctx context.Context) (*ASGSet, error) {
+	return newASGSet(ctx, r.awsClients, r.asgs, r.Opts.Force, r.startTime)
 }

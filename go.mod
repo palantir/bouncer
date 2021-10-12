@@ -3,7 +3,10 @@ module github.com/palantir/bouncer
 go 1.16
 
 require (
-	github.com/aws/aws-sdk-go v1.40.53
+	github.com/aws/aws-sdk-go-v2 v1.9.1
+	github.com/aws/aws-sdk-go-v2/config v1.8.2
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.12.1
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.18.0
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/pkg/errors v0.9.1
