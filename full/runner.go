@@ -100,15 +100,14 @@ func asgSetWrapper(asg *bouncer.ASG) *bouncer.ASGSet {
 }
 
 // Run has the meat of the batch job
-func (r *Runner) Run(ctx context.Context) error {
+func (r *Runner) Run(ctxParent context.Context) error {
 	var newDesiredCapacity int32
+
+	ctx, cancel := r.NewContext(ctxParent)
+	defer cancel()
 
 start:
 	for {
-		if r.TimedOut() {
-			return errors.Errorf("timeout exceeded, something is probably wrong with rollout")
-		}
-
 		// Rebuild the state of the world every iteration of the loop because instance and ASG statuses are changing
 		log.Debug("Beginning new full run check")
 		asgSet, err := r.NewASGSet(ctx)
@@ -118,7 +117,7 @@ start:
 
 		// See if we're still waiting on a change we made previously to finish or settle
 		if asgSet.IsTransient() {
-			r.Sleep()
+			r.Sleep(ctx)
 			continue
 		}
 
@@ -132,7 +131,10 @@ start:
 				if err != nil {
 					return errors.Wrap(err, "failed to kill instance")
 				}
-				r.Sleep()
+
+				ctx, cancel = r.ResetAndSleep(ctxParent)
+				defer cancel()
+
 				continue start
 			}
 		}
@@ -147,7 +149,10 @@ start:
 				if err != nil {
 					return errors.Wrap(err, "error setting desired capacity")
 				}
-				r.Sleep()
+
+				ctx, cancel = r.ResetAndSleep(ctxParent)
+				defer cancel()
+
 				continue start
 			}
 		}

@@ -88,12 +88,11 @@ func (r *Runner) ValidatePrereqs(ctx context.Context) error {
 }
 
 // Run has the meat of the batch job
-func (r *Runner) Run(ctx context.Context) error {
-	for {
-		if r.TimedOut() {
-			return errors.Errorf("timeout exceeded, something is probably wrong with rollout")
-		}
+func (r *Runner) Run(ctxParent context.Context) error {
+	ctx, cancel := r.NewContext(ctxParent)
+	defer cancel()
 
+	for {
 		// Rebuild the state of the world every iteration of the loop because instance and ASG statuses are changing
 		log.Debug("Beginning new serial run check")
 		asgSet, err := r.NewASGSet(ctx)
@@ -103,7 +102,7 @@ func (r *Runner) Run(ctx context.Context) error {
 
 		// See if we're still waiting on a change we made previously to finish or settle
 		if asgSet.IsTransient() {
-			r.Sleep()
+			r.Sleep(ctx)
 			continue
 		}
 
@@ -117,7 +116,9 @@ func (r *Runner) Run(ctx context.Context) error {
 		}
 
 		if len(divergedASGs) != 0 {
-			r.Sleep()
+			ctx, cancel = r.ResetAndSleep(ctxParent)
+			defer cancel()
+
 			continue
 		}
 
@@ -128,7 +129,9 @@ func (r *Runner) Run(ctx context.Context) error {
 				return errors.Wrap(err, "error finding or killing best old instance")
 			}
 
-			r.Sleep()
+			ctx, cancel = r.ResetAndSleep(ctxParent)
+			defer cancel()
+
 			continue
 		}
 
