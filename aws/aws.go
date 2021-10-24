@@ -21,6 +21,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/retry"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
 	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
@@ -44,7 +46,12 @@ func GetAWSClients(ctx context.Context) (*Clients, error) {
 		region = "us-east-1"
 	}
 
-	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
+	cfg, err := config.LoadDefaultConfig(ctx,
+		config.WithRegion(region),
+		config.WithRetryer(func() aws.Retryer {
+			return retry.AddWithMaxAttempts(retry.NewStandard(), 20)
+		}),
+	)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error opening default AWS config")
 	}
