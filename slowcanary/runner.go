@@ -90,10 +90,10 @@ func (r *Runner) ValidatePrereqs(ctx context.Context) error {
 }
 
 // Run has the meat of the batch job
-func (r *Runner) Run(ctx context.Context) error {
+func (r *Runner) Run() error {
 	var newDesiredCapacity int32
 
-	ctx, cancel := r.NewContext(ctx)
+	ctx, cancel := r.NewContext()
 	defer cancel()
 
 	for {
@@ -132,8 +132,9 @@ func (r *Runner) Run(ctx context.Context) error {
 				return errors.Wrap(err, "error setting desired capacity")
 			}
 
-			ctx, cancel = r.ResetAndSleep(ctx)
+			ctx, cancel = r.NewContext()
 			defer cancel()
+			r.Sleep(ctx)
 
 			continue
 		} else if *curDesiredCapacity == *finDesiredCapacity+1 {
@@ -160,8 +161,9 @@ func (r *Runner) Run(ctx context.Context) error {
 					return errors.Wrap(err, "error killing instance")
 				}
 
-				ctx, cancel = r.ResetAndSleep(ctx)
+				ctx, cancel = r.NewContext()
 				defer cancel()
+				r.Sleep(ctx)
 
 				continue
 			}
@@ -177,8 +179,9 @@ func (r *Runner) Run(ctx context.Context) error {
 				return errors.Wrap(err, "error killing instance")
 			}
 
-			ctx, cancel = r.ResetAndSleep(ctx)
+			ctx, cancel = r.NewContext()
 			defer cancel()
+			r.Sleep(ctx)
 
 			continue
 		}

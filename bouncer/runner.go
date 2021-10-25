@@ -51,6 +51,8 @@ const (
 
 	asgSeparator        = ","
 	desiredCapSeparator = ":"
+
+	debugTimeFormat = "2006-01-02 15:04:05 MST"
 )
 
 // NewBaseRunner instantiates a BaseRunner
@@ -189,23 +191,33 @@ func (r *BaseRunner) SetDesiredCapacity(ctx context.Context, asg *ASG, desiredCa
 }
 
 // NewContext generates a context with the ItemTimeout from the parent context given
-func (r *BaseRunner) NewContext(ctx context.Context) (context.Context, context.CancelFunc) {
-	return context.WithTimeout(ctx, r.Opts.ItemTimeout)
-}
+func (r *BaseRunner) NewContext() (context.Context, context.CancelFunc) {
+	ctx, cancel := context.WithTimeout(context.Background(), r.Opts.ItemTimeout)
+	dn, _ := ctx.Deadline()
 
-// ResetAndSleep resets our context timer (because we just performed a mutation action), and then sleeps
-func (r *BaseRunner) ResetAndSleep(ctx context.Context) (context.Context, context.CancelFunc) {
-	log.Debugf("Resetting timer")
+	l := log.WithFields(log.Fields{
+		"Context deadline": dn.Format(debugTimeFormat),
+		"Current time":     getHumanCurrentTime(),
+	})
 
-	ctx, cancel := r.NewContext(ctx)
-	r.Sleep(ctx)
+	l.Debug("Generating fresh context")
 
 	return ctx, cancel
 }
 
+func getHumanCurrentTime() string {
+	return time.Now().Format(debugTimeFormat)
+}
+
 // Sleep makes us sleep for the constant time - call this when waiting for an AWS change
 func (r *BaseRunner) Sleep(ctx context.Context) {
-	log.Debugf("Sleeping for %v", waitBetweenChecks)
+	l := log.WithFields(log.Fields{
+		"Sleep Duration": waitBetweenChecks,
+		"Current time":   getHumanCurrentTime(),
+	})
+
+	l.Debug("Sleeping between checks")
+	time.Sleep(waitBetweenChecks)
 
 	select {
 	case <-time.After(waitBetweenChecks):
