@@ -217,7 +217,6 @@ func (r *BaseRunner) Sleep(ctx context.Context) {
 	})
 
 	l.Debug("Sleeping between checks")
-	time.Sleep(waitBetweenChecks)
 
 	select {
 	case <-time.After(waitBetweenChecks):
