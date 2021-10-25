@@ -184,9 +184,10 @@ type ArchitectureType string
 
 // Enum values for ArchitectureType
 const (
-	ArchitectureTypeI386  ArchitectureType = "i386"
-	ArchitectureTypeX8664 ArchitectureType = "x86_64"
-	ArchitectureTypeArm64 ArchitectureType = "arm64"
+	ArchitectureTypeI386     ArchitectureType = "i386"
+	ArchitectureTypeX8664    ArchitectureType = "x86_64"
+	ArchitectureTypeArm64    ArchitectureType = "arm64"
+	ArchitectureTypeX8664Mac ArchitectureType = "x86_64_mac"
 )
 
 // Values returns all known values for ArchitectureType. Note that this can be
@@ -197,6 +198,7 @@ func (ArchitectureType) Values() []ArchitectureType {
 		"i386",
 		"x86_64",
 		"arm64",
+		"x86_64_mac",
 	}
 }
 
@@ -566,6 +568,39 @@ func (CancelSpotInstanceRequestState) Values() []CancelSpotInstanceRequestState 
 		"closed",
 		"cancelled",
 		"completed",
+	}
+}
+
+type CapacityReservationFleetState string
+
+// Enum values for CapacityReservationFleetState
+const (
+	CapacityReservationFleetStateSubmitted          CapacityReservationFleetState = "submitted"
+	CapacityReservationFleetStateModifying          CapacityReservationFleetState = "modifying"
+	CapacityReservationFleetStateActive             CapacityReservationFleetState = "active"
+	CapacityReservationFleetStatePartiallyFulfilled CapacityReservationFleetState = "partially_fulfilled"
+	CapacityReservationFleetStateExpiring           CapacityReservationFleetState = "expiring"
+	CapacityReservationFleetStateExpired            CapacityReservationFleetState = "expired"
+	CapacityReservationFleetStateCancelling         CapacityReservationFleetState = "cancelling"
+	CapacityReservationFleetStateCancelled          CapacityReservationFleetState = "cancelled"
+	CapacityReservationFleetStateFailed             CapacityReservationFleetState = "failed"
+)
+
+// Values returns all known values for CapacityReservationFleetState. Note that
+// this can be expanded in the future, and so it is only as up to date as the
+// client. The ordering of this slice is not guaranteed to be stable across
+// updates.
+func (CapacityReservationFleetState) Values() []CapacityReservationFleetState {
+	return []CapacityReservationFleetState{
+		"submitted",
+		"modifying",
+		"active",
+		"partially_fulfilled",
+		"expiring",
+		"expired",
+		"cancelling",
+		"cancelled",
+		"failed",
 	}
 }
 
@@ -1076,6 +1111,24 @@ func (DeleteQueuedReservedInstancesErrorCode) Values() []DeleteQueuedReservedIns
 	}
 }
 
+type DestinationFileFormat string
+
+// Enum values for DestinationFileFormat
+const (
+	DestinationFileFormatPlainText DestinationFileFormat = "plain-text"
+	DestinationFileFormatParquet   DestinationFileFormat = "parquet"
+)
+
+// Values returns all known values for DestinationFileFormat. Note that this can be
+// expanded in the future, and so it is only as up to date as the client. The
+// ordering of this slice is not guaranteed to be stable across updates.
+func (DestinationFileFormat) Values() []DestinationFileFormat {
+	return []DestinationFileFormat{
+		"plain-text",
+		"parquet",
+	}
+}
+
 type DeviceType string
 
 // Enum values for DeviceType
@@ -1491,6 +1544,23 @@ func (FleetActivityStatus) Values() []FleetActivityStatus {
 	}
 }
 
+type FleetCapacityReservationTenancy string
+
+// Enum values for FleetCapacityReservationTenancy
+const (
+	FleetCapacityReservationTenancyDefault FleetCapacityReservationTenancy = "default"
+)
+
+// Values returns all known values for FleetCapacityReservationTenancy. Note that
+// this can be expanded in the future, and so it is only as up to date as the
+// client. The ordering of this slice is not guaranteed to be stable across
+// updates.
+func (FleetCapacityReservationTenancy) Values() []FleetCapacityReservationTenancy {
+	return []FleetCapacityReservationTenancy{
+		"default",
+	}
+}
+
 type FleetCapacityReservationUsageStrategy string
 
 // Enum values for FleetCapacityReservationUsageStrategy
@@ -1544,6 +1614,22 @@ func (FleetExcessCapacityTerminationPolicy) Values() []FleetExcessCapacityTermin
 	return []FleetExcessCapacityTerminationPolicy{
 		"no-termination",
 		"termination",
+	}
+}
+
+type FleetInstanceMatchCriteria string
+
+// Enum values for FleetInstanceMatchCriteria
+const (
+	FleetInstanceMatchCriteriaOpen FleetInstanceMatchCriteria = "open"
+)
+
+// Values returns all known values for FleetInstanceMatchCriteria. Note that this
+// can be expanded in the future, and so it is only as up to date as the client.
+// The ordering of this slice is not guaranteed to be stable across updates.
+func (FleetInstanceMatchCriteria) Values() []FleetInstanceMatchCriteria {
+	return []FleetInstanceMatchCriteria{
+		"open",
 	}
 }
 
@@ -2138,6 +2224,25 @@ func (InstanceStateName) Values() []InstanceStateName {
 		"terminated",
 		"stopping",
 		"stopped",
+	}
+}
+
+type InstanceStorageEncryptionSupport string
+
+// Enum values for InstanceStorageEncryptionSupport
+const (
+	InstanceStorageEncryptionSupportUnsupported InstanceStorageEncryptionSupport = "unsupported"
+	InstanceStorageEncryptionSupportRequired    InstanceStorageEncryptionSupport = "required"
+)
+
+// Values returns all known values for InstanceStorageEncryptionSupport. Note that
+// this can be expanded in the future, and so it is only as up to date as the
+// client. The ordering of this slice is not guaranteed to be stable across
+// updates.
+func (InstanceStorageEncryptionSupport) Values() []InstanceStorageEncryptionSupport {
+	return []InstanceStorageEncryptionSupport{
+		"unsupported",
+		"required",
 	}
 }
 
