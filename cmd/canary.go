@@ -79,7 +79,7 @@ var canaryCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = r.Run(ctx)
+		err = r.Run()
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "error in run"))
 		}

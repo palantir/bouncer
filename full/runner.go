@@ -100,10 +100,10 @@ func asgSetWrapper(asg *bouncer.ASG) *bouncer.ASGSet {
 }
 
 // Run has the meat of the batch job
-func (r *Runner) Run(ctx context.Context) error {
+func (r *Runner) Run() error {
 	var newDesiredCapacity int32
 
-	ctx, cancel := r.NewContext(ctx)
+	ctx, cancel := r.NewContext()
 	defer cancel()
 
 start:
@@ -132,8 +132,9 @@ start:
 					return errors.Wrap(err, "failed to kill instance")
 				}
 
-				ctx, cancel = r.ResetAndSleep(ctx)
+				ctx, cancel = r.NewContext()
 				defer cancel()
+				r.Sleep(ctx)
 
 				continue start
 			}
@@ -150,8 +151,9 @@ start:
 					return errors.Wrap(err, "error setting desired capacity")
 				}
 
-				ctx, cancel = r.ResetAndSleep(ctx)
+				ctx, cancel = r.NewContext()
 				defer cancel()
+				r.Sleep(ctx)
 
 				continue start
 			}

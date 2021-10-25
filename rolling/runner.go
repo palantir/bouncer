@@ -79,8 +79,8 @@ func (r *Runner) ValidatePrereqs(ctx context.Context) error {
 }
 
 // Run has the meat of the batch job
-func (r *Runner) Run(ctx context.Context) error {
-	ctx, cancel := r.NewContext(ctx)
+func (r *Runner) Run() error {
+	ctx, cancel := r.NewContext()
 	defer cancel()
 
 	for {
@@ -104,8 +104,9 @@ func (r *Runner) Run(ctx context.Context) error {
 				return errors.Wrap(err, "error finding or killing best old instance")
 			}
 
-			ctx, cancel = r.ResetAndSleep(ctx)
+			ctx, cancel = r.NewContext()
 			defer cancel()
+			r.Sleep(ctx)
 
 			continue
 		}
