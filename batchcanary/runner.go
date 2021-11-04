@@ -1,0 +1,306 @@
+// Copyright 2017 Palantir Technologies, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package batchcanary
+
+import (
+	"context"
+	"strings"
+
+	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
+	"github.com/palantir/bouncer/bouncer"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+)
+
+// Runner holds data for a particular canary run
+// Note that in the canary case, asgs will always be of length 1
+type Runner struct {
+	bouncer.BaseRunner
+	batchSize int32 // This field is set in ValidatePrereqs
+}
+
+// NewRunner instantiates a new canary runner
+func NewRunner(ctx context.Context, opts *bouncer.RunnerOpts) (*Runner, error) {
+	br, err := bouncer.NewBaseRunner(ctx, opts)
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting base runner")
+	}
+
+	batchSize := *opts.BatchSize
+
+	if batchSize == 0 {
+		if len(strings.Split(opts.AsgString, ",")) > 1 {
+			return nil, errors.New("Batch canary mode supports only 1 ASG at a time")
+		}
+
+		da, err := bouncer.ExtractDesiredASG(opts.AsgString, nil, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		batchSize = da.DesiredCapacity
+	}
+
+	r := Runner{
+		BaseRunner: *br,
+		batchSize:  batchSize,
+	}
+	return &r, nil
+}
+
+// ValidatePrereqs checks that the batch runner is safe to proceed
+func (r *Runner) ValidatePrereqs(ctx context.Context) error {
+	asgSet, err := r.NewASGSet(ctx)
+	if err != nil {
+		return errors.Wrap(err, "error building actualASG")
+	}
+
+	if len(asgSet.ASGs) > 1 {
+		log.WithFields(log.Fields{
+			"count given": len(asgSet.ASGs),
+		}).Error("Batch Canary mode supports only 1 ASG at a time")
+		return errors.New("error validating ASG input")
+	}
+
+	for _, actualAsg := range asgSet.ASGs {
+		if actualAsg.DesiredASG.DesiredCapacity != *actualAsg.ASG.DesiredCapacity {
+			log.WithFields(log.Fields{
+				"desired_capacity given":  actualAsg.DesiredASG.DesiredCapacity,
+				"desired_capacity actual": *actualAsg.ASG.DesiredCapacity,
+			}).Error("Desired capacity given must be equal to starting desired_capacity of ASG")
+			return errors.New("error validating ASG state")
+		}
+
+		if actualAsg.DesiredASG.DesiredCapacity < *actualAsg.ASG.MinSize {
+			log.WithFields(log.Fields{
+				"min_size":         *actualAsg.ASG.MinSize,
+				"max_size":         *actualAsg.ASG.MaxSize,
+				"desired_capacity": actualAsg.DesiredASG.DesiredCapacity,
+			}).Error("Desired capacity given must be greater than or equal to min ASG size")
+			return errors.New("error validating ASG state")
+		}
+
+		if *actualAsg.ASG.MaxSize < (actualAsg.DesiredASG.DesiredCapacity + r.batchSize) {
+			log.WithFields(log.Fields{
+				"min_size":         *actualAsg.ASG.MinSize,
+				"max_size":         *actualAsg.ASG.MaxSize,
+				"desired_capacity": actualAsg.DesiredASG.DesiredCapacity,
+			}).Error("Max capacity of ASG must be >= desired capacity + batch size")
+			return errors.New("error validating ASG state")
+		}
+	}
+
+	return nil
+}
+
+func min(a, b int32) int32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// Run has the meat of the batch job
+func (r *Runner) Run() error {
+	var newDesiredCapacity int32
+	decrement := true
+
+	ctx, cancel := r.NewContext()
+	defer cancel()
+
+	for {
+		// Rebuild the state of the world every iteration of the loop because instance and ASG statuses are changing
+		log.Debug("Beginning new batch canary run check")
+		asgSet, err := r.NewASGSet(ctx)
+		if err != nil {
+			return errors.Wrap(err, "error building ASGSet")
+		}
+
+		// Since we only support one ASG in canary mode
+		asg := asgSet.ASGs[0]
+		curDesiredCapacity := *asg.ASG.DesiredCapacity
+		finDesiredCapacity := asg.DesiredASG.DesiredCapacity
+
+		newUnhealthy := asgSet.GetUnhealthyNewInstances()
+		oldUnhealthy := asgSet.GetUnHealthyOldInstances()
+		newHealthy := asgSet.GetHealthyNewInstances()
+		oldHealthy := asgSet.GetHealthyOldInstances()
+
+		newCount := int32(len(asgSet.GetNewInstances()))
+		oldCount := int32(len(asgSet.GetOldInstances()))
+		healthyCount := int32(len(newHealthy) + len(oldHealthy))
+		unHealthyCount := int32(len(newUnhealthy) + len(oldUnhealthy))
+
+		totalCount := unHealthyCount + healthyCount
+
+		newUnhealthyCount := len(newUnhealthy)
+		extraNodes := healthyCount - finDesiredCapacity
+
+		batchSize := r.batchSize
+		if r.batchSize == 0 {
+			batchSize = finDesiredCapacity
+		}
+
+		maxDesiredCapacity := finDesiredCapacity + batchSize
+		newDesiredCapacity = min(maxDesiredCapacity, finDesiredCapacity+oldCount)
+
+		// Our exit case - we have exactly the number of nodes we want, they're all new, and they're all InService
+		if oldCount == 0 && newCount == finDesiredCapacity {
+			if curDesiredCapacity == finDesiredCapacity {
+				log.Info("Didn't find any old instances or ASGs - we're done here!")
+				return nil
+			}
+
+			// Not sure how this would happen off-hand?
+			log.WithFields(log.Fields{
+				"Current desired capacity": curDesiredCapacity,
+				"Final desired capacity":   finDesiredCapacity,
+			}).Error("Capacity mismatch")
+			return errors.New("old instance mismatch")
+		}
+
+		// Clean-out old unhealthy instances in P:W now, as they're just adding confusion
+		for _, oi := range oldUnhealthy {
+			if oi.ASGInstance.LifecycleState == at.LifecycleStatePendingWait {
+				err := r.KillInstance(ctx, oi, &decrement)
+				if err != nil {
+					return errors.Wrap(err, "error killing instance")
+				}
+
+				ctx, cancel = r.NewContext()
+				defer cancel()
+				r.Sleep(ctx)
+
+				continue
+			}
+		}
+
+		// This check already prints statuses of individual nodes
+		if asgSet.IsStrictTransient() {
+			r.Sleep(ctx)
+			continue
+		}
+
+		// Final wait for new nodes
+		if oldCount == 0 && newUnhealthyCount != 0 {
+			log.Info("Waiting for new nodes to become healthy")
+
+			r.Sleep(ctx)
+			continue
+		}
+
+		// Let's make sure our canary phge is complete
+		if newCount == 1 && newUnhealthyCount == 1 {
+			log.Info("Waiting for canary node to become healthy")
+			r.Sleep(ctx)
+			continue
+		}
+
+		// If we already have enough nodes in play (final des cap + batch size), we wait
+		if totalCount >= maxDesiredCapacity && healthyCount <= finDesiredCapacity {
+			log.WithFields(log.Fields{
+				"Healthy new":   len(newHealthy),
+				"Healthy old":   len(oldHealthy),
+				"Unhealthy new": len(newUnhealthy),
+				"Unhealthy old": len(oldUnhealthy),
+				"Final descap":  finDesiredCapacity,
+				"Max descap":    maxDesiredCapacity,
+			}).Info("Waiting for total healthy nodes to be >= final capacity and total nodes to be <= max capacity")
+
+			r.Sleep(ctx)
+			continue
+		}
+
+		if oldCount == 0 {
+			badCounts := asgSet.GetDivergedASGs()
+			if len(badCounts) != 0 {
+				return errors.New("somehow our ASG's desired count isn't the canonical count, but we have all new instances, if this is correct, manually set desired capacity")
+			}
+		}
+
+		// If we haven't canaried a new instance yet, let's do that
+		if newCount == 0 {
+			log.Info("Adding canary node")
+			newDesiredCapacity = curDesiredCapacity + 1
+
+			err = r.SetDesiredCapacity(ctx, asg, &newDesiredCapacity)
+			if err != nil {
+				return errors.Wrap(err, "error setting desired capacity")
+			}
+
+			ctx, cancel = r.NewContext()
+			defer cancel()
+			r.Sleep(ctx)
+
+			continue
+		}
+
+		// We have capacity to spare, and old machines still exist
+		if totalCount < maxDesiredCapacity && oldCount > 0 && newDesiredCapacity != curDesiredCapacity {
+			log.WithFields(log.Fields{
+				"Batch size given":       r.batchSize,
+				"Old machines remaining": oldCount,
+				"Max descap":             maxDesiredCapacity,
+				"Current batch size":     newDesiredCapacity - curDesiredCapacity,
+			}).Info("Adding a batch of new nodes")
+
+			err = r.SetDesiredCapacity(ctx, asg, &newDesiredCapacity)
+			if err != nil {
+				return errors.Wrap(err, "error setting desired capacity")
+			}
+
+			ctx, cancel = r.NewContext()
+			defer cancel()
+			r.Sleep(ctx)
+
+			continue
+		}
+
+		// Terminate some oldies
+		if totalCount >= maxDesiredCapacity || newDesiredCapacity == curDesiredCapacity {
+			killed := int32(0)
+
+			log.WithFields(log.Fields{
+				"Old nodes":     oldCount,
+				"Healthy nodes": healthyCount,
+				"Extra nodes":   extraNodes,
+			}).Info("Killing a batch of nodes")
+
+			for _, oi := range oldHealthy {
+				err := r.KillInstance(ctx, oi, &decrement)
+				if err != nil {
+					return errors.Wrap(err, "error killing instance")
+				}
+				killed += 1
+				if killed == extraNodes {
+					log.WithFields(log.Fields{
+						"Killed Nodes": killed,
+					}).Info("Already killed number of extra nodes to get back to desired capacity, pausing here")
+					break
+				}
+			}
+			ctx, cancel = r.NewContext()
+			defer cancel()
+			r.Sleep(ctx)
+
+			continue
+		}
+
+		// Not sure how this would happen
+		log.Info("Waiting for transient nodes")
+		r.Sleep(ctx)
+		continue
+	}
+}

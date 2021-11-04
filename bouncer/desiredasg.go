@@ -21,6 +21,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const desiredCapSeparator = ":"
+
 // DesiredASG contains pieces of the ASG as they _should_ be, but at any given time, since we twiddle
 // the desired capacity, may not _actually_ be.
 type DesiredASG struct {
@@ -30,13 +32,13 @@ type DesiredASG struct {
 	PreTerminateCmd *string
 }
 
-// extractDesiredASG takes in a separator-separated string of asgname and desired capacity, and returns a DesiredASG pointer
-func extractDesiredASG(asgItem string, separator string, defaultDesired *int32, preTerminateCmd *string) (*DesiredASG, error) {
-	asgItems := strings.Split(asgItem, separator)
+// ExtractDesiredASG takes in a separator-separated string of asgname and desired capacity, and returns a DesiredASG pointer
+func ExtractDesiredASG(asgItem string, defaultDesired *int32, preTerminateCmd *string) (*DesiredASG, error) {
+	asgItems := strings.Split(asgItem, desiredCapSeparator)
 	var desiredCapacity int32
 
 	if len(asgItems) > 2 || (defaultDesired == nil && len(asgItems) == 1) {
-		return nil, errors.Errorf("Error parsing '%s'.  Must be in format '%s%s%s'", asgItem, "ASG-NAME", separator, "1")
+		return nil, errors.Errorf("Error parsing '%s'.  Must be in format '%s%s%s'", asgItem, "ASG-NAME", desiredCapSeparator, "1")
 	} else if len(asgItems) == 2 {
 		dcraw, err := strconv.ParseInt(asgItems[1], 10, 32)
 		if err != nil {

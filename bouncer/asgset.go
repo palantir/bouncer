@@ -65,12 +65,71 @@ func (a *ASGSet) GetImmutableInstances() []*Instance {
 	return instances
 }
 
+// GetOldImmutableInstances returns only old instances which are in autoscaling events that we can't manipulate by completing lifecycle actions
+func (a *ASGSet) GetOldImmutableInstances() []*Instance {
+	var instances []*Instance
+	for _, asg := range a.ASGs {
+		for _, inst := range asg.Instances {
+			if inst.IsOld &&
+				(inst.ASGInstance.LifecycleState == at.LifecycleStateTerminating ||
+					inst.ASGInstance.LifecycleState == at.LifecycleStatePending ||
+					inst.ASGInstance.LifecycleState == at.LifecycleStateTerminatingProceed) {
+				instances = append(instances, inst)
+			}
+		}
+	}
+
+	return instances
+}
+
 // GetUnhealthyNewInstances returns all instances which are on the latest launch configuration but are unhealthy
 func (a *ASGSet) GetUnhealthyNewInstances() []*Instance {
 	var instances []*Instance
 	for _, asg := range a.ASGs {
 		for _, inst := range asg.Instances {
 			if !inst.IsOld && !inst.IsHealthy {
+				instances = append(instances, inst)
+			}
+		}
+	}
+
+	return instances
+}
+
+// GetHealthyNewInstances returns all instances which are on the latest launch configuration and are Healthy
+func (a *ASGSet) GetHealthyNewInstances() []*Instance {
+	var instances []*Instance
+	for _, asg := range a.ASGs {
+		for _, inst := range asg.Instances {
+			if !inst.IsOld && inst.IsHealthy {
+				instances = append(instances, inst)
+			}
+		}
+	}
+
+	return instances
+}
+
+// GetHealthyOldInstances returns all instances which are old and are Healthy
+func (a *ASGSet) GetHealthyOldInstances() []*Instance {
+	var instances []*Instance
+	for _, asg := range a.ASGs {
+		for _, inst := range asg.Instances {
+			if inst.IsOld && inst.IsHealthy {
+				instances = append(instances, inst)
+			}
+		}
+	}
+
+	return instances
+}
+
+// GetUnHealthyOldInstances returns all instances which are old and are UnHealthy
+func (a *ASGSet) GetUnHealthyOldInstances() []*Instance {
+	var instances []*Instance
+	for _, asg := range a.ASGs {
+		for _, inst := range asg.Instances {
+			if inst.IsOld && !inst.IsHealthy {
 				instances = append(instances, inst)
 			}
 		}
@@ -295,5 +354,15 @@ func (a *ASGSet) IsTransient() bool {
 
 	// Idea here is to catch when the ASG has been set to 4, but currently has 3 nodes in it, and the 4th hasn't even made it to
 	// Pending yet, which would be caught in above IsNewUnhealthy()
+	return a.IsCountMismatch()
+}
+
+// IsStrictTransient is a more narrow definition of transient than above, for use in the new experimental batch modes
+func (a *ASGSet) IsStrictTransient() bool {
+	// Just print these states, but I don't actually want to return true in any of these cases
+	_ = a.IsTerminating()
+	_ = a.IsNewUnhealthy()
+
+	// Actually block if the instance count is mismatched though (note that this will catch IsTerminating as well)
 	return a.IsCountMismatch()
 }
