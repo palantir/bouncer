@@ -169,6 +169,7 @@ func (r *Runner) Run() error {
 
 		// This check already prints statuses of individual nodes
 		if asgSet.IsTransient() {
+			log.Info("Waiting for nodes to settle")
 			r.Sleep(ctx)
 			continue
 		}
