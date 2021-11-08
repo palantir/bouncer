@@ -156,7 +156,7 @@ func (r *Runner) Run() error {
 		toKill := min(finDesiredCapacity-minDesiredCapacity, oldCount)
 
 		// Our exit case - we have exactly the number of nodes we want, they're all new, and they're all InService
-		if oldCount == 0 && totalCount == finDesiredCapacity && newCount == finDesiredCapacity {
+		if oldCount == 0 && totalCount == finDesiredCapacity && unHealthyCount == 0 {
 			if curDesiredCapacity == finDesiredCapacity {
 				log.Info("Didn't find any old instances or ASGs - we're done here!")
 				return nil
@@ -207,15 +207,13 @@ func (r *Runner) Run() error {
 			continue
 		}
 
-		// If we already have too few nodes in play (final des cap + batch size), we wait
+		// If we already have too few nodes in play (final des cap - batch size), we wait
 		if totalCount == finDesiredCapacity && healthyCount == minDesiredCapacity {
 			log.WithFields(log.Fields{
 				"Healthy new":   len(newHealthy),
 				"Healthy old":   len(oldHealthy),
 				"Unhealthy new": len(newUnhealthy),
 				"Unhealthy old": len(oldUnhealthy),
-				"Final descap":  finDesiredCapacity,
-				"Min descap":    minDesiredCapacity,
 			}).Info("Waiting for in-flight nodes to become healthy")
 
 			r.Sleep(ctx)

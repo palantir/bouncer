@@ -157,7 +157,7 @@ func (r *Runner) Run() error {
 		newDesiredCapacity = min(maxDesiredCapacity, finDesiredCapacity+oldCount)
 
 		// Our exit case - we have exactly the number of nodes we want, they're all new, and they're all InService
-		if oldCount == 0 && newCount == finDesiredCapacity {
+		if oldCount == 0 && totalCount == finDesiredCapacity && unHealthyCount == 0 {
 			if curDesiredCapacity == finDesiredCapacity {
 				log.Info("Didn't find any old instances or ASGs - we're done here!")
 				return nil
@@ -215,9 +215,7 @@ func (r *Runner) Run() error {
 				"Healthy old":   len(oldHealthy),
 				"Unhealthy new": len(newUnhealthy),
 				"Unhealthy old": len(oldUnhealthy),
-				"Final descap":  finDesiredCapacity,
-				"Max descap":    maxDesiredCapacity,
-			}).Info("Waiting for total healthy nodes to be >= final capacity and total nodes to be <= max capacity")
+			}).Info("Waiting for in-flight nodes to become healthy")
 
 			r.Sleep(ctx)
 			continue
@@ -269,7 +267,7 @@ func (r *Runner) Run() error {
 		}
 
 		// Terminate some oldies
-		if totalCount >= maxDesiredCapacity || newDesiredCapacity == curDesiredCapacity {
+		if (totalCount >= maxDesiredCapacity || newDesiredCapacity == curDesiredCapacity) && extraNodes > 0 {
 			killed := int32(0)
 
 			log.WithFields(log.Fields{
@@ -298,7 +296,7 @@ func (r *Runner) Run() error {
 			continue
 		}
 
-		// Not sure how this would happen
+		// Can happen while waiting for scale-out to finish
 		log.Info("Waiting for transient nodes")
 		r.Sleep(ctx)
 		continue
