@@ -77,26 +77,27 @@ func (r *Runner) ValidatePrereqs(ctx context.Context) error {
 	for _, actualAsg := range asgSet.ASGs {
 		if actualAsg.DesiredASG.DesiredCapacity != *actualAsg.ASG.DesiredCapacity {
 			log.WithFields(log.Fields{
-				"desired_capacity given":  actualAsg.DesiredASG.DesiredCapacity,
-				"desired_capacity actual": *actualAsg.ASG.DesiredCapacity,
+				"desired capacity given":  actualAsg.DesiredASG.DesiredCapacity,
+				"desired capacity actual": *actualAsg.ASG.DesiredCapacity,
 			}).Error("Desired capacity given must be equal to starting desired_capacity of ASG")
 			return errors.New("error validating ASG state")
 		}
 
 		if actualAsg.DesiredASG.DesiredCapacity < *actualAsg.ASG.MinSize {
 			log.WithFields(log.Fields{
-				"min_size":         *actualAsg.ASG.MinSize,
-				"max_size":         *actualAsg.ASG.MaxSize,
-				"desired_capacity": actualAsg.DesiredASG.DesiredCapacity,
+				"min size":         *actualAsg.ASG.MinSize,
+				"max size":         *actualAsg.ASG.MaxSize,
+				"desired capacity": actualAsg.DesiredASG.DesiredCapacity,
 			}).Error("Desired capacity given must be greater than or equal to min ASG size")
 			return errors.New("error validating ASG state")
 		}
 
 		if *actualAsg.ASG.MinSize > (actualAsg.DesiredASG.DesiredCapacity - r.batchSize) {
 			log.WithFields(log.Fields{
-				"min_size":         *actualAsg.ASG.MinSize,
-				"max_size":         *actualAsg.ASG.MaxSize,
-				"desired_capacity": actualAsg.DesiredASG.DesiredCapacity,
+				"min size":         *actualAsg.ASG.MinSize,
+				"max size":         *actualAsg.ASG.MaxSize,
+				"desired capacity": actualAsg.DesiredASG.DesiredCapacity,
+				"batch size":       r.batchSize,
 			}).Error("Min capacity of ASG must be <= desired capacity - batch size")
 			return errors.New("error validating ASG state")
 		}
