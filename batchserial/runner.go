@@ -151,7 +151,7 @@ func (r *Runner) Run() error {
 		minDesiredCapacity := finDesiredCapacity - batchSize
 		toKill := min(finDesiredCapacity-minDesiredCapacity, oldCount)
 
-		// Clean-out old unhealthy instances in P:W now, as they're just adding confusion
+		// Clean-out old unhealthy instances in P:W now, as they're just wasting time
 		for _, oi := range oldUnhealthy {
 			if oi.ASGInstance.LifecycleState == at.LifecycleStatePendingWait {
 				err := r.KillInstance(ctx, oi, &decrement)
