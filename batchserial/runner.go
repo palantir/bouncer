@@ -132,19 +132,15 @@ func (r *Runner) Run() error {
 		curDesiredCapacity := *asg.ASG.DesiredCapacity
 		finDesiredCapacity := asg.DesiredASG.DesiredCapacity
 
-		newUnhealthy := asgSet.GetUnhealthyNewInstances()
 		oldUnhealthy := asgSet.GetUnHealthyOldInstances()
 		newHealthy := asgSet.GetHealthyNewInstances()
 		oldHealthy := asgSet.GetHealthyOldInstances()
 
 		newCount := int32(len(asgSet.GetNewInstances()))
 		oldCount := int32(len(asgSet.GetOldInstances()))
-		healthyCount := int32(len(newHealthy) + len(oldHealthy))
-		unHealthyCount := int32(len(newUnhealthy) + len(oldUnhealthy))
+		totalCount := newCount + oldCount
 
-		totalCount := unHealthyCount + healthyCount
-
-		newUnhealthyCount := len(newUnhealthy)
+		healthyCount := int32(len(oldHealthy) + len(newHealthy))
 
 		batchSize := r.batchSize
 		if r.batchSize == 0 {
@@ -154,21 +150,6 @@ func (r *Runner) Run() error {
 		minDesiredCapacity := finDesiredCapacity - batchSize
 
 		toKill := min(finDesiredCapacity-minDesiredCapacity, oldCount)
-
-		// Our exit case - we have exactly the number of nodes we want, they're all new, and they're all InService
-		if oldCount == 0 && totalCount == finDesiredCapacity && unHealthyCount == 0 {
-			if curDesiredCapacity == finDesiredCapacity {
-				log.Info("Didn't find any old instances or ASGs - we're done here!")
-				return nil
-			}
-
-			// Not sure how this would happen off-hand?
-			log.WithFields(log.Fields{
-				"Current desired capacity": curDesiredCapacity,
-				"Final desired capacity":   finDesiredCapacity,
-			}).Error("Capacity mismatch")
-			return errors.New("old instance mismatch")
-		}
 
 		// Clean-out old unhealthy instances in P:W now, as they're just adding confusion
 		for _, oi := range oldUnhealthy {
@@ -187,40 +168,27 @@ func (r *Runner) Run() error {
 		}
 
 		// This check already prints statuses of individual nodes
-		if asgSet.IsStrictTransient() {
+		if asgSet.IsTransient() {
 			r.Sleep(ctx)
 			continue
 		}
 
-		// Final wait for new nodes
-		if oldCount == 0 && newUnhealthyCount != 0 && totalCount == finDesiredCapacity {
-			log.Info("Waiting for new nodes to become healthy")
+		// Our exit case - we have exactly the number of nodes we want, they're all new, and they're all InService
+		if oldCount == 0 && totalCount == finDesiredCapacity {
+			if curDesiredCapacity == finDesiredCapacity {
+				log.Info("Didn't find any old instances or ASGs - we're done here!")
+				return nil
+			}
 
-			r.Sleep(ctx)
-			continue
-		}
-
-		// Let's make sure our canary phase is complete
-		if newCount == 1 && newUnhealthyCount == 1 {
-			log.Info("Waiting for canary node to become healthy")
-			r.Sleep(ctx)
-			continue
-		}
-
-		// If we already have too few nodes in play (final des cap - batch size), we wait
-		if totalCount == finDesiredCapacity && healthyCount == minDesiredCapacity {
+			// Not sure how this would happen off-hand?
 			log.WithFields(log.Fields{
-				"Healthy new":   len(newHealthy),
-				"Healthy old":   len(oldHealthy),
-				"Unhealthy new": len(newUnhealthy),
-				"Unhealthy old": len(oldUnhealthy),
-			}).Info("Waiting for in-flight nodes to become healthy")
-
-			r.Sleep(ctx)
-			continue
+				"Current desired capacity": curDesiredCapacity,
+				"Final desired capacity":   finDesiredCapacity,
+			}).Error("Capacity mismatch")
+			return errors.New("old instance mismatch")
 		}
 
-		// If we haven't canaried a new instance yet, let's do the termination piece
+		// If we haven't done the termination piece of canary, let's do that
 		if newCount == 0 && totalCount == finDesiredCapacity {
 			log.Info("Terminating a canary node")
 			oi := asgSet.GetBestOldInstance()
@@ -251,8 +219,8 @@ func (r *Runner) Run() error {
 			continue
 		}
 
-		// Terminate a batch
-		if totalCount == finDesiredCapacity && healthyCount > minDesiredCapacity && toKill > 0 {
+		// Scale-in a batch
+		if totalCount == finDesiredCapacity && toKill > 0 {
 			killed := int32(0)
 
 			log.WithFields(log.Fields{
@@ -282,8 +250,8 @@ func (r *Runner) Run() error {
 			continue
 		}
 
-		// Adding deleted nodes back to get new ones
-		if totalCount == healthyCount && totalCount < finDesiredCapacity {
+		// Scale-out a batch to original size to refresh nodes
+		if totalCount < finDesiredCapacity {
 			err = r.SetDesiredCapacity(ctx, asg, &finDesiredCapacity)
 			if err != nil {
 				return errors.Wrap(err, "error setting desired capacity")
@@ -297,7 +265,7 @@ func (r *Runner) Run() error {
 		}
 
 		// Not sure how this would happen
-		log.Info("Waiting for transient nodes")
+		log.Info("Somehow hit the bottom wait")
 		r.Sleep(ctx)
 		continue
 	}

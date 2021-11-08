@@ -356,13 +356,3 @@ func (a *ASGSet) IsTransient() bool {
 	// Pending yet, which would be caught in above IsNewUnhealthy()
 	return a.IsCountMismatch()
 }
-
-// IsStrictTransient is a more narrow definition of transient than above, for use in the new experimental batch modes
-func (a *ASGSet) IsStrictTransient() bool {
-	// Just print these states, but I don't actually want to return true in any of these cases
-	_ = a.IsTerminating()
-	_ = a.IsNewUnhealthy()
-
-	// Actually block if the instance count is mismatched though (note that this will catch IsTerminating as well)
-	return a.IsCountMismatch()
-}
