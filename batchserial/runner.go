@@ -147,8 +147,8 @@ func (r *Runner) Run() error {
 			batchSize = finDesiredCapacity
 		}
 
+		// Never terminate nodes so that we go below finDesiredCapacity - batchSize number of healthy (InService) machines
 		minDesiredCapacity := finDesiredCapacity - batchSize
-
 		toKill := min(finDesiredCapacity-minDesiredCapacity, oldCount)
 
 		// Clean-out old unhealthy instances in P:W now, as they're just adding confusion
@@ -264,9 +264,14 @@ func (r *Runner) Run() error {
 			continue
 		}
 
-		// Not sure how this would happen
-		log.Info("Somehow hit the bottom wait")
-		r.Sleep(ctx)
-		continue
+		// Not sure how this would happen off-hand?
+		log.WithFields(log.Fields{
+			"Current desired capacity": curDesiredCapacity,
+			"Final desired capacity":   finDesiredCapacity,
+			"Old nodes":                oldCount,
+			"Healthy nodes":            healthyCount,
+			"Nodes To Kill":            toKill,
+		}).Error("Unknown condition hit")
+		return errors.New("undefined error")
 	}
 }

@@ -143,6 +143,7 @@ func (r *Runner) Run() error {
 
 		totalCount := newCount + oldCount
 
+		// Never terminate nodes so that we go below finDesiredCapacity number of healthy (InService) machines
 		extraNodes := healthyCount - finDesiredCapacity
 
 		batchSize := r.batchSize
@@ -258,9 +259,14 @@ func (r *Runner) Run() error {
 			continue
 		}
 
-		// Not sure how this would happen
-		log.Info("Somehow hit the final wait")
-		r.Sleep(ctx)
-		continue
+		// Not sure how this would happen off-hand?
+		log.WithFields(log.Fields{
+			"Current desired capacity": curDesiredCapacity,
+			"Final desired capacity":   finDesiredCapacity,
+			"Old nodes":                oldCount,
+			"Healthy nodes":            healthyCount,
+			"Extra nodes":              extraNodes,
+		}).Error("Unknown condition hit")
+		return errors.New("undefined error")
 	}
 }
