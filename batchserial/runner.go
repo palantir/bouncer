@@ -24,14 +24,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Runner holds data for a particular canary run
-// Note that in the canary case, asgs will always be of length 1
+// Runner holds data for a particular batch-serial run
+// Note that in the batch-serial case, asgs will always be of length 1
 type Runner struct {
 	bouncer.BaseRunner
 	batchSize int32 // This field is set in ValidatePrereqs
 }
 
-// NewRunner instantiates a new canary runner
+// NewRunner instantiates a new batch-serial runner
 func NewRunner(ctx context.Context, opts *bouncer.RunnerOpts) (*Runner, error) {
 	br, err := bouncer.NewBaseRunner(ctx, opts)
 	if err != nil {
@@ -42,7 +42,7 @@ func NewRunner(ctx context.Context, opts *bouncer.RunnerOpts) (*Runner, error) {
 
 	if batchSize == 0 {
 		if len(strings.Split(opts.AsgString, ",")) > 1 {
-			return nil, errors.New("Batch canary mode supports only 1 ASG at a time")
+			return nil, errors.New("Batch serial mode supports only 1 ASG at a time")
 		}
 
 		da, err := bouncer.ExtractDesiredASG(opts.AsgString, nil, nil)
@@ -121,13 +121,13 @@ func (r *Runner) Run() error {
 
 	for {
 		// Rebuild the state of the world every iteration of the loop because instance and ASG statuses are changing
-		log.Debug("Beginning new batch canary run check")
+		log.Debug("Beginning new batch serial run check")
 		asgSet, err := r.NewASGSet(ctx)
 		if err != nil {
 			return errors.Wrap(err, "error building ASGSet")
 		}
 
-		// Since we only support one ASG in canary mode
+		// Since we only support one ASG in batch-serial mode
 		asg := asgSet.ASGs[0]
 		curDesiredCapacity := *asg.ASG.DesiredCapacity
 		finDesiredCapacity := asg.DesiredASG.DesiredCapacity

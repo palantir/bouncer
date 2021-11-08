@@ -24,14 +24,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Runner holds data for a particular canary run
-// Note that in the canary case, asgs will always be of length 1
+// Runner holds data for a particular batch-canary run
+// Note that in the batch-canary case, asgs will always be of length 1
 type Runner struct {
 	bouncer.BaseRunner
 	batchSize int32 // This field is set in ValidatePrereqs
 }
 
-// NewRunner instantiates a new canary runner
+// NewRunner instantiates a new batch-canary runner
 func NewRunner(ctx context.Context, opts *bouncer.RunnerOpts) (*Runner, error) {
 	br, err := bouncer.NewBaseRunner(ctx, opts)
 	if err != nil {
@@ -128,7 +128,7 @@ func (r *Runner) Run() error {
 			return errors.Wrap(err, "error building ASGSet")
 		}
 
-		// Since we only support one ASG in canary mode
+		// Since we only support one ASG in batch-canary mode
 		asg := asgSet.ASGs[0]
 		curDesiredCapacity := *asg.ASG.DesiredCapacity
 		finDesiredCapacity := asg.DesiredASG.DesiredCapacity
