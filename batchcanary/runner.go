@@ -243,7 +243,7 @@ func (r *Runner) Run() error {
 				if err != nil {
 					return errors.Wrap(err, "error killing instance")
 				}
-				killed += 1
+				killed++
 				if killed == extraNodes {
 					log.WithFields(log.Fields{
 						"Killed Nodes": killed,
