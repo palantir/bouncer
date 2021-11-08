@@ -147,12 +147,7 @@ func (r *Runner) Run() error {
 		// Never terminate nodes so that we go below finDesiredCapacity number of healthy (InService) machines
 		extraNodes := healthyCount - finDesiredCapacity
 
-		batchSize := r.batchSize
-		if r.batchSize == 0 {
-			batchSize = finDesiredCapacity
-		}
-
-		maxDesiredCapacity := finDesiredCapacity + batchSize
+		maxDesiredCapacity := finDesiredCapacity + r.batchSize
 		newDesiredCapacity = min(maxDesiredCapacity, finDesiredCapacity+oldCount)
 
 		// Clean-out old unhealthy instances in P:W now, as they're just wasting time

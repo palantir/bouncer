@@ -16,7 +16,6 @@ package batchserial
 
 import (
 	"context"
-	"strings"
 
 	at "github.com/aws/aws-sdk-go-v2/service/autoscaling/types"
 	"github.com/palantir/bouncer/bouncer"
@@ -38,24 +37,9 @@ func NewRunner(ctx context.Context, opts *bouncer.RunnerOpts) (*Runner, error) {
 		return nil, errors.Wrap(err, "error getting base runner")
 	}
 
-	batchSize := *opts.BatchSize
-
-	if batchSize == 0 {
-		if len(strings.Split(opts.AsgString, ",")) > 1 {
-			return nil, errors.New("Batch serial mode supports only 1 ASG at a time")
-		}
-
-		da, err := bouncer.ExtractDesiredASG(opts.AsgString, nil, nil)
-		if err != nil {
-			return nil, err
-		}
-
-		batchSize = da.DesiredCapacity
-	}
-
 	r := Runner{
 		BaseRunner: *br,
-		batchSize:  batchSize,
+		batchSize:  *opts.BatchSize,
 	}
 	return &r, nil
 }
@@ -143,13 +127,8 @@ func (r *Runner) Run() error {
 
 		healthyCount := int32(len(oldHealthy) + len(newHealthy))
 
-		batchSize := r.batchSize
-		if r.batchSize == 0 {
-			batchSize = finDesiredCapacity
-		}
-
 		// Never terminate nodes so that we go below finDesiredCapacity - batchSize number of healthy (InService) machines
-		minDesiredCapacity := finDesiredCapacity - batchSize
+		minDesiredCapacity := finDesiredCapacity - r.batchSize
 		toKill := min(finDesiredCapacity-minDesiredCapacity, oldCount)
 
 		// Clean-out old unhealthy instances in P:W now, as they're just wasting time

@@ -65,23 +65,6 @@ func (a *ASGSet) GetImmutableInstances() []*Instance {
 	return instances
 }
 
-// GetOldImmutableInstances returns only old instances which are in autoscaling events that we can't manipulate by completing lifecycle actions
-func (a *ASGSet) GetOldImmutableInstances() []*Instance {
-	var instances []*Instance
-	for _, asg := range a.ASGs {
-		for _, inst := range asg.Instances {
-			if inst.IsOld &&
-				(inst.ASGInstance.LifecycleState == at.LifecycleStateTerminating ||
-					inst.ASGInstance.LifecycleState == at.LifecycleStatePending ||
-					inst.ASGInstance.LifecycleState == at.LifecycleStateTerminatingProceed) {
-				instances = append(instances, inst)
-			}
-		}
-	}
-
-	return instances
-}
-
 // GetUnhealthyNewInstances returns all instances which are on the latest launch configuration but are unhealthy
 func (a *ASGSet) GetUnhealthyNewInstances() []*Instance {
 	var instances []*Instance
