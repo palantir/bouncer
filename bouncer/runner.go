@@ -48,7 +48,7 @@ type BaseRunner struct {
 }
 
 const (
-	waitBetweenChecks = 3 * time.Second
+	waitBetweenChecks = 15 * time.Second
 
 	asgSeparator = ","
 
