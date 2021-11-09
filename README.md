@@ -78,6 +78,60 @@ Only accepts 1 ASG. In this example, the ASG must, at start time of bouncer, hav
 * Once nodes have settled and we have again 4 healthy nodes, we call terminate on another old node.
 * Once nodes have settled and we have again 4 healthy nodes (3 being new), we call terminate WITH `should-decrement-desired-capacity` to let us go back to our steady-state of 3 nodes.
 
+## New experimental batch modes
+
+Eventually, `batch-serial` and `batch-canary` could potentially replace `serial` and `canary` with their default values. However, given that the logic in the new batch modes is significantly different than the older modes, they're implemented in parallel for now to prevent potential disruptions relying on the existing behaviour.
+
+### Batch-canary
+
+Use-case is, you'd prefer to use canary, but you don't have capacity to double your ASG in the middle phase. Instead, you want to add new nodes in batches as you delete old nodes.
+
+This method takes in a `batch` parameter. Your final desired capacity + `batch` determines the maximum bouncer will ever scale your ASG to. Bouncer will never scale your ASG below your desired capacity.
+
+I.e. the core tenants of batch-canary are:
+
+* Your total `InService` node count will not go below your given desired capacity
+* Your total node count regardless of status will never go above (desired capacity + batch size)
+
+NOTE: You should probably suspend the "AZ Rebalance" process on your ASG so that AWS doesn't violate these contraints either.
+
+EX: You have an ASG of size 4. You don't have enough instance capacity to run 8 instances, but you do have enough to run 6. Invoke bouncer in `batch-canary` with a `batchsize` of `2` to accomplish this. This will
+
+* Bump desired capacity to 5 to create our first "canary" node.
+* Wait for this node to become healthy (`InService`).
+* Kill an old node. We will wait for this node to be completely gone before continuing.
+* Given we just killed a node, desired capacity is back to `4`. Canary phase is done.
+* Set desired capacity to our max size, `6`, which starts two new machines spawning.
+* Wait for these two nodes to become `InService`.
+* Kill 2 old nodes to get us back down to `4` desired capacity. We've now issued kills to 3 old nodes in total.
+* Again wait for the ASG to settle, which means waiting for the nodes we just killed to fully terminate.
+* Given we only have one old node now, we increase our desired capacity only up to 5, to give us one new node.
+* Once this node enters `InService`, we issue the terminate to the final old node.
+* Wait for the old node to totally finish terminating. Done!
+
+### Batch-serial
+
+Use-case is, you'd prefer to use serial, but you have way too many instances so this takes too long. You can't use canary because your desired capacity is also your max capacity for external reasons (perhaps you tie a static EBS volume to every instance in this ASG).
+
+This method takes in a `batch` parameter. `batch` determines the maximum number of instances bouncer will delete at any time from your desired capacity. Bouncer will never scale your ASG above your desired capacity.
+
+I.e. the core tenants of batch-serial are:
+
+* Your total `InService` node count will not go below (desired capacity - batch size)
+* Your total node count regardless of status will never go above your given desired capacity
+
+NOTE: You should probably suspend the "AZ Rebalance" process on your ASG so that AWS doesn't violate these contraints either.
+
+EX: You have an ASG of size 4. You don't want to delete one instance at a time, but two at a time is ok. Set `batch` to `2`. This mode still does canary a single node so you don't potentially batch a huge number of instances that might all fail to boot. This will
+
+* Terminate a single node, waiting for it to be fully destroyed.
+* Increase desired capacity back to original value.
+* Wait for this new node to become healthy. Canary phase is done.
+* Kill up to batchsize nodes, so in this case, `2`. Wait for them to fully die.
+* Increase desired capacity back to original value, and wait for all nodes to come up healthy.
+* Kill last old node, wait for it to fully die.
+* Increase capacity back to original value, and wait for all nodes to become healthy.
+
 ## Force bouncing all nodes
 
 By default, the bouncer will ignore any nodes which are running the same launch template version (or same launch configuration) that's set on their ASG.  If you've made a change external to the launch configuration / template and want the bouncer to start over bouncing all nodes regardless of launch config / template "oldness", you can add the `-f` flag to any of the run types.  This flag marks any node whose launch time is older than the start time of the current bouncer invocation as "out of date", thus bouncing all nodes.

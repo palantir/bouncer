@@ -30,6 +30,7 @@ import (
 type RunnerOpts struct {
 	Noop            bool
 	Force           bool
+	BatchSize       *int32
 	AsgString       string
 	CommandString   string
 	DefaultCapacity *int32
@@ -49,8 +50,7 @@ type BaseRunner struct {
 const (
 	waitBetweenChecks = 15 * time.Second
 
-	asgSeparator        = ","
-	desiredCapSeparator = ":"
+	asgSeparator = ","
 
 	debugTimeFormat = "2006-01-02 15:04:05 MST"
 )
@@ -99,7 +99,7 @@ func getASGList(opts *RunnerOpts) ([]*DesiredASG, error) {
 			command = nil
 		}
 
-		curAsg, err := extractDesiredASG(asgItem, desiredCapSeparator, opts.DefaultCapacity, command)
+		curAsg, err := ExtractDesiredASG(asgItem, opts.DefaultCapacity, command)
 		if err != nil {
 			return nil, errors.Wrap(err, "error parsing ASG item")
 		}

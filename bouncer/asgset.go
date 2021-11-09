@@ -79,6 +79,48 @@ func (a *ASGSet) GetUnhealthyNewInstances() []*Instance {
 	return instances
 }
 
+// GetHealthyNewInstances returns all instances which are on the latest launch configuration and are Healthy
+func (a *ASGSet) GetHealthyNewInstances() []*Instance {
+	var instances []*Instance
+	for _, asg := range a.ASGs {
+		for _, inst := range asg.Instances {
+			if !inst.IsOld && inst.IsHealthy {
+				instances = append(instances, inst)
+			}
+		}
+	}
+
+	return instances
+}
+
+// GetHealthyOldInstances returns all instances which are old and are Healthy
+func (a *ASGSet) GetHealthyOldInstances() []*Instance {
+	var instances []*Instance
+	for _, asg := range a.ASGs {
+		for _, inst := range asg.Instances {
+			if inst.IsOld && inst.IsHealthy {
+				instances = append(instances, inst)
+			}
+		}
+	}
+
+	return instances
+}
+
+// GetUnHealthyOldInstances returns all instances which are old and are UnHealthy
+func (a *ASGSet) GetUnHealthyOldInstances() []*Instance {
+	var instances []*Instance
+	for _, asg := range a.ASGs {
+		for _, inst := range asg.Instances {
+			if inst.IsOld && !inst.IsHealthy {
+				instances = append(instances, inst)
+			}
+		}
+	}
+
+	return instances
+}
+
 // GetTerminatingInstances returns all instances which are in the process of terminating
 func (a *ASGSet) GetTerminatingInstances() []*Instance {
 	var terminatingInstances []*Instance
