@@ -84,7 +84,7 @@ Eventually, `batch-serial` and `batch-canary` could potentially replace `serial`
 
 ### Batch-canary
 
-Use-case is, you'd prefer to use canary, but you don't have capacity (or money) to double your ASG in the middle phase. Instead, you want to add new nodes in batches as you delete old nodes.
+Use-case is, you'd prefer to use canary, but you don't have capacity to double your ASG in the middle phase. Instead, you want to add new nodes in batches as you delete old nodes.
 
 This method takes in a `batch` parameter. Your final desired capacity + `batch` determines the maximum bouncer will ever scale your ASG to. Bouncer will never scale your ASG below your desired capacity.
 
@@ -98,16 +98,16 @@ NOTE: You should probably suspend the "AZ Rebalance" process on your ASG so that
 EX: You have an ASG of size 4. You don't have enough instance capacity to run 8 instances, but you do have enough to run 6. Invoke bouncer in `batch-canary` with a `batchsize` of `2` to accomplish this. This will
 
 * Bump desired capacity to 5 to create our first "canary" node.
-* Wait for this node to become healthy.
-* Kill an old node. Note that we will wait for it to leave `Terminating`, and in this case also wait for `Terminating:Wait` to complete before proceeding. This is because we will wait for the ASG to "settle" to the desired capacity chosen.
+* Wait for this node to become healthy (`InService`).
+* Kill an old node. We will wait for this node to be completely gone before continuing.
 * Given we just killed a node, desired capacity is back to `4`. Canary phase is done.
 * Set desired capacity to our max size, `6`, which starts two new machines spawning.
-* Wait for the highly ephemeral phase of `Pending` to complete, but do NOT wait for `Pending:Wait` to complete.
-* Kill 2 old nodes to get us back down to `4` desired capacity. We've now issued kills to 3 old nodes.
+* Wait for these two nodes to become `InService`.
+* Kill 2 old nodes to get us back down to `4` desired capacity. We've now issued kills to 3 old nodes in total.
 * Again wait for the ASG to settle, which means waiting for the nodes we just killed to fully terminate.
 * Given we only have one old node now, we increase our desired capacity only up to 5, to give us one new node.
-* Once this node leaves `Pending` and enters `Pending:Wait`, issue a terminate to the final old node.
-* Wait for the old node to totally finish terminating, AND wait for all in-flight new nodes (in this case 1) to become `InService` before completing
+* Once this node enters `InService`, we issue the terminate to the final old node.
+* Wait for the old node to totally finish terminating. Done!
 
 ### Batch-serial
 
@@ -126,8 +126,8 @@ EX: You have an ASG of size 4. You don't want to delete one instance at a time, 
 
 * Terminate a single node, waiting for it to be fully destroyed.
 * Increase desired capacity back to original value.
-* Wait for this new node to become healthy.
-* Kill up to batchsize nodes, so in this case, 2. Wait for them to fully die.
+* Wait for this new node to become healthy. Canary phase is done.
+* Kill up to batchsize nodes, so in this case, `2`. Wait for them to fully die.
 * Increase desired capacity back to original value, and wait for all nodes to come up healthy.
 * Kill last old node, wait for it to fully die.
 * Increase capacity back to original value, and wait for all nodes to become healthy.
