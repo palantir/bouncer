@@ -113,7 +113,7 @@ EX: You have an ASG of size 4. You don't have enough instance capacity to run 8 
 
 Use-case is, you'd prefer to use serial, but you have way too many instances so this takes too long. You can't use canary because your desired capacity is also your max capacity for external reasons (perhaps you tie a static EBS volume to every instance in this ASG).
 
-This method takes in a `batch` parameter. Your final desired capacity - `batch` determines the maximum number of instances bouncer will delete at any time. Bouncer will never scale your ASG above your desired capacity.
+This method takes in a `batch` parameter. `batch` determines the maximum number of instances bouncer will delete at any time from your desired capacity. Bouncer will never scale your ASG above your desired capacity.
 
 I.e. the core tenants of batch-serial are:
 
