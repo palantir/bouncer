@@ -132,19 +132,23 @@ func (r *Runner) Run() error {
 		toKill := min(finDesiredCapacity-minDesiredCapacity, oldCount)
 
 		// Clean-out old unhealthy instances in P:W now, as they're just wasting time
+		oldKilled := false
 		for _, oi := range oldUnhealthy {
 			if oi.ASGInstance.LifecycleState == at.LifecycleStatePendingWait {
 				err := r.KillInstance(ctx, oi, &decrement)
 				if err != nil {
 					return errors.Wrap(err, "error killing instance")
 				}
-
-				ctx, cancel = r.NewContext()
-				defer cancel()
-				r.Sleep(ctx)
-
-				continue
+				oldKilled = true
 			}
+		}
+
+		if oldKilled {
+			ctx, cancel = r.NewContext()
+			defer cancel()
+			r.Sleep(ctx)
+
+			continue
 		}
 
 		// This check already prints statuses of individual nodes
@@ -186,8 +190,8 @@ func (r *Runner) Run() error {
 			continue
 		}
 
-		// If we haven't done the new instance piece of canary, let's do that
-		if newCount == 0 && totalCount < finDesiredCapacity {
+		// Scale-out a batch to original size to refresh nodes
+		if totalCount < finDesiredCapacity {
 			err = r.SetDesiredCapacity(ctx, asg, &finDesiredCapacity)
 			if err != nil {
 				return errors.Wrap(err, "error setting desired capacity")
@@ -201,7 +205,7 @@ func (r *Runner) Run() error {
 		}
 
 		// Scale-in a batch
-		if totalCount == finDesiredCapacity && toKill > 0 {
+		if toKill > 0 {
 			killed := int32(0)
 
 			log.WithFields(log.Fields{
@@ -222,20 +226,6 @@ func (r *Runner) Run() error {
 					}).Info("Already killed max number of nodes to get to min capacity, pausing here")
 					break
 				}
-			}
-
-			ctx, cancel = r.NewContext()
-			defer cancel()
-			r.Sleep(ctx)
-
-			continue
-		}
-
-		// Scale-out a batch to original size to refresh nodes
-		if totalCount < finDesiredCapacity {
-			err = r.SetDesiredCapacity(ctx, asg, &finDesiredCapacity)
-			if err != nil {
-				return errors.Wrap(err, "error setting desired capacity")
 			}
 
 			ctx, cancel = r.NewContext()

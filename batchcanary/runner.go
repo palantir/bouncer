@@ -151,19 +151,23 @@ func (r *Runner) Run() error {
 		newDesiredCapacity = min(maxDesiredCapacity, finDesiredCapacity+oldCount)
 
 		// Clean-out old unhealthy instances in P:W now, as they're just wasting time
+		oldKilled := false
 		for _, oi := range oldUnhealthy {
 			if oi.ASGInstance.LifecycleState == at.LifecycleStatePendingWait {
 				err := r.KillInstance(ctx, oi, &decrement)
 				if err != nil {
 					return errors.Wrap(err, "error killing instance")
 				}
-
-				ctx, cancel = r.NewContext()
-				defer cancel()
-				r.Sleep(ctx)
-
-				continue
+				oldKilled = true
 			}
+		}
+
+		if oldKilled {
+			ctx, cancel = r.NewContext()
+			defer cancel()
+			r.Sleep(ctx)
+
+			continue
 		}
 
 		// This check already prints statuses of individual nodes
