@@ -30,6 +30,7 @@ import (
 type RunnerOpts struct {
 	Noop            bool
 	Force           bool
+	Fast            bool
 	BatchSize       *int32
 	AsgString       string
 	CommandString   string

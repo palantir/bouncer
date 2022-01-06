@@ -48,6 +48,7 @@ var fullCmd = &cobra.Command{
 		force := viper.GetBool("full.force")
 		termHook := viper.GetString("terminate-hook")
 		pendHook := viper.GetString("pending-hook")
+		fast := viper.GetBool("full.fast")
 		timeout := timeoutFromViper()
 
 		log.Debugf("Binding vars, got %+v %+v %+v %+v", asgsString, noop, version, commandString)
@@ -58,6 +59,7 @@ var fullCmd = &cobra.Command{
 		opts := bouncer.RunnerOpts{
 			Noop:            noop,
 			Force:           force,
+			Fast:            fast,
 			AsgString:       asgsString,
 			CommandString:   commandString,
 			DefaultCapacity: &defCap,
@@ -110,6 +112,12 @@ func init() {
 
 	fullCmd.Flags().BoolP("force", "f", false, "Force all nodes to be recycled, even if they're running the latest launch config")
 	err = viper.BindPFlag("full.force", fullCmd.Flags().Lookup("force"))
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "Binding PFlag 'force' to viper var 'full.force' failed: %s"))
+	}
+
+	fullCmd.Flags().BoolP("fast", "", false, "Bring down all nodes simultaneously for a faster bounce cycle")
+	err = viper.BindPFlag("full.fast", fullCmd.Flags().Lookup("fast"))
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "Binding PFlag 'force' to viper var 'full.force' failed: %s"))
 	}

@@ -126,17 +126,32 @@ start:
 			set := asgSetWrapper(asg)
 
 			if set.IsOldInstance() {
-				decrement := true
-				err := r.KillInstance(ctx, set.GetBestOldInstance(), &decrement)
-				if err != nil {
-					return errors.Wrap(err, "failed to kill instance")
+				if r.Opts.Fast { // if we're running fast, kill all the old instances at once.
+					for _, instance := range set.GetOldInstances() {
+						decrement := true
+						err := r.KillInstance(ctx, instance, &decrement)
+						if err != nil {
+							return errors.Wrap(err, "failed to kill instance")
+						}
+					}
+					ctx, cancel = r.NewContext()
+					defer cancel()
+					r.Sleep(ctx)
+
+					continue start
+				} else {
+					decrement := true
+					err := r.KillInstance(ctx, set.GetBestOldInstance(), &decrement)
+					if err != nil {
+						return errors.Wrap(err, "failed to kill instance")
+					}
+
+					ctx, cancel = r.NewContext()
+					defer cancel()
+					r.Sleep(ctx)
+
+					continue start
 				}
-
-				ctx, cancel = r.NewContext()
-				defer cancel()
-				r.Sleep(ctx)
-
-				continue start
 			}
 		}
 
