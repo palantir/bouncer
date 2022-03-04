@@ -1,3 +1,6 @@
+<p align="right">
+<a href="https://autorelease.general.dmz.palantir.tech/palantir/bouncer"><img src="https://img.shields.io/badge/Perform%20an-Autorelease-success.svg" alt="Autorelease"></a>
+
 # bouncer
 
 Bouncer rebuilds your running infrastructure to make sure it matches the infrastructure you've defined in code. All releases can be downloaded from [the release page](https://github.com/palantir/bouncer/releases), or automated in your code via bouncerw (see below).
