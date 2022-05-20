@@ -1,3 +1,36 @@
+# v1.23.2 (2022-05-17)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.23.1 (2022-04-25)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.23.0 (2022-04-19)
+
+* **Feature**: EC2 Auto Scaling now adds default instance warm-up times for all scaling activities, health check replacements, and other replacement events in the Auto Scaling instance lifecycle.
+
+# v1.22.4 (2022-03-30)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.22.3 (2022-03-24)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.22.2 (2022-03-23)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.22.1 (2022-03-08.2)
+
+* No change notes available for this release.
+
+# v1.22.0 (2022-03-08)
+
+* **Feature**: Updated `github.com/aws/smithy-go` to latest version
+* **Dependency Update**: Updated to the latest SDK module versions
+
 # v1.21.0 (2022-02-24.2)
 
 * **Feature**: API client updated

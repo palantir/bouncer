@@ -168,6 +168,18 @@ type AddIpamOperatingRegion struct {
 	noSmithyDocumentSerde
 }
 
+// Describes an additional detail for a path analysis.
+type AdditionalDetail struct {
+
+	// The information type.
+	AdditionalDetailType *string
+
+	// The path component.
+	Component *AnalysisComponent
+
+	noSmithyDocumentSerde
+}
+
 // An entry for a prefix list.
 type AddPrefixListEntry struct {
 
@@ -392,7 +404,7 @@ type AnalysisRouteTableRoute struct {
 	// The ID of a network interface.
 	NetworkInterfaceId *string
 
-	// Describes how the route was created. The following are possible values:
+	// Describes how the route was created. The following are the possible values:
 	//
 	// *
 	// CreateRouteTable - The route was automatically created when the route table was
@@ -419,7 +431,7 @@ type AnalysisSecurityGroupRule struct {
 	// The IPv4 address range, in CIDR notation.
 	Cidr *string
 
-	// The direction. The following are possible values:
+	// The direction. The following are the possible values:
 	//
 	// * egress
 	//
@@ -2571,6 +2583,24 @@ type DnsEntry struct {
 	noSmithyDocumentSerde
 }
 
+// Describes the DNS options for an endpoint.
+type DnsOptions struct {
+
+	// The DNS records created for the endpoint.
+	DnsRecordIpType DnsRecordIpType
+
+	noSmithyDocumentSerde
+}
+
+// Describes the DNS options for an endpoint.
+type DnsOptionsSpecification struct {
+
+	// The DNS records created for the endpoint.
+	DnsRecordIpType DnsRecordIpType
+
+	noSmithyDocumentSerde
+}
+
 // Information about the DNS server to be used.
 type DnsServersOptionsModifyStructure struct {
 
@@ -2641,7 +2671,9 @@ type EbsBlockDevice struct {
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_RequestSpotInstances.html).
 	KmsKeyId *string
 
-	// The ARN of the Outpost on which the snapshot is stored.
+	// The ARN of the Outpost on which the snapshot is stored. This parameter is only
+	// supported on BlockDeviceMapping objects called by  CreateImage
+	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateImage.html).
 	OutpostArn *string
 
 	// The ID of the snapshot.
@@ -3149,7 +3181,7 @@ type Explanation struct {
 	// The destination VPC.
 	DestinationVpc *AnalysisComponent
 
-	// The direction. The following are possible values:
+	// The direction. The following are the possible values:
 	//
 	// * egress
 	//
@@ -3236,6 +3268,18 @@ type Explanation struct {
 
 	// The route table for the subnet.
 	SubnetRouteTable *AnalysisComponent
+
+	// The transit gateway.
+	TransitGateway *AnalysisComponent
+
+	// The transit gateway attachment.
+	TransitGatewayAttachment *AnalysisComponent
+
+	// The transit gateway route table.
+	TransitGatewayRouteTable *AnalysisComponent
+
+	// The transit gateway route table route.
+	TransitGatewayRouteTableRoute *TransitGatewayRouteTableRoute
 
 	// The component VPC.
 	Vpc *AnalysisComponent
@@ -4283,6 +4327,10 @@ type Host struct {
 	// group; otherwise, it is not.
 	MemberOfServiceLinkedResourceGroup *bool
 
+	// The Amazon Resource Name (ARN) of the Amazon Web Services Outpost on which the
+	// Dedicated Host is allocated.
+	OutpostArn *string
+
 	// The ID of the Amazon Web Services account that owns the Dedicated Host.
 	OwnerId *string
 
@@ -4602,6 +4650,12 @@ type Image struct {
 
 	// Any tags assigned to the image.
 	Tags []Tag
+
+	// If the image is configured for NitroTPM support, the value is v2.0. For more
+	// information, see NitroTPM
+	// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nitrotpm.html) in the
+	// Amazon Elastic Compute Cloud User Guide.
+	TpmSupport TpmSupportValues
 
 	// The operation of the Amazon EC2 instance and the billing code that is associated
 	// with the AMI. usageOperation corresponds to the lineitem/Operation
@@ -4987,6 +5041,9 @@ type Instance struct {
 	// The license configurations for the instance.
 	Licenses []LicenseConfiguration
 
+	// Provides information on the recovery and maintenance options of your instance.
+	MaintenanceOptions *InstanceMaintenanceOptions
+
 	// The metadata options for the instance.
 	MetadataOptions *InstanceMetadataOptionsResponse
 
@@ -5076,6 +5133,12 @@ type Instance struct {
 
 	// Any tags assigned to the instance.
 	Tags []Tag
+
+	// If the instance is configured for NitroTPM support, the value is v2.0. For more
+	// information, see NitroTPM
+	// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nitrotpm.html) in the
+	// Amazon EC2 User Guide.
+	TpmSupport *string
 
 	// The usage operation value for the instance. For more information, see AMI
 	// billing information fields
@@ -5369,6 +5432,27 @@ type InstanceIpv6Prefix struct {
 
 	// One or more IPv6 prefixes assigned to the network interface.
 	Ipv6Prefix *string
+
+	noSmithyDocumentSerde
+}
+
+// The maintenance options for the instance.
+type InstanceMaintenanceOptions struct {
+
+	// Provides information on the current automatic recovery behavior of your
+	// instance.
+	AutoRecovery InstanceAutoRecoveryState
+
+	noSmithyDocumentSerde
+}
+
+// The maintenance options for the instance.
+type InstanceMaintenanceOptionsRequest struct {
+
+	// Disables the automatic recovery behavior of your instance or sets it to default.
+	// For more information, see Simplified automatic recovery
+	// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html#instance-configuration-recovery).
+	AutoRecovery InstanceAutoRecoveryState
 
 	noSmithyDocumentSerde
 }
@@ -5912,7 +5996,9 @@ type InstanceRequirements struct {
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_GetSpotPlacementScores.html)
 	// and GetInstanceTypesFromInstanceRequirements
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_GetInstanceTypesFromInstanceRequirements.html).
-	// Default: 20
+	// If you set TargetCapacityUnitType to vcpu or memory-mib, the price protection
+	// threshold is applied based on the per-vCPU or per-memory price instead of the
+	// per-instance price. Default: 20
 	OnDemandMaxPricePercentageOverLowestPrice *int32
 
 	// Indicates whether instance types must support hibernation for On-Demand
@@ -5931,7 +6017,9 @@ type InstanceRequirements struct {
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_GetSpotPlacementScores.html)
 	// and GetInstanceTypesFromInstanceRequirements
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_GetInstanceTypesFromInstanceRequirements.html).
-	// Default: 100
+	// If you set TargetCapacityUnitType to vcpu or memory-mib, the price protection
+	// threshold is applied based on the per-vCPU or per-memory price instead of the
+	// per-instance price. Default: 100
 	SpotMaxPricePercentageOverLowestPrice *int32
 
 	// The minimum and maximum amount of total local storage, in GB. Default: No
@@ -6152,7 +6240,9 @@ type InstanceRequirementsRequest struct {
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_GetSpotPlacementScores.html)
 	// and GetInstanceTypesFromInstanceRequirements
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_GetInstanceTypesFromInstanceRequirements.html).
-	// Default: 20
+	// If you set TargetCapacityUnitType to vcpu or memory-mib, the price protection
+	// threshold is applied based on the per-vCPU or per-memory price instead of the
+	// per-instance price. Default: 20
 	OnDemandMaxPricePercentageOverLowestPrice *int32
 
 	// Indicates whether instance types must support hibernation for On-Demand
@@ -6171,7 +6261,9 @@ type InstanceRequirementsRequest struct {
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_GetSpotPlacementScores.html)
 	// and GetInstanceTypesFromInstanceRequirements
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_GetInstanceTypesFromInstanceRequirements.html).
-	// Default: 100
+	// If you set TargetCapacityUnitType to vcpu or memory-mib, the price protection
+	// threshold is applied based on the per-vCPU or per-memory price instead of the
+	// per-instance price. Default: 100
 	SpotMaxPricePercentageOverLowestPrice *int32
 
 	// The minimum and maximum amount of total local storage, in GB. Default: No
@@ -6921,7 +7013,7 @@ type IpamResourceTag struct {
 // intended for all public IP address space. Scopes enable you to reuse IP
 // addresses across multiple unconnected networks without causing IP address
 // overlap or conflict. For more information, see How IPAM works in the Amazon VPC
-// IPAM User Guide
+// IPAM User Guide.
 type IpamScope struct {
 
 	// The description of the scope.
@@ -7132,6 +7224,14 @@ type Ipv6Range struct {
 // Describes a key pair.
 type KeyPairInfo struct {
 
+	// If you used Amazon EC2 to create the key pair, this is the date and time when
+	// the key was created, in ISO 8601 date-time format
+	// (https://www.iso.org/iso-8601-date-and-time-format.html), in the UTC time zone.
+	// If you imported an existing key pair to Amazon EC2, this is the date and time
+	// the key was imported, in ISO 8601 date-time format
+	// (https://www.iso.org/iso-8601-date-and-time-format.html), in the UTC time zone.
+	CreateTime *time.Time
+
 	// If you used CreateKeyPair to create the key pair:
 	//
 	// * For RSA key pairs, the key
@@ -7162,6 +7262,9 @@ type KeyPairInfo struct {
 
 	// The type of key pair.
 	KeyType KeyType
+
+	// The public key material.
+	PublicKey *string
 
 	// Any tags applied to the key pair.
 	Tags []Tag
@@ -7236,7 +7339,7 @@ type LaunchSpecification struct {
 	// The ID of the AMI.
 	ImageId *string
 
-	// The instance type.
+	// The instance type. Only one instance type can be specified.
 	InstanceType InstanceType
 
 	// The ID of the kernel.
@@ -7628,6 +7731,26 @@ type LaunchTemplateIamInstanceProfileSpecificationRequest struct {
 
 	// The name of the instance profile.
 	Name *string
+
+	noSmithyDocumentSerde
+}
+
+// The maintenance options of your instance.
+type LaunchTemplateInstanceMaintenanceOptions struct {
+
+	// Disables the automatic recovery behavior of your instance or sets it to default.
+	AutoRecovery LaunchTemplateAutoRecoveryState
+
+	noSmithyDocumentSerde
+}
+
+// The maintenance options of your instance.
+type LaunchTemplateInstanceMaintenanceOptionsRequest struct {
+
+	// Disables the automatic recovery behavior of your instance or sets it to default.
+	// For more information, see Simplified automatic recovery
+	// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html#instance-configuration-recovery).
+	AutoRecovery LaunchTemplateAutoRecoveryState
 
 	noSmithyDocumentSerde
 }
@@ -9563,6 +9686,9 @@ type PathComponent struct {
 	// The network ACL rule.
 	AclRule *AnalysisAclRule
 
+	// The additional details.
+	AdditionalDetails []AdditionalDetail
+
 	// The resource to which the path component is attached.
 	AttachedTo *AnalysisComponent
 
@@ -9592,6 +9718,12 @@ type PathComponent struct {
 
 	// The subnet.
 	Subnet *AnalysisComponent
+
+	// Describes a path component.
+	TransitGateway *AnalysisComponent
+
+	// The route in a transit gateway route table.
+	TransitGatewayRouteTableRoute *TransitGatewayRouteTableRoute
 
 	// The component VPC.
 	Vpc *AnalysisComponent
@@ -10068,11 +10200,7 @@ type PrivateDnsDetails struct {
 	noSmithyDocumentSerde
 }
 
-// Information about the private DNS name for the service endpoint. For more
-// information about these parameters, see VPC Endpoint Service Private DNS Name
-// Verification
-// (https://docs.aws.amazon.com/vpc/latest/userguide/ndpoint-services-dns-validation.html)
-// in the Amazon Virtual Private Cloud User Guide.
+// Information about the private DNS name for the service endpoint.
 type PrivateDnsNameConfiguration struct {
 
 	// The name of the record subdomain the service provider needs to create. The
@@ -10488,7 +10616,8 @@ type RequestIpamResourceTag struct {
 	noSmithyDocumentSerde
 }
 
-// The information to include in the launch template.
+// The information to include in the launch template. You must specify at least one
+// parameter for the launch template data.
 type RequestLaunchTemplateData struct {
 
 	// The block device mapping.
@@ -10588,6 +10717,9 @@ type RequestLaunchTemplateData struct {
 	// The license configurations.
 	LicenseSpecifications []LaunchTemplateLicenseConfigurationRequest
 
+	// The maintenance options for the instance.
+	MaintenanceOptions *LaunchTemplateInstanceMaintenanceOptionsRequest
+
 	// The metadata options for the instance. For more information, see Instance
 	// metadata and user data
 	// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html)
@@ -10675,7 +10807,7 @@ type RequestSpotLaunchSpecification struct {
 	// The ID of the AMI.
 	ImageId *string
 
-	// The instance type.
+	// The instance type. Only one instance type can be specified.
 	InstanceType InstanceType
 
 	// The ID of the kernel.
@@ -11179,6 +11311,9 @@ type ResponseLaunchTemplateData struct {
 
 	// The license configurations.
 	LicenseSpecifications []LaunchTemplateLicenseConfiguration
+
+	// The maintenance options for your instance.
+	MaintenanceOptions *LaunchTemplateInstanceMaintenanceOptions
 
 	// The metadata options for the instance. For more information, see Instance
 	// metadata and user data
@@ -12002,6 +12137,9 @@ type ServiceConfiguration struct {
 	// The type of service.
 	ServiceType []ServiceTypeDetail
 
+	// The supported IP address types.
+	SupportedIpAddressTypes []ServiceConnectivityType
+
 	// Any tags assigned to the service.
 	Tags []Tag
 
@@ -12049,6 +12187,9 @@ type ServiceDetail struct {
 
 	// The type of service.
 	ServiceType []ServiceTypeDetail
+
+	// The supported IP address types.
+	SupportedIpAddressTypes []ServiceConnectivityType
 
 	// Any tags assigned to the service.
 	Tags []Tag
@@ -12816,10 +12957,10 @@ type SpotInstanceRequest struct {
 	// The maximum price per hour that you are willing to pay for a Spot Instance.
 	SpotPrice *string
 
-	// The state of the Spot Instance request. Spot status information helps track your
-	// Spot Instance requests. For more information, see Spot status
-	// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-bid-status.html) in
-	// the Amazon EC2 User Guide for Linux Instances.
+	// The state of the Spot Instance request. Spot request status information helps
+	// track your Spot Instance requests. For more information, see Spot request status
+	// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-request-status.html)
+	// in the Amazon EC2 User Guide for Linux Instances.
 	State SpotInstanceState
 
 	// The status code and status message describing the Spot Instance request.
@@ -12865,8 +13006,8 @@ type SpotInstanceStateFault struct {
 // Describes the status of a Spot Instance request.
 type SpotInstanceStatus struct {
 
-	// The status code. For a list of status codes, see Spot status codes
-	// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-bid-status.html#spot-instance-bid-status-understand)
+	// The status code. For a list of status codes, see Spot request status codes
+	// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-request-status.html#spot-instance-request-status-understand)
 	// in the Amazon EC2 User Guide for Linux Instances.
 	Code *string
 
@@ -13836,6 +13977,9 @@ type TrafficMirrorTarget struct {
 	// Information about the Traffic Mirror target.
 	Description *string
 
+	// The ID of the Gateway Load Balancer endpoint.
+	GatewayLoadBalancerEndpointId *string
+
 	// The network interface ID that is attached to the target.
 	NetworkInterfaceId *string
 
@@ -14538,6 +14682,37 @@ type TransitGatewayRouteTablePropagation struct {
 
 	// The ID of the attachment.
 	TransitGatewayAttachmentId *string
+
+	noSmithyDocumentSerde
+}
+
+// Describes a route in a transit gateway route table.
+type TransitGatewayRouteTableRoute struct {
+
+	// The ID of the route attachment.
+	AttachmentId *string
+
+	// The CIDR block used for destination matches.
+	DestinationCidr *string
+
+	// The ID of the prefix list.
+	PrefixListId *string
+
+	// The ID of the resource for the route attachment.
+	ResourceId *string
+
+	// The resource type for the route attachment.
+	ResourceType *string
+
+	// The route origin. The following are the possible values:
+	//
+	// * static
+	//
+	// * propagated
+	RouteOrigin *string
+
+	// The state of the route.
+	State *string
 
 	noSmithyDocumentSerde
 }
@@ -15266,23 +15441,29 @@ type VpcClassicLink struct {
 // Describes a VPC endpoint.
 type VpcEndpoint struct {
 
-	// The date and time that the VPC endpoint was created.
+	// The date and time that the endpoint was created.
 	CreationTimestamp *time.Time
 
 	// (Interface endpoint) The DNS entries for the endpoint.
 	DnsEntries []DnsEntry
 
+	// The DNS options for the endpoint.
+	DnsOptions *DnsOptions
+
 	// (Interface endpoint) Information about the security groups that are associated
 	// with the network interface.
 	Groups []SecurityGroupIdentifier
 
-	// The last error that occurred for VPC endpoint.
+	// The IP address type for the endpoint.
+	IpAddressType IpAddressType
+
+	// The last error that occurred for endpoint.
 	LastError *LastError
 
 	// (Interface endpoint) One or more network interfaces for the endpoint.
 	NetworkInterfaceIds []string
 
-	// The ID of the Amazon Web Services account that owns the VPC endpoint.
+	// The ID of the Amazon Web Services account that owns the endpoint.
 	OwnerId *string
 
 	// The policy document associated with the endpoint, if applicable.
@@ -15292,7 +15473,7 @@ type VpcEndpoint struct {
 	// hosted zone.
 	PrivateDnsEnabled *bool
 
-	// Indicates whether the VPC endpoint is being managed by its service.
+	// Indicates whether the endpoint is being managed by its service.
 	RequesterManaged *bool
 
 	// (Gateway endpoint) One or more route tables associated with the endpoint.
@@ -15301,16 +15482,16 @@ type VpcEndpoint struct {
 	// The name of the service to which the endpoint is associated.
 	ServiceName *string
 
-	// The state of the VPC endpoint.
+	// The state of the endpoint.
 	State State
 
-	// (Interface endpoint) One or more subnets in which the endpoint is located.
+	// (Interface endpoint) The subnets for the endpoint.
 	SubnetIds []string
 
-	// Any tags assigned to the VPC endpoint.
+	// Any tags assigned to the endpoint.
 	Tags []Tag
 
-	// The ID of the VPC endpoint.
+	// The ID of the endpoint.
 	VpcEndpointId *string
 
 	// The type of endpoint.
@@ -15333,6 +15514,9 @@ type VpcEndpointConnection struct {
 
 	// The Amazon Resource Names (ARNs) of the Gateway Load Balancers for the service.
 	GatewayLoadBalancerArns []string
+
+	// The IP address type for the endpoint.
+	IpAddressType IpAddressType
 
 	// The Amazon Resource Names (ARNs) of the network load balancers for the service.
 	NetworkLoadBalancerArns []string
