@@ -2298,6 +2298,7 @@ const (
 	InstanceAttributeNameSriovNetSupport                   InstanceAttributeName = "sriovNetSupport"
 	InstanceAttributeNameEnaSupport                        InstanceAttributeName = "enaSupport"
 	InstanceAttributeNameEnclaveOptions                    InstanceAttributeName = "enclaveOptions"
+	InstanceAttributeNameDisableApiStop                    InstanceAttributeName = "disableApiStop"
 )
 
 // Values returns all known values for InstanceAttributeName. Note that this can be
@@ -2320,6 +2321,7 @@ func (InstanceAttributeName) Values() []InstanceAttributeName {
 		"sriovNetSupport",
 		"enaSupport",
 		"enclaveOptions",
+		"disableApiStop",
 	}
 }
 
@@ -3110,6 +3112,17 @@ const (
 	InstanceTypeI4i8xlarge      InstanceType = "i4i.8xlarge"
 	InstanceTypeI4i16xlarge     InstanceType = "i4i.16xlarge"
 	InstanceTypeI4i32xlarge     InstanceType = "i4i.32xlarge"
+	InstanceTypeI4iMetal        InstanceType = "i4i.metal"
+	InstanceTypeX2idnMetal      InstanceType = "x2idn.metal"
+	InstanceTypeX2iednMetal     InstanceType = "x2iedn.metal"
+	InstanceTypeC7gMedium       InstanceType = "c7g.medium"
+	InstanceTypeC7gLarge        InstanceType = "c7g.large"
+	InstanceTypeC7gXlarge       InstanceType = "c7g.xlarge"
+	InstanceTypeC7g2xlarge      InstanceType = "c7g.2xlarge"
+	InstanceTypeC7g4xlarge      InstanceType = "c7g.4xlarge"
+	InstanceTypeC7g8xlarge      InstanceType = "c7g.8xlarge"
+	InstanceTypeC7g12xlarge     InstanceType = "c7g.12xlarge"
+	InstanceTypeC7g16xlarge     InstanceType = "c7g.16xlarge"
 )
 
 // Values returns all known values for InstanceType. Note that this can be expanded
@@ -3631,6 +3644,17 @@ func (InstanceType) Values() []InstanceType {
 		"i4i.8xlarge",
 		"i4i.16xlarge",
 		"i4i.32xlarge",
+		"i4i.metal",
+		"x2idn.metal",
+		"x2iedn.metal",
+		"c7g.medium",
+		"c7g.large",
+		"c7g.xlarge",
+		"c7g.2xlarge",
+		"c7g.4xlarge",
+		"c7g.8xlarge",
+		"c7g.12xlarge",
+		"c7g.16xlarge",
 	}
 }
 
