@@ -234,11 +234,18 @@ func (r *Runner) Run() error {
 		if extraNodes > 0 {
 			killed := int32(0)
 
-			log.WithFields(log.Fields{
+			l := log.WithFields(log.Fields{
 				"Old nodes":     oldCount,
 				"Healthy nodes": healthyCount,
 				"Extra nodes":   extraNodes,
-			}).Info("Killing a batch of nodes")
+			})
+
+			if len(oldHealthy) == 0 {
+				l.Error("We have extra nodes but no old nodes, something other than bouncer is probably altering the ASG")
+				return errors.New("ASG mutation error")
+			}
+
+			l.Info("Killing a batch of nodes")
 
 			for _, oi := range oldHealthy {
 				err := r.KillInstance(ctx, oi, &decrement)
