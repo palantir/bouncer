@@ -3145,6 +3145,7 @@ const (
 	InstanceTypeC7g8xlarge      InstanceType = "c7g.8xlarge"
 	InstanceTypeC7g12xlarge     InstanceType = "c7g.12xlarge"
 	InstanceTypeC7g16xlarge     InstanceType = "c7g.16xlarge"
+	InstanceTypeMac2Metal       InstanceType = "mac2.metal"
 )
 
 // Values returns all known values for InstanceType. Note that this can be expanded
@@ -3677,6 +3678,7 @@ func (InstanceType) Values() []InstanceType {
 		"c7g.8xlarge",
 		"c7g.12xlarge",
 		"c7g.16xlarge",
+		"mac2.metal",
 	}
 }
 
@@ -5322,6 +5324,9 @@ const (
 	ResourceTypeVpnConnection                                          ResourceType = "vpn-connection"
 	ResourceTypeVpnGateway                                             ResourceType = "vpn-gateway"
 	ResourceTypeVpcFlowLog                                             ResourceType = "vpc-flow-log"
+	ResourceTypeCapacityReservationFleet                               ResourceType = "capacity-reservation-fleet"
+	ResourceTypeTrafficMirrorFilterRule                                ResourceType = "traffic-mirror-filter-rule"
+	ResourceTypeVpcEndpointConnectionDeviceType                        ResourceType = "vpc-endpoint-connection-device-type"
 )
 
 // Values returns all known values for ResourceType. Note that this can be expanded
@@ -5399,6 +5404,9 @@ func (ResourceType) Values() []ResourceType {
 		"vpn-connection",
 		"vpn-gateway",
 		"vpc-flow-log",
+		"capacity-reservation-fleet",
+		"traffic-mirror-filter-rule",
+		"vpc-endpoint-connection-device-type",
 	}
 }
 

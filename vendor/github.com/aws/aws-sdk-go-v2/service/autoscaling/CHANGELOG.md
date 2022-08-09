@@ -1,3 +1,15 @@
+# v1.23.8 (2022-08-08)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.23.7 (2022-08-01)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.23.6 (2022-07-25)
+
+* **Documentation**: Documentation update for Amazon EC2 Auto Scaling.
+
 # v1.23.5 (2022-07-05)
 
 * **Dependency Update**: Updated to the latest SDK module versions
