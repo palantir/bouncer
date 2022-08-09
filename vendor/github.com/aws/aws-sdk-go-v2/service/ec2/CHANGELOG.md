@@ -1,3 +1,27 @@
+# v1.51.2 (2022-08-08)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.51.1 (2022-08-01)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.51.0 (2022-07-29)
+
+* **Feature**: Documentation updates for Amazon EC2.
+
+# v1.50.1 (2022-07-28)
+
+* **Documentation**: Documentation updates for VM Import/Export.
+
+# v1.50.0 (2022-07-22)
+
+* **Feature**: Added support for EC2 M1 Mac instances. For more information, please visit aws.amazon.com/mac.
+
+# v1.49.1 (2022-07-18)
+
+* **Documentation**: Documentation updates for Amazon EC2.
+
 # v1.49.0 (2022-07-14)
 
 * **Feature**: This release adds flow logs for Transit Gateway to  allow customers to gain deeper visibility and insights into network traffic through their Transit Gateways.
