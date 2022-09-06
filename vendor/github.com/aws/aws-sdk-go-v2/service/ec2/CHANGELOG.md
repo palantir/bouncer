@@ -1,3 +1,39 @@
+# v1.54.4 (2022-09-02)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.54.3 (2022-08-31)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.54.2 (2022-08-30)
+
+* No change notes available for this release.
+
+# v1.54.1 (2022-08-29)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.54.0 (2022-08-22)
+
+* **Feature**: R6a instances are powered by 3rd generation AMD EPYC (Milan) processors delivering all-core turbo frequency of 3.6 GHz. C6id, M6id, and R6id instances are powered by 3rd generation Intel Xeon Scalable processor (Ice Lake) delivering all-core turbo frequency of 3.5 GHz.
+
+# v1.53.0 (2022-08-18)
+
+* **Feature**: This release adds support for VPN log options , a new feature allowing S2S VPN connections to send IKE activity logs to CloudWatch Logs
+
+# v1.52.1 (2022-08-11)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.52.0 (2022-08-10)
+
+* **Feature**: This release adds support for excluding specific data (non-root) volumes from multi-volume snapshot sets created from instances.
+
+# v1.51.3 (2022-08-09)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
 # v1.51.2 (2022-08-08)
 
 * **Dependency Update**: Updated to the latest SDK module versions

@@ -1,3 +1,31 @@
+# v1.11.21 (2022-09-02)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.11.20 (2022-08-31)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.11.19 (2022-08-30)
+
+* **Documentation**: Documentation updates for the AWS IAM Identity Center Portal CLI Reference.
+
+# v1.11.18 (2022-08-29)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.11.17 (2022-08-15)
+
+* **Documentation**: Documentation updates to reflect service rename - AWS IAM Identity Center (successor to AWS Single Sign-On)
+
+# v1.11.16 (2022-08-11)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.11.15 (2022-08-09)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
 # v1.11.14 (2022-08-08)
 
 * **Documentation**: Documentation updates to reflect service rename - AWS IAM Identity Center (successor to AWS Single Sign-On)
