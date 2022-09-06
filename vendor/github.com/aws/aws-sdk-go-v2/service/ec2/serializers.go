@@ -34930,6 +34930,28 @@ func awsEc2query_serializeDocumentClientVpnSecurityGroupIdSet(v []string, value 
 	return nil
 }
 
+func awsEc2query_serializeDocumentCloudWatchLogOptionsSpecification(v *types.CloudWatchLogOptionsSpecification, value query.Value) error {
+	object := value.Object()
+	_ = object
+
+	if v.LogEnabled != nil {
+		objectKey := object.Key("LogEnabled")
+		objectKey.Boolean(*v.LogEnabled)
+	}
+
+	if v.LogGroupArn != nil {
+		objectKey := object.Key("LogGroupArn")
+		objectKey.String(*v.LogGroupArn)
+	}
+
+	if v.LogOutputFormat != nil {
+		objectKey := object.Key("LogOutputFormat")
+		objectKey.String(*v.LogOutputFormat)
+	}
+
+	return nil
+}
+
 func awsEc2query_serializeDocumentCoipPoolIdSet(v []string, value query.Value) error {
 	if len(v) == 0 {
 		return nil
@@ -37147,6 +37169,13 @@ func awsEc2query_serializeDocumentInstanceSpecification(v *types.InstanceSpecifi
 		objectKey.Boolean(*v.ExcludeBootVolume)
 	}
 
+	if v.ExcludeDataVolumeIds != nil {
+		objectKey := object.FlatKey("ExcludeDataVolumeId")
+		if err := awsEc2query_serializeDocumentVolumeIdStringList(v.ExcludeDataVolumeIds, objectKey); err != nil {
+			return err
+		}
+	}
+
 	if v.InstanceId != nil {
 		objectKey := object.Key("InstanceId")
 		objectKey.String(*v.InstanceId)
@@ -38722,6 +38751,13 @@ func awsEc2query_serializeDocumentModifyVpnTunnelOptionsSpecification(v *types.M
 	if v.IKEVersions != nil {
 		objectKey := object.FlatKey("IKEVersion")
 		if err := awsEc2query_serializeDocumentIKEVersionsRequestList(v.IKEVersions, objectKey); err != nil {
+			return err
+		}
+	}
+
+	if v.LogOptions != nil {
+		objectKey := object.Key("LogOptions")
+		if err := awsEc2query_serializeDocumentVpnTunnelLogOptionsSpecification(v.LogOptions, objectKey); err != nil {
 			return err
 		}
 	}
@@ -42770,6 +42806,20 @@ func awsEc2query_serializeDocumentVpnGatewayIdStringList(v []string, value query
 	return nil
 }
 
+func awsEc2query_serializeDocumentVpnTunnelLogOptionsSpecification(v *types.VpnTunnelLogOptionsSpecification, value query.Value) error {
+	object := value.Object()
+	_ = object
+
+	if v.CloudWatchLogOptions != nil {
+		objectKey := object.Key("CloudWatchLogOptions")
+		if err := awsEc2query_serializeDocumentCloudWatchLogOptionsSpecification(v.CloudWatchLogOptions, objectKey); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func awsEc2query_serializeDocumentVpnTunnelOptionsSpecification(v *types.VpnTunnelOptionsSpecification, value query.Value) error {
 	object := value.Object()
 	_ = object
@@ -42787,6 +42837,13 @@ func awsEc2query_serializeDocumentVpnTunnelOptionsSpecification(v *types.VpnTunn
 	if v.IKEVersions != nil {
 		objectKey := object.FlatKey("IKEVersion")
 		if err := awsEc2query_serializeDocumentIKEVersionsRequestList(v.IKEVersions, objectKey); err != nil {
+			return err
+		}
+	}
+
+	if v.LogOptions != nil {
+		objectKey := object.Key("LogOptions")
+		if err := awsEc2query_serializeDocumentVpnTunnelLogOptionsSpecification(v.LogOptions, objectKey); err != nil {
 			return err
 		}
 	}
