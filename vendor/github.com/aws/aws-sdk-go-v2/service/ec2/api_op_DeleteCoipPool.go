@@ -11,38 +11,28 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Creates a default VPC with a size /16 IPv4 CIDR block and a default subnet in
-// each Availability Zone. For more information about the components of a default
-// VPC, see Default VPC and default subnets
-// (https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) in the
-// Amazon Virtual Private Cloud User Guide. You cannot specify the components of
-// the default VPC yourself. If you deleted your previous default VPC, you can
-// create a default VPC. You cannot have more than one default VPC per Region. If
-// your account supports EC2-Classic, you cannot use this action to create a
-// default VPC in a Region that supports EC2-Classic. If you want a default VPC in
-// a Region that supports EC2-Classic, see "I really want a default VPC for my
-// existing EC2 account. Is that possible?" in the Default VPCs FAQ
-// (http://aws.amazon.com/vpc/faqs/#Default_VPCs). We are retiring EC2-Classic. We
-// recommend that you migrate from EC2-Classic to a VPC. For more information, see
-// Migrate from EC2-Classic to a VPC
-// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/vpc-migrate.html) in the
-// Amazon Elastic Compute Cloud User Guide.
-func (c *Client) CreateDefaultVpc(ctx context.Context, params *CreateDefaultVpcInput, optFns ...func(*Options)) (*CreateDefaultVpcOutput, error) {
+// Deletes a pool of customer-owned IP (CoIP) addresses.
+func (c *Client) DeleteCoipPool(ctx context.Context, params *DeleteCoipPoolInput, optFns ...func(*Options)) (*DeleteCoipPoolOutput, error) {
 	if params == nil {
-		params = &CreateDefaultVpcInput{}
+		params = &DeleteCoipPoolInput{}
 	}
 
-	result, metadata, err := c.invokeOperation(ctx, "CreateDefaultVpc", params, optFns, c.addOperationCreateDefaultVpcMiddlewares)
+	result, metadata, err := c.invokeOperation(ctx, "DeleteCoipPool", params, optFns, c.addOperationDeleteCoipPoolMiddlewares)
 	if err != nil {
 		return nil, err
 	}
 
-	out := result.(*CreateDefaultVpcOutput)
+	out := result.(*DeleteCoipPoolOutput)
 	out.ResultMetadata = metadata
 	return out, nil
 }
 
-type CreateDefaultVpcInput struct {
+type DeleteCoipPoolInput struct {
+
+	// The ID of the CoIP pool that you want to delete.
+	//
+	// This member is required.
+	CoipPoolId *string
 
 	// Checks whether you have the required permissions for the action, without
 	// actually making the request, and provides an error response. If you have the
@@ -53,10 +43,10 @@ type CreateDefaultVpcInput struct {
 	noSmithyDocumentSerde
 }
 
-type CreateDefaultVpcOutput struct {
+type DeleteCoipPoolOutput struct {
 
-	// Information about the VPC.
-	Vpc *types.Vpc
+	// Describes a customer-owned address pool.
+	CoipPool *types.CoipPool
 
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -64,12 +54,12 @@ type CreateDefaultVpcOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (c *Client) addOperationCreateDefaultVpcMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	err = stack.Serialize.Add(&awsEc2query_serializeOpCreateDefaultVpc{}, middleware.After)
+func (c *Client) addOperationDeleteCoipPoolMiddlewares(stack *middleware.Stack, options Options) (err error) {
+	err = stack.Serialize.Add(&awsEc2query_serializeOpDeleteCoipPool{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	err = stack.Deserialize.Add(&awsEc2query_deserializeOpCreateDefaultVpc{}, middleware.After)
+	err = stack.Deserialize.Add(&awsEc2query_deserializeOpDeleteCoipPool{}, middleware.After)
 	if err != nil {
 		return err
 	}
@@ -109,7 +99,10 @@ func (c *Client) addOperationCreateDefaultVpcMiddlewares(stack *middleware.Stack
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
-	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opCreateDefaultVpc(options.Region), middleware.Before); err != nil {
+	if err = addOpDeleteCoipPoolValidationMiddleware(stack); err != nil {
+		return err
+	}
+	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opDeleteCoipPool(options.Region), middleware.Before); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -124,11 +117,11 @@ func (c *Client) addOperationCreateDefaultVpcMiddlewares(stack *middleware.Stack
 	return nil
 }
 
-func newServiceMetadataMiddleware_opCreateDefaultVpc(region string) *awsmiddleware.RegisterServiceMetadata {
+func newServiceMetadataMiddleware_opDeleteCoipPool(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
 		SigningName:   "ec2",
-		OperationName: "CreateDefaultVpc",
+		OperationName: "DeleteCoipPool",
 	}
 }

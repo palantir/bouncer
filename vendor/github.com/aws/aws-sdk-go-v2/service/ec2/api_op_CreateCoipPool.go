@@ -11,38 +11,28 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Creates a default VPC with a size /16 IPv4 CIDR block and a default subnet in
-// each Availability Zone. For more information about the components of a default
-// VPC, see Default VPC and default subnets
-// (https://docs.aws.amazon.com/vpc/latest/userguide/default-vpc.html) in the
-// Amazon Virtual Private Cloud User Guide. You cannot specify the components of
-// the default VPC yourself. If you deleted your previous default VPC, you can
-// create a default VPC. You cannot have more than one default VPC per Region. If
-// your account supports EC2-Classic, you cannot use this action to create a
-// default VPC in a Region that supports EC2-Classic. If you want a default VPC in
-// a Region that supports EC2-Classic, see "I really want a default VPC for my
-// existing EC2 account. Is that possible?" in the Default VPCs FAQ
-// (http://aws.amazon.com/vpc/faqs/#Default_VPCs). We are retiring EC2-Classic. We
-// recommend that you migrate from EC2-Classic to a VPC. For more information, see
-// Migrate from EC2-Classic to a VPC
-// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/vpc-migrate.html) in the
-// Amazon Elastic Compute Cloud User Guide.
-func (c *Client) CreateDefaultVpc(ctx context.Context, params *CreateDefaultVpcInput, optFns ...func(*Options)) (*CreateDefaultVpcOutput, error) {
+// Creates a pool of customer-owned IP (CoIP) addresses.
+func (c *Client) CreateCoipPool(ctx context.Context, params *CreateCoipPoolInput, optFns ...func(*Options)) (*CreateCoipPoolOutput, error) {
 	if params == nil {
-		params = &CreateDefaultVpcInput{}
+		params = &CreateCoipPoolInput{}
 	}
 
-	result, metadata, err := c.invokeOperation(ctx, "CreateDefaultVpc", params, optFns, c.addOperationCreateDefaultVpcMiddlewares)
+	result, metadata, err := c.invokeOperation(ctx, "CreateCoipPool", params, optFns, c.addOperationCreateCoipPoolMiddlewares)
 	if err != nil {
 		return nil, err
 	}
 
-	out := result.(*CreateDefaultVpcOutput)
+	out := result.(*CreateCoipPoolOutput)
 	out.ResultMetadata = metadata
 	return out, nil
 }
 
-type CreateDefaultVpcInput struct {
+type CreateCoipPoolInput struct {
+
+	// The ID of the local gateway route table.
+	//
+	// This member is required.
+	LocalGatewayRouteTableId *string
 
 	// Checks whether you have the required permissions for the action, without
 	// actually making the request, and provides an error response. If you have the
@@ -50,13 +40,16 @@ type CreateDefaultVpcInput struct {
 	// UnauthorizedOperation.
 	DryRun *bool
 
+	// The tags to assign to the CoIP address pool.
+	TagSpecifications []types.TagSpecification
+
 	noSmithyDocumentSerde
 }
 
-type CreateDefaultVpcOutput struct {
+type CreateCoipPoolOutput struct {
 
-	// Information about the VPC.
-	Vpc *types.Vpc
+	// Describes a customer-owned address pool.
+	CoipPool *types.CoipPool
 
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -64,12 +57,12 @@ type CreateDefaultVpcOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (c *Client) addOperationCreateDefaultVpcMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	err = stack.Serialize.Add(&awsEc2query_serializeOpCreateDefaultVpc{}, middleware.After)
+func (c *Client) addOperationCreateCoipPoolMiddlewares(stack *middleware.Stack, options Options) (err error) {
+	err = stack.Serialize.Add(&awsEc2query_serializeOpCreateCoipPool{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	err = stack.Deserialize.Add(&awsEc2query_deserializeOpCreateDefaultVpc{}, middleware.After)
+	err = stack.Deserialize.Add(&awsEc2query_deserializeOpCreateCoipPool{}, middleware.After)
 	if err != nil {
 		return err
 	}
@@ -109,7 +102,10 @@ func (c *Client) addOperationCreateDefaultVpcMiddlewares(stack *middleware.Stack
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
-	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opCreateDefaultVpc(options.Region), middleware.Before); err != nil {
+	if err = addOpCreateCoipPoolValidationMiddleware(stack); err != nil {
+		return err
+	}
+	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opCreateCoipPool(options.Region), middleware.Before); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -124,11 +120,11 @@ func (c *Client) addOperationCreateDefaultVpcMiddlewares(stack *middleware.Stack
 	return nil
 }
 
-func newServiceMetadataMiddleware_opCreateDefaultVpc(region string) *awsmiddleware.RegisterServiceMetadata {
+func newServiceMetadataMiddleware_opCreateCoipPool(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
 		SigningName:   "ec2",
-		OperationName: "CreateDefaultVpc",
+		OperationName: "CreateCoipPool",
 	}
 }
