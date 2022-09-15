@@ -11,40 +11,33 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Creates a static route for the specified local gateway route table. You must
-// specify one of the following targets:
-//
-// * LocalGatewayVirtualInterfaceGroupId
-//
-// *
-// NetworkInterfaceId
-func (c *Client) CreateLocalGatewayRoute(ctx context.Context, params *CreateLocalGatewayRouteInput, optFns ...func(*Options)) (*CreateLocalGatewayRouteOutput, error) {
+// Creates a local gateway route table virtual interface group association.
+func (c *Client) CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation(ctx context.Context, params *CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationInput, optFns ...func(*Options)) (*CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationOutput, error) {
 	if params == nil {
-		params = &CreateLocalGatewayRouteInput{}
+		params = &CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationInput{}
 	}
 
-	result, metadata, err := c.invokeOperation(ctx, "CreateLocalGatewayRoute", params, optFns, c.addOperationCreateLocalGatewayRouteMiddlewares)
+	result, metadata, err := c.invokeOperation(ctx, "CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation", params, optFns, c.addOperationCreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationMiddlewares)
 	if err != nil {
 		return nil, err
 	}
 
-	out := result.(*CreateLocalGatewayRouteOutput)
+	out := result.(*CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationOutput)
 	out.ResultMetadata = metadata
 	return out, nil
 }
 
-type CreateLocalGatewayRouteInput struct {
-
-	// The CIDR range used for destination matches. Routing decisions are based on the
-	// most specific match.
-	//
-	// This member is required.
-	DestinationCidrBlock *string
+type CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationInput struct {
 
 	// The ID of the local gateway route table.
 	//
 	// This member is required.
 	LocalGatewayRouteTableId *string
+
+	// The ID of the local gateway route table virtual interface group association.
+	//
+	// This member is required.
+	LocalGatewayVirtualInterfaceGroupId *string
 
 	// Checks whether you have the required permissions for the action, without
 	// actually making the request, and provides an error response. If you have the
@@ -52,19 +45,18 @@ type CreateLocalGatewayRouteInput struct {
 	// UnauthorizedOperation.
 	DryRun *bool
 
-	// The ID of the virtual interface group.
-	LocalGatewayVirtualInterfaceGroupId *string
-
-	// The ID of the network interface.
-	NetworkInterfaceId *string
+	// The tags assigned to the local gateway route table virtual interface group
+	// association.
+	TagSpecifications []types.TagSpecification
 
 	noSmithyDocumentSerde
 }
 
-type CreateLocalGatewayRouteOutput struct {
+type CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationOutput struct {
 
-	// Information about the route.
-	Route *types.LocalGatewayRoute
+	// Describes an association between a local gateway route table and a virtual
+	// interface group.
+	LocalGatewayRouteTableVirtualInterfaceGroupAssociation *types.LocalGatewayRouteTableVirtualInterfaceGroupAssociation
 
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -72,12 +64,12 @@ type CreateLocalGatewayRouteOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (c *Client) addOperationCreateLocalGatewayRouteMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	err = stack.Serialize.Add(&awsEc2query_serializeOpCreateLocalGatewayRoute{}, middleware.After)
+func (c *Client) addOperationCreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationMiddlewares(stack *middleware.Stack, options Options) (err error) {
+	err = stack.Serialize.Add(&awsEc2query_serializeOpCreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	err = stack.Deserialize.Add(&awsEc2query_deserializeOpCreateLocalGatewayRoute{}, middleware.After)
+	err = stack.Deserialize.Add(&awsEc2query_deserializeOpCreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation{}, middleware.After)
 	if err != nil {
 		return err
 	}
@@ -117,10 +109,10 @@ func (c *Client) addOperationCreateLocalGatewayRouteMiddlewares(stack *middlewar
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
-	if err = addOpCreateLocalGatewayRouteValidationMiddleware(stack); err != nil {
+	if err = addOpCreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationValidationMiddleware(stack); err != nil {
 		return err
 	}
-	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opCreateLocalGatewayRoute(options.Region), middleware.Before); err != nil {
+	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opCreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation(options.Region), middleware.Before); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -135,11 +127,11 @@ func (c *Client) addOperationCreateLocalGatewayRouteMiddlewares(stack *middlewar
 	return nil
 }
 
-func newServiceMetadataMiddleware_opCreateLocalGatewayRoute(region string) *awsmiddleware.RegisterServiceMetadata {
+func newServiceMetadataMiddleware_opCreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
 		SigningName:   "ec2",
-		OperationName: "CreateLocalGatewayRoute",
+		OperationName: "CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation",
 	}
 }
