@@ -216,6 +216,22 @@ func (AllocationStrategy) Values() []AllocationStrategy {
 	}
 }
 
+type AllocationType string
+
+// Enum values for AllocationType
+const (
+	AllocationTypeUsed AllocationType = "used"
+)
+
+// Values returns all known values for AllocationType. Note that this can be
+// expanded in the future, and so it is only as up to date as the client. The
+// ordering of this slice is not guaranteed to be stable across updates.
+func (AllocationType) Values() []AllocationType {
+	return []AllocationType{
+		"used",
+	}
+}
+
 type AllowsMultipleInstanceTypes string
 
 // Enum values for AllowsMultipleInstanceTypes
@@ -5428,7 +5444,9 @@ const (
 	ResourceTypeVolume                                                 ResourceType = "volume"
 	ResourceTypeVpc                                                    ResourceType = "vpc"
 	ResourceTypeVpcEndpoint                                            ResourceType = "vpc-endpoint"
+	ResourceTypeVpcEndpointConnection                                  ResourceType = "vpc-endpoint-connection"
 	ResourceTypeVpcEndpointService                                     ResourceType = "vpc-endpoint-service"
+	ResourceTypeVpcEndpointServicePermission                           ResourceType = "vpc-endpoint-service-permission"
 	ResourceTypeVpcPeeringConnection                                   ResourceType = "vpc-peering-connection"
 	ResourceTypeVpnConnection                                          ResourceType = "vpn-connection"
 	ResourceTypeVpnGateway                                             ResourceType = "vpn-gateway"
@@ -5510,7 +5528,9 @@ func (ResourceType) Values() []ResourceType {
 		"volume",
 		"vpc",
 		"vpc-endpoint",
+		"vpc-endpoint-connection",
 		"vpc-endpoint-service",
+		"vpc-endpoint-service-permission",
 		"vpc-peering-connection",
 		"vpn-connection",
 		"vpn-gateway",
