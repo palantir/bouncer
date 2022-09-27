@@ -50715,6 +50715,19 @@ func awsEc2query_deserializeDocumentAnalysisRouteTableRoute(v **types.AnalysisRo
 				sv.Origin = ptr.String(xtv)
 			}
 
+		case strings.EqualFold("state", t.Name.Local):
+			val, err := decoder.Value()
+			if err != nil {
+				return err
+			}
+			if val == nil {
+				break
+			}
+			{
+				xtv := string(val)
+				sv.State = ptr.String(xtv)
+			}
+
 		case strings.EqualFold("transitGatewayId", t.Name.Local):
 			val, err := decoder.Value()
 			if err != nil {
@@ -62026,7 +62039,7 @@ func awsEc2query_deserializeDocumentEbsBlockDevice(v **types.EbsBlockDevice, dec
 				sv.Iops = ptr.Int32(int32(i64))
 			}
 
-		case strings.EqualFold("KmsKeyId", t.Name.Local):
+		case strings.EqualFold("kmsKeyId", t.Name.Local):
 			val, err := decoder.Value()
 			if err != nil {
 				return err
@@ -64286,6 +64299,32 @@ func awsEc2query_deserializeDocumentExplanation(v **types.Explanation, decoder s
 				return err
 			}
 
+		case strings.EqualFold("componentAccount", t.Name.Local):
+			val, err := decoder.Value()
+			if err != nil {
+				return err
+			}
+			if val == nil {
+				break
+			}
+			{
+				xtv := string(val)
+				sv.ComponentAccount = ptr.String(xtv)
+			}
+
+		case strings.EqualFold("componentRegion", t.Name.Local):
+			val, err := decoder.Value()
+			if err != nil {
+				return err
+			}
+			if val == nil {
+				break
+			}
+			{
+				xtv := string(val)
+				sv.ComponentRegion = ptr.String(xtv)
+			}
+
 		case strings.EqualFold("customerGateway", t.Name.Local):
 			nodeDecoder := smithyxml.WrapNodeDecoder(decoder.Decoder, t)
 			if err := awsEc2query_deserializeDocumentAnalysisComponent(&sv.CustomerGateway, nodeDecoder); err != nil {
@@ -66342,6 +66381,19 @@ func awsEc2query_deserializeDocumentFleetLaunchTemplateOverrides(v **types.Fleet
 			{
 				xtv := string(val)
 				sv.AvailabilityZone = ptr.String(xtv)
+			}
+
+		case strings.EqualFold("imageId", t.Name.Local):
+			val, err := decoder.Value()
+			if err != nil {
+				return err
+			}
+			if val == nil {
+				break
+			}
+			{
+				xtv := string(val)
+				sv.ImageId = ptr.String(xtv)
 			}
 
 		case strings.EqualFold("instanceRequirements", t.Name.Local):
@@ -91687,6 +91739,18 @@ func awsEc2query_deserializeDocumentPathComponent(v **types.PathComponent, decod
 		case strings.EqualFold("destinationVpc", t.Name.Local):
 			nodeDecoder := smithyxml.WrapNodeDecoder(decoder.Decoder, t)
 			if err := awsEc2query_deserializeDocumentAnalysisComponent(&sv.DestinationVpc, nodeDecoder); err != nil {
+				return err
+			}
+
+		case strings.EqualFold("elasticLoadBalancerListener", t.Name.Local):
+			nodeDecoder := smithyxml.WrapNodeDecoder(decoder.Decoder, t)
+			if err := awsEc2query_deserializeDocumentAnalysisComponent(&sv.ElasticLoadBalancerListener, nodeDecoder); err != nil {
+				return err
+			}
+
+		case strings.EqualFold("explanationSet", t.Name.Local):
+			nodeDecoder := smithyxml.WrapNodeDecoder(decoder.Decoder, t)
+			if err := awsEc2query_deserializeDocumentExplanationList(&sv.Explanations, nodeDecoder); err != nil {
 				return err
 			}
 

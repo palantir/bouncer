@@ -1,3 +1,16 @@
+# v1.60.0 (2022-09-23)
+
+* **Feature**: Letting external AWS customers provide ImageId as a Launch Template override in FleetLaunchTemplateOverridesRequest
+
+# v1.59.0 (2022-09-22)
+
+* **Feature**: Documentation updates for Amazon EC2.
+
+# v1.58.0 (2022-09-20)
+
+* **Feature**: This release adds support for blocked paths to Amazon VPC Reachability Analyzer.
+* **Dependency Update**: Updated to the latest SDK module versions
+
 # v1.57.0 (2022-09-19)
 
 * **Feature**: This release adds CapacityAllocations field to DescribeCapacityReservations
