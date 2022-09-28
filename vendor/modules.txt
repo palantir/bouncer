@@ -1,4 +1,4 @@
-# github.com/aws/aws-sdk-go-v2 v1.16.15
+# github.com/aws/aws-sdk-go-v2 v1.16.16
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2
 github.com/aws/aws-sdk-go-v2/aws
@@ -19,10 +19,10 @@ github.com/aws/aws-sdk-go-v2/internal/sdkio
 github.com/aws/aws-sdk-go-v2/internal/strings
 github.com/aws/aws-sdk-go-v2/internal/sync/singleflight
 github.com/aws/aws-sdk-go-v2/internal/timeconv
-# github.com/aws/aws-sdk-go-v2/config v1.17.6
+# github.com/aws/aws-sdk-go-v2/config v1.17.7
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/config
-# github.com/aws/aws-sdk-go-v2/credentials v1.12.19
+# github.com/aws/aws-sdk-go-v2/credentials v1.12.20
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/credentials
 github.com/aws/aws-sdk-go-v2/credentials/ec2rolecreds
@@ -31,43 +31,43 @@ github.com/aws/aws-sdk-go-v2/credentials/endpointcreds/internal/client
 github.com/aws/aws-sdk-go-v2/credentials/processcreds
 github.com/aws/aws-sdk-go-v2/credentials/ssocreds
 github.com/aws/aws-sdk-go-v2/credentials/stscreds
-# github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.16
+# github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.17
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/feature/ec2/imds
 github.com/aws/aws-sdk-go-v2/feature/ec2/imds/internal/config
-# github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.22
+# github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.23
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/internal/configsources
-# github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.16
+# github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.17
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2
-# github.com/aws/aws-sdk-go-v2/internal/ini v1.3.23
+# github.com/aws/aws-sdk-go-v2/internal/ini v1.3.24
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/internal/ini
-# github.com/aws/aws-sdk-go-v2/service/autoscaling v1.23.15
+# github.com/aws/aws-sdk-go-v2/service/autoscaling v1.23.16
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/service/autoscaling
 github.com/aws/aws-sdk-go-v2/service/autoscaling/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/autoscaling/types
-# github.com/aws/aws-sdk-go-v2/service/ec2 v1.57.0
+# github.com/aws/aws-sdk-go-v2/service/ec2 v1.60.0
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/service/ec2
 github.com/aws/aws-sdk-go-v2/service/ec2/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/ec2/types
-# github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.16
+# github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.17
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url
-# github.com/aws/aws-sdk-go-v2/service/sso v1.11.22
+# github.com/aws/aws-sdk-go-v2/service/sso v1.11.23
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/service/sso
 github.com/aws/aws-sdk-go-v2/service/sso/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/sso/types
-# github.com/aws/aws-sdk-go-v2/service/ssooidc v1.13.4
+# github.com/aws/aws-sdk-go-v2/service/ssooidc v1.13.5
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/service/ssooidc
 github.com/aws/aws-sdk-go-v2/service/ssooidc/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/ssooidc/types
-# github.com/aws/aws-sdk-go-v2/service/sts v1.16.18
+# github.com/aws/aws-sdk-go-v2/service/sts v1.16.19
 ## explicit; go 1.15
 github.com/aws/aws-sdk-go-v2/service/sts
 github.com/aws/aws-sdk-go-v2/service/sts/internal/endpoints
