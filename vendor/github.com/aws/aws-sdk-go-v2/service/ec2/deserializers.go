@@ -70559,6 +70559,19 @@ func awsEc2query_deserializeDocumentImage(v **types.Image, decoder smithyxml.Nod
 				sv.ImageType = types.ImageTypeValues(xtv)
 			}
 
+		case strings.EqualFold("imdsSupport", t.Name.Local):
+			val, err := decoder.Value()
+			if err != nil {
+				return err
+			}
+			if val == nil {
+				break
+			}
+			{
+				xtv := string(val)
+				sv.ImdsSupport = types.ImdsSupportValues(xtv)
+			}
+
 		case strings.EqualFold("kernelId", t.Name.Local):
 			val, err := decoder.Value()
 			if err != nil {
@@ -133033,6 +133046,12 @@ func awsEc2query_deserializeOpDocumentDescribeImageAttributeOutput(v **DescribeI
 				sv.ImageId = ptr.String(xtv)
 			}
 
+		case strings.EqualFold("imdsSupport", t.Name.Local):
+			nodeDecoder := smithyxml.WrapNodeDecoder(decoder.Decoder, t)
+			if err := awsEc2query_deserializeDocumentAttributeValue(&sv.ImdsSupport, nodeDecoder); err != nil {
+				return err
+			}
+
 		case strings.EqualFold("kernel", t.Name.Local):
 			nodeDecoder := smithyxml.WrapNodeDecoder(decoder.Decoder, t)
 			if err := awsEc2query_deserializeDocumentAttributeValue(&sv.KernelId, nodeDecoder); err != nil {
@@ -137754,6 +137773,12 @@ func awsEc2query_deserializeOpDocumentDescribeVpcAttributeOutput(v **DescribeVpc
 		case strings.EqualFold("enableDnsSupport", t.Name.Local):
 			nodeDecoder := smithyxml.WrapNodeDecoder(decoder.Decoder, t)
 			if err := awsEc2query_deserializeDocumentAttributeBooleanValue(&sv.EnableDnsSupport, nodeDecoder); err != nil {
+				return err
+			}
+
+		case strings.EqualFold("enableNetworkAddressUsageMetrics", t.Name.Local):
+			nodeDecoder := smithyxml.WrapNodeDecoder(decoder.Decoder, t)
+			if err := awsEc2query_deserializeDocumentAttributeBooleanValue(&sv.EnableNetworkAddressUsageMetrics, nodeDecoder); err != nil {
 				return err
 			}
 
