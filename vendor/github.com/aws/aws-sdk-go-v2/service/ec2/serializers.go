@@ -58253,6 +58253,13 @@ func awsEc2query_serializeOpDocumentModifyVpcAttributeInput(v *ModifyVpcAttribut
 		}
 	}
 
+	if v.EnableNetworkAddressUsageMetrics != nil {
+		objectKey := object.Key("EnableNetworkAddressUsageMetrics")
+		if err := awsEc2query_serializeDocumentAttributeBooleanValue(v.EnableNetworkAddressUsageMetrics, objectKey); err != nil {
+			return err
+		}
+	}
+
 	if v.VpcId != nil {
 		objectKey := object.Key("VpcId")
 		objectKey.String(*v.VpcId)
@@ -59005,6 +59012,11 @@ func awsEc2query_serializeOpDocumentRegisterImageInput(v *RegisterImageInput, va
 	if v.ImageLocation != nil {
 		objectKey := object.Key("ImageLocation")
 		objectKey.String(*v.ImageLocation)
+	}
+
+	if len(v.ImdsSupport) > 0 {
+		objectKey := object.Key("ImdsSupport")
+		objectKey.String(string(v.ImdsSupport))
 	}
 
 	if v.KernelId != nil {
