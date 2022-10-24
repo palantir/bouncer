@@ -1,3 +1,11 @@
+# v1.63.2 (2022-10-21)
+
+* **Dependency Update**: Updated to the latest SDK module versions
+
+# v1.63.1 (2022-10-06)
+
+* No change notes available for this release.
+
 # v1.63.0 (2022-10-04)
 
 * **Feature**: Added EnableNetworkAddressUsageMetrics flag for ModifyVpcAttribute, DescribeVpcAttribute APIs.
