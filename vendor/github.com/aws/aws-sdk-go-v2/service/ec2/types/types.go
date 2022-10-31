@@ -283,6 +283,36 @@ type AddressAttribute struct {
 	noSmithyDocumentSerde
 }
 
+// Details on the Elastic IP address transfer. For more information, see Transfer
+// Elastic IP addresses
+// (https://docs.aws.amazon.com/vpc/latest/userguide/vpc-eips.html#transfer-EIPs-intro)
+// in the Amazon Virtual Private Cloud User Guide.
+type AddressTransfer struct {
+
+	// The Elastic IP address transfer status.
+	AddressTransferStatus AddressTransferStatus
+
+	// The allocation ID of an Elastic IP address.
+	AllocationId *string
+
+	// The Elastic IP address being transferred.
+	PublicIp *string
+
+	// The ID of the account that you want to transfer the Elastic IP address to.
+	TransferAccountId *string
+
+	// The timestamp when the Elastic IP address transfer was accepted.
+	TransferOfferAcceptedTimestamp *time.Time
+
+	// The timestamp when the Elastic IP address transfer expired. When the source
+	// account starts the transfer, the transfer account has seven hours to allocate
+	// the Elastic IP address to complete the transfer, or the Elastic IP address will
+	// return to its original owner.
+	TransferOfferExpirationTimestamp *time.Time
+
+	noSmithyDocumentSerde
+}
+
 // Describes a principal.
 type AllowedPrincipal struct {
 
@@ -10843,11 +10873,21 @@ type ReplaceRootVolumeTask struct {
 	// The time the task completed.
 	CompleteTime *string
 
+	// Indicates whether the original root volume is to be deleted after the root
+	// volume replacement task completes.
+	DeleteReplacedRootVolume *bool
+
+	// The ID of the AMI used to create the replacement root volume.
+	ImageId *string
+
 	// The ID of the instance for which the root volume replacement task was created.
 	InstanceId *string
 
 	// The ID of the root volume replacement task.
 	ReplaceRootVolumeTaskId *string
+
+	// The ID of the snapshot used to create the replacement root volume.
+	SnapshotId *string
 
 	// The time the task was started.
 	StartTime *string
