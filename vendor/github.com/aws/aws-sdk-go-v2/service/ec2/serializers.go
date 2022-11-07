@@ -2641,6 +2641,70 @@ func (m *awsEc2query_serializeOpCancelExportTask) HandleSerialize(ctx context.Co
 	return next.HandleSerialize(ctx, in)
 }
 
+type awsEc2query_serializeOpCancelImageLaunchPermission struct {
+}
+
+func (*awsEc2query_serializeOpCancelImageLaunchPermission) ID() string {
+	return "OperationSerializer"
+}
+
+func (m *awsEc2query_serializeOpCancelImageLaunchPermission) HandleSerialize(ctx context.Context, in middleware.SerializeInput, next middleware.SerializeHandler) (
+	out middleware.SerializeOutput, metadata middleware.Metadata, err error,
+) {
+	request, ok := in.Request.(*smithyhttp.Request)
+	if !ok {
+		return out, metadata, &smithy.SerializationError{Err: fmt.Errorf("unknown transport type %T", in.Request)}
+	}
+
+	input, ok := in.Parameters.(*CancelImageLaunchPermissionInput)
+	_ = input
+	if !ok {
+		return out, metadata, &smithy.SerializationError{Err: fmt.Errorf("unknown input parameters type %T", in.Parameters)}
+	}
+
+	operationPath := "/"
+	if len(request.Request.URL.Path) == 0 {
+		request.Request.URL.Path = operationPath
+	} else {
+		request.Request.URL.Path = path.Join(request.Request.URL.Path, operationPath)
+		if request.Request.URL.Path != "/" && operationPath[len(operationPath)-1] == '/' {
+			request.Request.URL.Path += "/"
+		}
+	}
+	request.Request.Method = "POST"
+	httpBindingEncoder, err := httpbinding.NewEncoder(request.URL.Path, request.URL.RawQuery, request.Header)
+	if err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+	httpBindingEncoder.SetHeader("Content-Type").String("application/x-www-form-urlencoded")
+
+	bodyWriter := bytes.NewBuffer(nil)
+	bodyEncoder := query.NewEncoder(bodyWriter)
+	body := bodyEncoder.Object()
+	body.Key("Action").String("CancelImageLaunchPermission")
+	body.Key("Version").String("2016-11-15")
+
+	if err := awsEc2query_serializeOpDocumentCancelImageLaunchPermissionInput(input, bodyEncoder.Value); err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+
+	err = bodyEncoder.Encode()
+	if err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+
+	if request, err = request.SetStream(bytes.NewReader(bodyWriter.Bytes())); err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+
+	if request.Request, err = httpBindingEncoder.Encode(request.Request); err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+	in.Request = request
+
+	return next.HandleSerialize(ctx, in)
+}
+
 type awsEc2query_serializeOpCancelImportTask struct {
 }
 
@@ -35208,6 +35272,19 @@ func awsEc2query_serializeDocumentAllocationIds(v []string, value query.Value) e
 	return nil
 }
 
+func awsEc2query_serializeDocumentAllowedInstanceTypeSet(v []string, value query.Value) error {
+	if len(v) == 0 {
+		return nil
+	}
+	array := value.Array("Item")
+
+	for i := range v {
+		av := array.Value()
+		av.String(v[i])
+	}
+	return nil
+}
+
 func awsEc2query_serializeDocumentArchitectureTypeSet(v []types.ArchitectureType, value query.Value) error {
 	if len(v) == 0 {
 		return nil
@@ -37724,6 +37801,13 @@ func awsEc2query_serializeDocumentInstanceRequirements(v *types.InstanceRequirem
 		}
 	}
 
+	if v.AllowedInstanceTypes != nil {
+		objectKey := object.FlatKey("AllowedInstanceTypeSet")
+		if err := awsEc2query_serializeDocumentAllowedInstanceTypeSet(v.AllowedInstanceTypes, objectKey); err != nil {
+			return err
+		}
+	}
+
 	if len(v.BareMetal) > 0 {
 		objectKey := object.Key("BareMetal")
 		objectKey.String(string(v.BareMetal))
@@ -37784,6 +37868,13 @@ func awsEc2query_serializeDocumentInstanceRequirements(v *types.InstanceRequirem
 	if v.MemoryMiB != nil {
 		objectKey := object.Key("MemoryMiB")
 		if err := awsEc2query_serializeDocumentMemoryMiB(v.MemoryMiB, objectKey); err != nil {
+			return err
+		}
+	}
+
+	if v.NetworkBandwidthGbps != nil {
+		objectKey := object.Key("NetworkBandwidthGbps")
+		if err := awsEc2query_serializeDocumentNetworkBandwidthGbps(v.NetworkBandwidthGbps, objectKey); err != nil {
 			return err
 		}
 	}
@@ -37866,6 +37957,13 @@ func awsEc2query_serializeDocumentInstanceRequirementsRequest(v *types.InstanceR
 		}
 	}
 
+	if v.AllowedInstanceTypes != nil {
+		objectKey := object.FlatKey("AllowedInstanceType")
+		if err := awsEc2query_serializeDocumentAllowedInstanceTypeSet(v.AllowedInstanceTypes, objectKey); err != nil {
+			return err
+		}
+	}
+
 	if len(v.BareMetal) > 0 {
 		objectKey := object.Key("BareMetal")
 		objectKey.String(string(v.BareMetal))
@@ -37926,6 +38024,13 @@ func awsEc2query_serializeDocumentInstanceRequirementsRequest(v *types.InstanceR
 	if v.MemoryMiB != nil {
 		objectKey := object.Key("MemoryMiB")
 		if err := awsEc2query_serializeDocumentMemoryMiBRequest(v.MemoryMiB, objectKey); err != nil {
+			return err
+		}
+	}
+
+	if v.NetworkBandwidthGbps != nil {
+		objectKey := object.Key("NetworkBandwidthGbps")
+		if err := awsEc2query_serializeDocumentNetworkBandwidthGbpsRequest(v.NetworkBandwidthGbps, objectKey); err != nil {
 			return err
 		}
 	}
@@ -39712,6 +39817,92 @@ func awsEc2query_serializeDocumentNetworkAclIdStringList(v []string, value query
 		av := array.Value()
 		av.String(v[i])
 	}
+	return nil
+}
+
+func awsEc2query_serializeDocumentNetworkBandwidthGbps(v *types.NetworkBandwidthGbps, value query.Value) error {
+	object := value.Object()
+	_ = object
+
+	if v.Max != nil {
+		objectKey := object.Key("Max")
+		switch {
+		case math.IsNaN(*v.Max):
+			objectKey.String("NaN")
+
+		case math.IsInf(*v.Max, 1):
+			objectKey.String("Infinity")
+
+		case math.IsInf(*v.Max, -1):
+			objectKey.String("-Infinity")
+
+		default:
+			objectKey.Double(*v.Max)
+
+		}
+	}
+
+	if v.Min != nil {
+		objectKey := object.Key("Min")
+		switch {
+		case math.IsNaN(*v.Min):
+			objectKey.String("NaN")
+
+		case math.IsInf(*v.Min, 1):
+			objectKey.String("Infinity")
+
+		case math.IsInf(*v.Min, -1):
+			objectKey.String("-Infinity")
+
+		default:
+			objectKey.Double(*v.Min)
+
+		}
+	}
+
+	return nil
+}
+
+func awsEc2query_serializeDocumentNetworkBandwidthGbpsRequest(v *types.NetworkBandwidthGbpsRequest, value query.Value) error {
+	object := value.Object()
+	_ = object
+
+	if v.Max != nil {
+		objectKey := object.Key("Max")
+		switch {
+		case math.IsNaN(*v.Max):
+			objectKey.String("NaN")
+
+		case math.IsInf(*v.Max, 1):
+			objectKey.String("Infinity")
+
+		case math.IsInf(*v.Max, -1):
+			objectKey.String("-Infinity")
+
+		default:
+			objectKey.Double(*v.Max)
+
+		}
+	}
+
+	if v.Min != nil {
+		objectKey := object.Key("Min")
+		switch {
+		case math.IsNaN(*v.Min):
+			objectKey.String("NaN")
+
+		case math.IsInf(*v.Min, 1):
+			objectKey.String("Infinity")
+
+		case math.IsInf(*v.Min, -1):
+			objectKey.String("-Infinity")
+
+		default:
+			objectKey.Double(*v.Min)
+
+		}
+	}
+
 	return nil
 }
 
@@ -45014,6 +45205,23 @@ func awsEc2query_serializeOpDocumentCancelExportTaskInput(v *CancelExportTaskInp
 	if v.ExportTaskId != nil {
 		objectKey := object.Key("ExportTaskId")
 		objectKey.String(*v.ExportTaskId)
+	}
+
+	return nil
+}
+
+func awsEc2query_serializeOpDocumentCancelImageLaunchPermissionInput(v *CancelImageLaunchPermissionInput, value query.Value) error {
+	object := value.Object()
+	_ = object
+
+	if v.DryRun != nil {
+		objectKey := object.Key("DryRun")
+		objectKey.Boolean(*v.DryRun)
+	}
+
+	if v.ImageId != nil {
+		objectKey := object.Key("ImageId")
+		objectKey.String(*v.ImageId)
 	}
 
 	return nil
