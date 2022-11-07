@@ -1,3 +1,11 @@
+# v1.67.0 (2022-11-07)
+
+* **Feature**: This release adds support for two new attributes for attribute-based instance type selection - NetworkBandwidthGbps and AllowedInstanceTypes.
+
+# v1.66.0 (2022-11-04)
+
+* **Feature**: This release adds API support for the recipient of an AMI account share to remove shared AMI launch permissions.
+
 # v1.65.0 (2022-10-31)
 
 * **Feature**: Elastic IP transfer is a new Amazon VPC feature that allows you to transfer your Elastic IP addresses from one AWS Account to another.
