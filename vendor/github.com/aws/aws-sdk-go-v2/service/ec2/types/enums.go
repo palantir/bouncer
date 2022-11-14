@@ -222,6 +222,7 @@ const (
 	AllocationStrategyDiversified                  AllocationStrategy = "diversified"
 	AllocationStrategyCapacityOptimized            AllocationStrategy = "capacityOptimized"
 	AllocationStrategyCapacityOptimizedPrioritized AllocationStrategy = "capacityOptimizedPrioritized"
+	AllocationStrategyPriceCapacityOptimized       AllocationStrategy = "priceCapacityOptimized"
 )
 
 // Values returns all known values for AllocationStrategy. Note that this can be
@@ -233,6 +234,7 @@ func (AllocationStrategy) Values() []AllocationStrategy {
 		"diversified",
 		"capacityOptimized",
 		"capacityOptimizedPrioritized",
+		"priceCapacityOptimized",
 	}
 }
 
@@ -316,6 +318,7 @@ const (
 	ArchitectureTypeX8664    ArchitectureType = "x86_64"
 	ArchitectureTypeArm64    ArchitectureType = "arm64"
 	ArchitectureTypeX8664Mac ArchitectureType = "x86_64_mac"
+	ArchitectureTypeArm64Mac ArchitectureType = "arm64_mac"
 )
 
 // Values returns all known values for ArchitectureType. Note that this can be
@@ -327,6 +330,7 @@ func (ArchitectureType) Values() []ArchitectureType {
 		"x86_64",
 		"arm64",
 		"x86_64_mac",
+		"arm64_mac",
 	}
 }
 
@@ -338,6 +342,7 @@ const (
 	ArchitectureValuesX8664    ArchitectureValues = "x86_64"
 	ArchitectureValuesArm64    ArchitectureValues = "arm64"
 	ArchitectureValuesX8664Mac ArchitectureValues = "x86_64_mac"
+	ArchitectureValuesArm64Mac ArchitectureValues = "arm64_mac"
 )
 
 // Values returns all known values for ArchitectureValues. Note that this can be
@@ -349,6 +354,7 @@ func (ArchitectureValues) Values() []ArchitectureValues {
 		"x86_64",
 		"arm64",
 		"x86_64_mac",
+		"arm64_mac",
 	}
 }
 
@@ -3247,6 +3253,10 @@ const (
 	InstanceTypeR6aMetal        InstanceType = "r6a.metal"
 	InstanceTypeP4de24xlarge    InstanceType = "p4de.24xlarge"
 	InstanceTypeU3tb156xlarge   InstanceType = "u-3tb1.56xlarge"
+	InstanceTypeU18tb1112xlarge InstanceType = "u-18tb1.112xlarge"
+	InstanceTypeU24tb1112xlarge InstanceType = "u-24tb1.112xlarge"
+	InstanceTypeTrn12xlarge     InstanceType = "trn1.2xlarge"
+	InstanceTypeTrn132xlarge    InstanceType = "trn1.32xlarge"
 )
 
 // Values returns all known values for InstanceType. Note that this can be expanded
@@ -3823,6 +3833,10 @@ func (InstanceType) Values() []InstanceType {
 		"r6a.metal",
 		"p4de.24xlarge",
 		"u-3tb1.56xlarge",
+		"u-18tb1.112xlarge",
+		"u-24tb1.112xlarge",
+		"trn1.2xlarge",
+		"trn1.32xlarge",
 	}
 }
 
@@ -5861,6 +5875,7 @@ const (
 	SpotAllocationStrategyDiversified                  SpotAllocationStrategy = "diversified"
 	SpotAllocationStrategyCapacityOptimized            SpotAllocationStrategy = "capacity-optimized"
 	SpotAllocationStrategyCapacityOptimizedPrioritized SpotAllocationStrategy = "capacity-optimized-prioritized"
+	SpotAllocationStrategyPriceCapacityOptimized       SpotAllocationStrategy = "price-capacity-optimized"
 )
 
 // Values returns all known values for SpotAllocationStrategy. Note that this can
@@ -5872,6 +5887,7 @@ func (SpotAllocationStrategy) Values() []SpotAllocationStrategy {
 		"diversified",
 		"capacity-optimized",
 		"capacity-optimized-prioritized",
+		"price-capacity-optimized",
 	}
 }
 
