@@ -6,55 +6,33 @@ import (
 	"context"
 	awsmiddleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
 	"github.com/aws/aws-sdk-go-v2/aws/signer/v4"
-	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/smithy-go/middleware"
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Modifies the specified transit gateway. When you modify a transit gateway, the
-// modified options are applied to new transit gateway attachments only. Your
-// existing transit gateway attachments are not modified.
-func (c *Client) ModifyTransitGateway(ctx context.Context, params *ModifyTransitGatewayInput, optFns ...func(*Options)) (*ModifyTransitGatewayOutput, error) {
+func (c *Client) EnableReachabilityAnalyzerOrganizationSharing(ctx context.Context, params *EnableReachabilityAnalyzerOrganizationSharingInput, optFns ...func(*Options)) (*EnableReachabilityAnalyzerOrganizationSharingOutput, error) {
 	if params == nil {
-		params = &ModifyTransitGatewayInput{}
+		params = &EnableReachabilityAnalyzerOrganizationSharingInput{}
 	}
 
-	result, metadata, err := c.invokeOperation(ctx, "ModifyTransitGateway", params, optFns, c.addOperationModifyTransitGatewayMiddlewares)
+	result, metadata, err := c.invokeOperation(ctx, "EnableReachabilityAnalyzerOrganizationSharing", params, optFns, c.addOperationEnableReachabilityAnalyzerOrganizationSharingMiddlewares)
 	if err != nil {
 		return nil, err
 	}
 
-	out := result.(*ModifyTransitGatewayOutput)
+	out := result.(*EnableReachabilityAnalyzerOrganizationSharingOutput)
 	out.ResultMetadata = metadata
 	return out, nil
 }
 
-type ModifyTransitGatewayInput struct {
-
-	// The ID of the transit gateway.
-	//
-	// This member is required.
-	TransitGatewayId *string
-
-	// The description for the transit gateway.
-	Description *string
-
-	// Checks whether you have the required permissions for the action, without
-	// actually making the request, and provides an error response. If you have the
-	// required permissions, the error response is DryRunOperation. Otherwise, it is
-	// UnauthorizedOperation.
+type EnableReachabilityAnalyzerOrganizationSharingInput struct {
 	DryRun *bool
-
-	// The options to modify.
-	Options *types.ModifyTransitGatewayOptions
 
 	noSmithyDocumentSerde
 }
 
-type ModifyTransitGatewayOutput struct {
-
-	// Information about the transit gateway.
-	TransitGateway *types.TransitGateway
+type EnableReachabilityAnalyzerOrganizationSharingOutput struct {
+	ReturnValue *bool
 
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -62,12 +40,12 @@ type ModifyTransitGatewayOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (c *Client) addOperationModifyTransitGatewayMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	err = stack.Serialize.Add(&awsEc2query_serializeOpModifyTransitGateway{}, middleware.After)
+func (c *Client) addOperationEnableReachabilityAnalyzerOrganizationSharingMiddlewares(stack *middleware.Stack, options Options) (err error) {
+	err = stack.Serialize.Add(&awsEc2query_serializeOpEnableReachabilityAnalyzerOrganizationSharing{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	err = stack.Deserialize.Add(&awsEc2query_deserializeOpModifyTransitGateway{}, middleware.After)
+	err = stack.Deserialize.Add(&awsEc2query_deserializeOpEnableReachabilityAnalyzerOrganizationSharing{}, middleware.After)
 	if err != nil {
 		return err
 	}
@@ -107,10 +85,7 @@ func (c *Client) addOperationModifyTransitGatewayMiddlewares(stack *middleware.S
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
-	if err = addOpModifyTransitGatewayValidationMiddleware(stack); err != nil {
-		return err
-	}
-	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opModifyTransitGateway(options.Region), middleware.Before); err != nil {
+	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opEnableReachabilityAnalyzerOrganizationSharing(options.Region), middleware.Before); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -125,11 +100,11 @@ func (c *Client) addOperationModifyTransitGatewayMiddlewares(stack *middleware.S
 	return nil
 }
 
-func newServiceMetadataMiddleware_opModifyTransitGateway(region string) *awsmiddleware.RegisterServiceMetadata {
+func newServiceMetadataMiddleware_opEnableReachabilityAnalyzerOrganizationSharing(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
 		SigningName:   "ec2",
-		OperationName: "ModifyTransitGateway",
+		OperationName: "EnableReachabilityAnalyzerOrganizationSharing",
 	}
 }
