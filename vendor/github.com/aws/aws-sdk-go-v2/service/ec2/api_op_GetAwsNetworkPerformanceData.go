@@ -10,28 +10,29 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/smithy-go/middleware"
 	smithyhttp "github.com/aws/smithy-go/transport/http"
+	"time"
 )
 
-// Describes a root volume replacement task. For more information, see Replace a
-// root volume
-// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/replace-root.html) in the
-// Amazon Elastic Compute Cloud User Guide.
-func (c *Client) DescribeReplaceRootVolumeTasks(ctx context.Context, params *DescribeReplaceRootVolumeTasksInput, optFns ...func(*Options)) (*DescribeReplaceRootVolumeTasksOutput, error) {
+// Gets network performance data.
+func (c *Client) GetAwsNetworkPerformanceData(ctx context.Context, params *GetAwsNetworkPerformanceDataInput, optFns ...func(*Options)) (*GetAwsNetworkPerformanceDataOutput, error) {
 	if params == nil {
-		params = &DescribeReplaceRootVolumeTasksInput{}
+		params = &GetAwsNetworkPerformanceDataInput{}
 	}
 
-	result, metadata, err := c.invokeOperation(ctx, "DescribeReplaceRootVolumeTasks", params, optFns, c.addOperationDescribeReplaceRootVolumeTasksMiddlewares)
+	result, metadata, err := c.invokeOperation(ctx, "GetAwsNetworkPerformanceData", params, optFns, c.addOperationGetAwsNetworkPerformanceDataMiddlewares)
 	if err != nil {
 		return nil, err
 	}
 
-	out := result.(*DescribeReplaceRootVolumeTasksOutput)
+	out := result.(*GetAwsNetworkPerformanceDataOutput)
 	out.ResultMetadata = metadata
 	return out, nil
 }
 
-type DescribeReplaceRootVolumeTasksInput struct {
+type GetAwsNetworkPerformanceDataInput struct {
+
+	// A list of network performance data queries.
+	DataQueries []types.DataQuery
 
 	// Checks whether you have the required permissions for the action, without
 	// actually making the request, and provides an error response. If you have the
@@ -39,11 +40,9 @@ type DescribeReplaceRootVolumeTasksInput struct {
 	// UnauthorizedOperation.
 	DryRun *bool
 
-	// Filter to use:
-	//
-	// * instance-id - The ID of the instance for which the root volume
-	// replacement task was created.
-	Filters []types.Filter
+	// The ending time for the performance data request. The end time must be formatted
+	// as yyyy-mm-ddThh:mm:ss. For example, 2022-06-12T12:00:00.000Z.
+	EndTime *time.Time
 
 	// The maximum number of results to return with a single call. To retrieve the
 	// remaining results, make another call with the returned nextToken value.
@@ -52,20 +51,21 @@ type DescribeReplaceRootVolumeTasksInput struct {
 	// The token for the next page of results.
 	NextToken *string
 
-	// The ID of the root volume replacement task to view.
-	ReplaceRootVolumeTaskIds []string
+	// The starting time for the performance data request. The starting time must be
+	// formatted as yyyy-mm-ddThh:mm:ss. For example, 2022-06-10T12:00:00.000Z.
+	StartTime *time.Time
 
 	noSmithyDocumentSerde
 }
 
-type DescribeReplaceRootVolumeTasksOutput struct {
+type GetAwsNetworkPerformanceDataOutput struct {
+
+	// The list of data responses.
+	DataResponses []types.DataResponse
 
 	// The token to use to retrieve the next page of results. This value is null when
 	// there are no more results to return.
 	NextToken *string
-
-	// Information about the root volume replacement task.
-	ReplaceRootVolumeTasks []types.ReplaceRootVolumeTask
 
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -73,12 +73,12 @@ type DescribeReplaceRootVolumeTasksOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (c *Client) addOperationDescribeReplaceRootVolumeTasksMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	err = stack.Serialize.Add(&awsEc2query_serializeOpDescribeReplaceRootVolumeTasks{}, middleware.After)
+func (c *Client) addOperationGetAwsNetworkPerformanceDataMiddlewares(stack *middleware.Stack, options Options) (err error) {
+	err = stack.Serialize.Add(&awsEc2query_serializeOpGetAwsNetworkPerformanceData{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	err = stack.Deserialize.Add(&awsEc2query_deserializeOpDescribeReplaceRootVolumeTasks{}, middleware.After)
+	err = stack.Deserialize.Add(&awsEc2query_deserializeOpGetAwsNetworkPerformanceData{}, middleware.After)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (c *Client) addOperationDescribeReplaceRootVolumeTasksMiddlewares(stack *mi
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
-	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opDescribeReplaceRootVolumeTasks(options.Region), middleware.Before); err != nil {
+	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opGetAwsNetworkPerformanceData(options.Region), middleware.Before); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -133,17 +133,17 @@ func (c *Client) addOperationDescribeReplaceRootVolumeTasksMiddlewares(stack *mi
 	return nil
 }
 
-// DescribeReplaceRootVolumeTasksAPIClient is a client that implements the
-// DescribeReplaceRootVolumeTasks operation.
-type DescribeReplaceRootVolumeTasksAPIClient interface {
-	DescribeReplaceRootVolumeTasks(context.Context, *DescribeReplaceRootVolumeTasksInput, ...func(*Options)) (*DescribeReplaceRootVolumeTasksOutput, error)
+// GetAwsNetworkPerformanceDataAPIClient is a client that implements the
+// GetAwsNetworkPerformanceData operation.
+type GetAwsNetworkPerformanceDataAPIClient interface {
+	GetAwsNetworkPerformanceData(context.Context, *GetAwsNetworkPerformanceDataInput, ...func(*Options)) (*GetAwsNetworkPerformanceDataOutput, error)
 }
 
-var _ DescribeReplaceRootVolumeTasksAPIClient = (*Client)(nil)
+var _ GetAwsNetworkPerformanceDataAPIClient = (*Client)(nil)
 
-// DescribeReplaceRootVolumeTasksPaginatorOptions is the paginator options for
-// DescribeReplaceRootVolumeTasks
-type DescribeReplaceRootVolumeTasksPaginatorOptions struct {
+// GetAwsNetworkPerformanceDataPaginatorOptions is the paginator options for
+// GetAwsNetworkPerformanceData
+type GetAwsNetworkPerformanceDataPaginatorOptions struct {
 	// The maximum number of results to return with a single call. To retrieve the
 	// remaining results, make another call with the returned nextToken value.
 	Limit int32
@@ -153,24 +153,24 @@ type DescribeReplaceRootVolumeTasksPaginatorOptions struct {
 	StopOnDuplicateToken bool
 }
 
-// DescribeReplaceRootVolumeTasksPaginator is a paginator for
-// DescribeReplaceRootVolumeTasks
-type DescribeReplaceRootVolumeTasksPaginator struct {
-	options   DescribeReplaceRootVolumeTasksPaginatorOptions
-	client    DescribeReplaceRootVolumeTasksAPIClient
-	params    *DescribeReplaceRootVolumeTasksInput
+// GetAwsNetworkPerformanceDataPaginator is a paginator for
+// GetAwsNetworkPerformanceData
+type GetAwsNetworkPerformanceDataPaginator struct {
+	options   GetAwsNetworkPerformanceDataPaginatorOptions
+	client    GetAwsNetworkPerformanceDataAPIClient
+	params    *GetAwsNetworkPerformanceDataInput
 	nextToken *string
 	firstPage bool
 }
 
-// NewDescribeReplaceRootVolumeTasksPaginator returns a new
-// DescribeReplaceRootVolumeTasksPaginator
-func NewDescribeReplaceRootVolumeTasksPaginator(client DescribeReplaceRootVolumeTasksAPIClient, params *DescribeReplaceRootVolumeTasksInput, optFns ...func(*DescribeReplaceRootVolumeTasksPaginatorOptions)) *DescribeReplaceRootVolumeTasksPaginator {
+// NewGetAwsNetworkPerformanceDataPaginator returns a new
+// GetAwsNetworkPerformanceDataPaginator
+func NewGetAwsNetworkPerformanceDataPaginator(client GetAwsNetworkPerformanceDataAPIClient, params *GetAwsNetworkPerformanceDataInput, optFns ...func(*GetAwsNetworkPerformanceDataPaginatorOptions)) *GetAwsNetworkPerformanceDataPaginator {
 	if params == nil {
-		params = &DescribeReplaceRootVolumeTasksInput{}
+		params = &GetAwsNetworkPerformanceDataInput{}
 	}
 
-	options := DescribeReplaceRootVolumeTasksPaginatorOptions{}
+	options := GetAwsNetworkPerformanceDataPaginatorOptions{}
 	if params.MaxResults != nil {
 		options.Limit = *params.MaxResults
 	}
@@ -179,7 +179,7 @@ func NewDescribeReplaceRootVolumeTasksPaginator(client DescribeReplaceRootVolume
 		fn(&options)
 	}
 
-	return &DescribeReplaceRootVolumeTasksPaginator{
+	return &GetAwsNetworkPerformanceDataPaginator{
 		options:   options,
 		client:    client,
 		params:    params,
@@ -189,12 +189,12 @@ func NewDescribeReplaceRootVolumeTasksPaginator(client DescribeReplaceRootVolume
 }
 
 // HasMorePages returns a boolean indicating whether more pages are available
-func (p *DescribeReplaceRootVolumeTasksPaginator) HasMorePages() bool {
+func (p *GetAwsNetworkPerformanceDataPaginator) HasMorePages() bool {
 	return p.firstPage || (p.nextToken != nil && len(*p.nextToken) != 0)
 }
 
-// NextPage retrieves the next DescribeReplaceRootVolumeTasks page.
-func (p *DescribeReplaceRootVolumeTasksPaginator) NextPage(ctx context.Context, optFns ...func(*Options)) (*DescribeReplaceRootVolumeTasksOutput, error) {
+// NextPage retrieves the next GetAwsNetworkPerformanceData page.
+func (p *GetAwsNetworkPerformanceDataPaginator) NextPage(ctx context.Context, optFns ...func(*Options)) (*GetAwsNetworkPerformanceDataOutput, error) {
 	if !p.HasMorePages() {
 		return nil, fmt.Errorf("no more pages available")
 	}
@@ -208,7 +208,7 @@ func (p *DescribeReplaceRootVolumeTasksPaginator) NextPage(ctx context.Context, 
 	}
 	params.MaxResults = limit
 
-	result, err := p.client.DescribeReplaceRootVolumeTasks(ctx, &params, optFns...)
+	result, err := p.client.GetAwsNetworkPerformanceData(ctx, &params, optFns...)
 	if err != nil {
 		return nil, err
 	}
@@ -227,11 +227,11 @@ func (p *DescribeReplaceRootVolumeTasksPaginator) NextPage(ctx context.Context, 
 	return result, nil
 }
 
-func newServiceMetadataMiddleware_opDescribeReplaceRootVolumeTasks(region string) *awsmiddleware.RegisterServiceMetadata {
+func newServiceMetadataMiddleware_opGetAwsNetworkPerformanceData(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
 		SigningName:   "ec2",
-		OperationName: "DescribeReplaceRootVolumeTasks",
+		OperationName: "GetAwsNetworkPerformanceData",
 	}
 }

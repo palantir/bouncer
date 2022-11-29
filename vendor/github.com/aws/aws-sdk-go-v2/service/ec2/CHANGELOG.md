@@ -1,3 +1,23 @@
+# v1.73.0 (2022-11-29)
+
+* **Feature**: Introduces ENA Express, which uses AWS SRD and dynamic routing to increase throughput and minimize latency, adds support for trust relationships between Reachability Analyzer and AWS Organizations to enable cross-account analysis, and adds support for Infrastructure Performance metric subscriptions.
+
+# v1.72.1 (2022-11-22)
+
+* No change notes available for this release.
+
+# v1.72.0 (2022-11-18)
+
+* **Feature**: This release adds support for copying an Amazon Machine Image's tags when copying an AMI.
+
+# v1.71.0 (2022-11-17)
+
+* **Feature**: This release adds a new optional parameter "privateIpAddress" for the CreateNatGateway API. PrivateIPAddress will allow customers to select a custom Private IPv4 address instead of having it be auto-assigned.
+
+# v1.70.1 (2022-11-16)
+
+* No change notes available for this release.
+
 # v1.70.0 (2022-11-10)
 
 * **Feature**: This release adds a new price capacity optimized allocation strategy for Spot Instances to help customers optimize provisioning of Spot Instances via EC2 Auto Scaling, EC2 Fleet, and Spot Fleet. It allocates Spot Instances based on both spare capacity availability and Spot Instance price.

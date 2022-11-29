@@ -11,24 +11,27 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Rejects a request to associate cross-account subnets with a transit gateway
-// multicast domain.
-func (c *Client) RejectTransitGatewayMulticastDomainAssociations(ctx context.Context, params *RejectTransitGatewayMulticastDomainAssociationsInput, optFns ...func(*Options)) (*RejectTransitGatewayMulticastDomainAssociationsOutput, error) {
+// Enables Infrastructure Performance subscriptions.
+func (c *Client) EnableAwsNetworkPerformanceMetricSubscription(ctx context.Context, params *EnableAwsNetworkPerformanceMetricSubscriptionInput, optFns ...func(*Options)) (*EnableAwsNetworkPerformanceMetricSubscriptionOutput, error) {
 	if params == nil {
-		params = &RejectTransitGatewayMulticastDomainAssociationsInput{}
+		params = &EnableAwsNetworkPerformanceMetricSubscriptionInput{}
 	}
 
-	result, metadata, err := c.invokeOperation(ctx, "RejectTransitGatewayMulticastDomainAssociations", params, optFns, c.addOperationRejectTransitGatewayMulticastDomainAssociationsMiddlewares)
+	result, metadata, err := c.invokeOperation(ctx, "EnableAwsNetworkPerformanceMetricSubscription", params, optFns, c.addOperationEnableAwsNetworkPerformanceMetricSubscriptionMiddlewares)
 	if err != nil {
 		return nil, err
 	}
 
-	out := result.(*RejectTransitGatewayMulticastDomainAssociationsOutput)
+	out := result.(*EnableAwsNetworkPerformanceMetricSubscriptionOutput)
 	out.ResultMetadata = metadata
 	return out, nil
 }
 
-type RejectTransitGatewayMulticastDomainAssociationsInput struct {
+type EnableAwsNetworkPerformanceMetricSubscriptionInput struct {
+
+	// The target Region or Availability Zone that the metric subscription is enabled
+	// for. For example, eu-west-1.
+	Destination *string
 
 	// Checks whether you have the required permissions for the action, without
 	// actually making the request, and provides an error response. If you have the
@@ -36,22 +39,23 @@ type RejectTransitGatewayMulticastDomainAssociationsInput struct {
 	// UnauthorizedOperation.
 	DryRun *bool
 
-	// The IDs of the subnets to associate with the transit gateway multicast domain.
-	SubnetIds []string
+	// The metric used for the enabled subscription.
+	Metric types.MetricType
 
-	// The ID of the transit gateway attachment.
-	TransitGatewayAttachmentId *string
+	// The source Region or Availability Zone that the metric subscription is enabled
+	// for. For example, us-east-1.
+	Source *string
 
-	// The ID of the transit gateway multicast domain.
-	TransitGatewayMulticastDomainId *string
+	// The statistic used for the enabled subscription.
+	Statistic types.StatisticType
 
 	noSmithyDocumentSerde
 }
 
-type RejectTransitGatewayMulticastDomainAssociationsOutput struct {
+type EnableAwsNetworkPerformanceMetricSubscriptionOutput struct {
 
-	// Information about the multicast domain associations.
-	Associations *types.TransitGatewayMulticastDomainAssociations
+	// Indicates whether the subscribe action was successful.
+	Output *bool
 
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -59,12 +63,12 @@ type RejectTransitGatewayMulticastDomainAssociationsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (c *Client) addOperationRejectTransitGatewayMulticastDomainAssociationsMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	err = stack.Serialize.Add(&awsEc2query_serializeOpRejectTransitGatewayMulticastDomainAssociations{}, middleware.After)
+func (c *Client) addOperationEnableAwsNetworkPerformanceMetricSubscriptionMiddlewares(stack *middleware.Stack, options Options) (err error) {
+	err = stack.Serialize.Add(&awsEc2query_serializeOpEnableAwsNetworkPerformanceMetricSubscription{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	err = stack.Deserialize.Add(&awsEc2query_deserializeOpRejectTransitGatewayMulticastDomainAssociations{}, middleware.After)
+	err = stack.Deserialize.Add(&awsEc2query_deserializeOpEnableAwsNetworkPerformanceMetricSubscription{}, middleware.After)
 	if err != nil {
 		return err
 	}
@@ -104,7 +108,7 @@ func (c *Client) addOperationRejectTransitGatewayMulticastDomainAssociationsMidd
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
-	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opRejectTransitGatewayMulticastDomainAssociations(options.Region), middleware.Before); err != nil {
+	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opEnableAwsNetworkPerformanceMetricSubscription(options.Region), middleware.Before); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
@@ -119,11 +123,11 @@ func (c *Client) addOperationRejectTransitGatewayMulticastDomainAssociationsMidd
 	return nil
 }
 
-func newServiceMetadataMiddleware_opRejectTransitGatewayMulticastDomainAssociations(region string) *awsmiddleware.RegisterServiceMetadata {
+func newServiceMetadataMiddleware_opEnableAwsNetworkPerformanceMetricSubscription(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
 		SigningName:   "ec2",
-		OperationName: "RejectTransitGatewayMulticastDomainAssociations",
+		OperationName: "EnableAwsNetworkPerformanceMetricSubscription",
 	}
 }

@@ -594,6 +594,31 @@ type AthenaIntegration struct {
 	noSmithyDocumentSerde
 }
 
+// Describes the ENA Express configuration for the network interface that's
+// attached to the instance.
+type AttachmentEnaSrdSpecification struct {
+
+	// Indicates whether ENA Express is enabled for the network interface that's
+	// attached to the instance.
+	EnaSrdEnabled *bool
+
+	// ENA Express configuration for UDP network traffic.
+	EnaSrdUdpSpecification *AttachmentEnaSrdUdpSpecification
+
+	noSmithyDocumentSerde
+}
+
+// Describes the ENA Express configuration for UDP traffic on the network interface
+// that's attached to the instance.
+type AttachmentEnaSrdUdpSpecification struct {
+
+	// Indicates whether UDP traffic to and from the instance uses ENA Express. To
+	// specify this setting, you must first enable ENA Express.
+	EnaSrdUdpEnabled *bool
+
+	noSmithyDocumentSerde
+}
+
 // Describes a value for a resource attribute that is a Boolean value.
 type AttributeBooleanValue struct {
 
@@ -2214,6 +2239,72 @@ type CustomerGateway struct {
 	noSmithyDocumentSerde
 }
 
+// A query used for retrieving network health data.
+type DataQuery struct {
+
+	// The Region or Availability Zone that's the target for the data query. For
+	// example, eu-north-1.
+	Destination *string
+
+	// A user-defined ID associated with a data query that's returned in the
+	// dataResponse identifying the query. For example, if you set the Id to
+	// MyQuery01in the query, the dataResponse identifies the query as MyQuery01.
+	Id *string
+
+	// The aggregation metric used for the data query. Currently only
+	// aggregation-latency is supported, indicating network latency.
+	Metric MetricType
+
+	// The aggregation period used for the data query.
+	Period PeriodType
+
+	// The Region or Availability Zone that's the source for the data query. For
+	// example, us-east-1.
+	Source *string
+
+	// Metric data aggregations over specified periods of time. The following are the
+	// supported Infrastructure Performance statistics:
+	//
+	// * p50 - The median value of
+	// the metric aggregated over a specified start and end time. For example, a metric
+	// of five_minutes is the median of all the data points gathered within those five
+	// minutes.
+	Statistic StatisticType
+
+	noSmithyDocumentSerde
+}
+
+// The response to a DataQuery.
+type DataResponse struct {
+
+	// The Region or Availability Zone that's the destination for the data query. For
+	// example, eu-west-1.
+	Destination *string
+
+	// The ID passed in the DataQuery.
+	Id *string
+
+	// The metric used for the network performance request. Currently only
+	// aggregate-latency is supported, showing network latency during a specified
+	// period.
+	Metric MetricType
+
+	// A list of MetricPoint objects.
+	MetricPoints []MetricPoint
+
+	// The period used for the network performance request.
+	Period PeriodType
+
+	// The Region or Availability Zone that's the source for the data query. For
+	// example, us-east-1.
+	Source *string
+
+	// The statistic used for the network performance request.
+	Statistic StatisticType
+
+	noSmithyDocumentSerde
+}
+
 // Describes an EC2 Fleet error.
 type DeleteFleetError struct {
 
@@ -3150,6 +3241,42 @@ type EnableFastSnapshotRestoreSuccessItem struct {
 	// * Client.UserInitiated - Lifecycle state transition - The state
 	// successfully transitioned to optimizing, enabled, or disabled.
 	StateTransitionReason *string
+
+	noSmithyDocumentSerde
+}
+
+// ENA Express uses Amazon Web Services Scalable Reliable Datagram (SRD) technology
+// to increase the maximum bandwidth used per stream and minimize tail latency of
+// network traffic between EC2 instances. With ENA Express, you can communicate
+// between two EC2 instances in the same subnet within the same account, or in
+// different accounts. Both sending and receiving instances must have ENA Express
+// enabled. To improve the reliability of network packet delivery, ENA Express
+// reorders network packets on the receiving end by default. However, some
+// UDP-based applications are designed to handle network packets that are out of
+// order to reduce the overhead for packet delivery at the network layer. When ENA
+// Express is enabled, you can specify whether UDP network traffic uses it.
+type EnaSrdSpecification struct {
+
+	// Indicates whether ENA Express is enabled for the network interface.
+	EnaSrdEnabled *bool
+
+	// Configures ENA Express for UDP network traffic.
+	EnaSrdUdpSpecification *EnaSrdUdpSpecification
+
+	noSmithyDocumentSerde
+}
+
+// ENA Express is compatible with both TCP and UDP transport protocols. When it’s
+// enabled, TCP traffic automatically uses it. However, some UDP-based applications
+// are designed to handle network packets that are out of order, without a need for
+// retransmission, such as live video broadcasting or other near-real-time
+// applications. For UDP traffic, you can specify whether to use ENA Express, based
+// on your application environment needs.
+type EnaSrdUdpSpecification struct {
+
+	// Indicates whether UDP traffic uses ENA Express. To specify this setting, you
+	// must first enable ENA Express.
+	EnaSrdUdpEnabled *bool
 
 	noSmithyDocumentSerde
 }
@@ -4793,7 +4920,7 @@ type Image struct {
 	Platform PlatformValues
 
 	// The platform details associated with the billing code of the AMI. For more
-	// information, see Understanding AMI billing
+	// information, see Understand AMI billing information
 	// (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ami-billing-info.html) in
 	// the Amazon Elastic Compute Cloud User Guide.
 	PlatformDetails *string
@@ -8804,7 +8931,7 @@ type LocalGatewayRouteTable struct {
 	// The state of the local gateway route table.
 	State *string
 
-	// Describes a state change.
+	// Information about the state change.
 	StateReason *StateReason
 
 	// The tags assigned to the local gateway route table.
@@ -9033,6 +9160,28 @@ type MemoryMiBRequest struct {
 	// The maximum amount of memory, in MiB. To specify no maximum limit, omit this
 	// parameter.
 	Max *int32
+
+	noSmithyDocumentSerde
+}
+
+// Indicates whether the network was healthy or unhealthy at a particular point.
+// The value is aggregated from the startDate to the endDate. Currently only
+// five_minutes is supported.
+type MetricPoint struct {
+
+	// The end date for the metric point. The ending time must be formatted as
+	// yyyy-mm-ddThh:mm:ss. For example, 2022-06-12T12:00:00.000Z.
+	EndDate *time.Time
+
+	// The start date for the metric point. The starting date for the metric point. The
+	// starting time must be formatted as yyyy-mm-ddThh:mm:ss. For example,
+	// 2022-06-10T12:00:00.000Z.
+	StartDate *time.Time
+
+	// The status of the metric point.
+	Status *string
+
+	Value *float32
 
 	noSmithyDocumentSerde
 }
@@ -9488,6 +9637,12 @@ type NetworkInfo struct {
 	// Indicates whether Elastic Fabric Adapter (EFA) is supported.
 	EfaSupported *bool
 
+	// Indicates whether the instance type supports ENA Express. ENA Express uses
+	// Amazon Web Services Scalable Reliable Datagram (SRD) technology to increase the
+	// maximum bandwidth used per stream and minimize tail latency of network traffic
+	// between EC2 instances.
+	EnaSrdSupported *bool
+
 	// Indicates whether Elastic Network Adapter (ENA) is supported.
 	EnaSupport EnaSupport
 
@@ -9597,6 +9752,7 @@ type NetworkInsightsAccessScopeContent struct {
 
 // Describes a network insights analysis.
 type NetworkInsightsAnalysis struct {
+	AdditionalAccounts []string
 
 	// Potential intermediate components.
 	AlternatePathHints []AlternatePathHint
@@ -9637,6 +9793,8 @@ type NetworkInsightsAnalysis struct {
 	// The status message, if the status is failed.
 	StatusMessage *string
 
+	SuggestedAccounts []string
+
 	// The tags.
 	Tags []Tag
 
@@ -9654,6 +9812,8 @@ type NetworkInsightsPath struct {
 
 	// The Amazon Web Services resource that is the destination of the path.
 	Destination *string
+
+	DestinationArn *string
 
 	// The IP address of the Amazon Web Services resource that is the destination of
 	// the path.
@@ -9673,6 +9833,8 @@ type NetworkInsightsPath struct {
 
 	// The Amazon Web Services resource that is the source of the path.
 	Source *string
+
+	SourceArn *string
 
 	// The IP address of the Amazon Web Services resource that is the source of the
 	// path.
@@ -9820,6 +9982,10 @@ type NetworkInterfaceAttachment struct {
 
 	// The device index of the network interface attachment on the instance.
 	DeviceIndex *int32
+
+	// Configures ENA Express for the network interface that this action attaches to
+	// the instance.
+	EnaSrdSpecification *AttachmentEnaSrdSpecification
 
 	// The ID of the instance.
 	InstanceId *string
@@ -10366,54 +10532,55 @@ type Phase2IntegrityAlgorithmsRequestListValue struct {
 type Placement struct {
 
 	// The affinity setting for the instance on the Dedicated Host. This parameter is
-	// not supported for the ImportInstance
-	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ImportInstance.html)
-	// command. This parameter is not supported by CreateFleet
-	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateFleet).
+	// not supported for CreateFleet
+	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateFleet) or
+	// ImportInstance
+	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ImportInstance.html).
 	Affinity *string
 
 	// The Availability Zone of the instance. If not specified, an Availability Zone
 	// will be automatically chosen for you based on the load balancing criteria for
-	// the Region. This parameter is not supported by CreateFleet
+	// the Region. This parameter is not supported for CreateFleet
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateFleet).
 	AvailabilityZone *string
 
-	// The Group Id of the placement group.
+	// The ID of the placement group that the instance is in. If you specify GroupId,
+	// you can't specify GroupName.
 	GroupId *string
 
-	// The name of the placement group the instance is in.
+	// The name of the placement group that the instance is in. If you specify
+	// GroupName, you can't specify GroupId.
 	GroupName *string
 
 	// The ID of the Dedicated Host on which the instance resides. This parameter is
-	// not supported for the ImportInstance
-	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ImportInstance.html)
-	// command. This parameter is not supported by CreateFleet
-	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateFleet).
+	// not supported for CreateFleet
+	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateFleet) or
+	// ImportInstance
+	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ImportInstance.html).
 	HostId *string
 
 	// The ARN of the host resource group in which to launch the instances. If you
-	// specify a host resource group ARN, omit the Tenancy parameter or set it to host.
-	// This parameter is not supported by CreateFleet
+	// specify this parameter, either omit the Tenancy parameter or set it to host.
+	// This parameter is not supported for CreateFleet
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateFleet).
 	HostResourceGroupArn *string
 
 	// The number of the partition that the instance is in. Valid only if the placement
-	// group strategy is set to partition. This parameter is not supported by
+	// group strategy is set to partition. This parameter is not supported for
 	// CreateFleet
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateFleet).
 	PartitionNumber *int32
 
-	// Reserved for future use. This parameter is not supported by CreateFleet
-	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateFleet).
+	// Reserved for future use.
 	SpreadDomain *string
 
 	// The tenancy of the instance (if the instance is running in a VPC). An instance
-	// with a tenancy of dedicated runs on single-tenant hardware. The host tenancy is
-	// not supported for the ImportInstance
+	// with a tenancy of dedicated runs on single-tenant hardware. This parameter is
+	// not supported for CreateFleet
+	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateFleet). The
+	// host tenancy is not supported for ImportInstance
 	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_ImportInstance.html)
-	// command. This parameter is not supported by CreateFleet
-	// (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateFleet). T3
-	// instances that use the unlimited CPU credit option do not support host tenancy.
+	// or for T3 instances that are configured for the unlimited CPU credit option.
 	Tenancy Tenancy
 
 	noSmithyDocumentSerde
@@ -11970,8 +12137,8 @@ type S3ObjectTag struct {
 type S3Storage struct {
 
 	// The access key ID of the owner of the bucket. Before you specify a value for
-	// your access key ID, review and follow the guidance in Best Practices for
-	// Managing Amazon Web Services Access Keys
+	// your access key ID, review and follow the guidance in Best practices for
+	// managing Amazon Web Services access keys
 	// (https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html).
 	AWSAccessKeyId *string
 
@@ -14086,6 +14253,29 @@ type SubnetIpv6CidrBlockAssociation struct {
 
 	// The state of the CIDR block.
 	Ipv6CidrBlockState *SubnetCidrBlockState
+
+	noSmithyDocumentSerde
+}
+
+// Describes an Infrastructure Performance subscription.
+type Subscription struct {
+
+	// The Region or Availability Zone that's the target for the subscription. For
+	// example, eu-west-1.
+	Destination *string
+
+	// The metric used for the subscription.
+	Metric MetricType
+
+	// The data aggregation time for the subscription.
+	Period PeriodType
+
+	// The Region or Availability Zone that's the source for the subscription. For
+	// example, us-east-1.
+	Source *string
+
+	// The statistic used for the subscription.
+	Statistic StatisticType
 
 	noSmithyDocumentSerde
 }
