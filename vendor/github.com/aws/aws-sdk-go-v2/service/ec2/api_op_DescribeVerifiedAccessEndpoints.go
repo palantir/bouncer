@@ -12,7 +12,7 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Describe Amazon Web Services Verified Access endpoints.
+// Describes the specified Amazon Web Services Verified Access endpoints.
 func (c *Client) DescribeVerifiedAccessEndpoints(ctx context.Context, params *DescribeVerifiedAccessEndpointsInput, optFns ...func(*Options)) (*DescribeVerifiedAccessEndpointsOutput, error) {
 	if params == nil {
 		params = &DescribeVerifiedAccessEndpointsInput{}
@@ -46,13 +46,13 @@ type DescribeVerifiedAccessEndpointsInput struct {
 	// The token for the next page of results.
 	NextToken *string
 
-	// The ID of the Amazon Web Services Verified Access endpoint.
+	// The ID of the Verified Access endpoint.
 	VerifiedAccessEndpointIds []string
 
-	// The ID of the Amazon Web Services Verified Access group.
+	// The ID of the Verified Access group.
 	VerifiedAccessGroupId *string
 
-	// The ID of the Amazon Web Services Verified Access instance.
+	// The ID of the Verified Access instance.
 	VerifiedAccessInstanceId *string
 
 	noSmithyDocumentSerde
@@ -64,7 +64,7 @@ type DescribeVerifiedAccessEndpointsOutput struct {
 	// there are no more results to return.
 	NextToken *string
 
-	// The ID of the Amazon Web Services Verified Access endpoint.
+	// The ID of the Verified Access endpoint.
 	VerifiedAccessEndpoints []types.VerifiedAccessEndpoint
 
 	// Metadata pertaining to the operation's result.
@@ -119,6 +119,9 @@ func (c *Client) addOperationDescribeVerifiedAccessEndpointsMiddlewares(stack *m
 		return err
 	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opDescribeVerifiedAccessEndpoints(options.Region), middleware.Before); err != nil {
+		return err
+	}
+	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {

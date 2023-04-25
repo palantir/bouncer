@@ -30,7 +30,7 @@ func (c *Client) DeleteVerifiedAccessGroup(ctx context.Context, params *DeleteVe
 
 type DeleteVerifiedAccessGroupInput struct {
 
-	// The ID of the Amazon Web Services Verified Access group.
+	// The ID of the Verified Access group.
 	//
 	// This member is required.
 	VerifiedAccessGroupId *string
@@ -51,7 +51,7 @@ type DeleteVerifiedAccessGroupInput struct {
 
 type DeleteVerifiedAccessGroupOutput struct {
 
-	// The ID of the Amazon Web Services Verified Access group.
+	// The ID of the Verified Access group.
 	VerifiedAccessGroup *types.VerifiedAccessGroup
 
 	// Metadata pertaining to the operation's result.
@@ -112,6 +112,9 @@ func (c *Client) addOperationDeleteVerifiedAccessGroupMiddlewares(stack *middlew
 		return err
 	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opDeleteVerifiedAccessGroup(options.Region), middleware.Before); err != nil {
+		return err
+	}
+	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
