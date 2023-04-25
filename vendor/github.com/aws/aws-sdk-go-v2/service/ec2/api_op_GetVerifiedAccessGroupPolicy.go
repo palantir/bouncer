@@ -28,7 +28,7 @@ func (c *Client) GetVerifiedAccessGroupPolicy(ctx context.Context, params *GetVe
 
 type GetVerifiedAccessGroupPolicyInput struct {
 
-	// The ID of the Amazon Web Services Verified Access group.
+	// The ID of the Verified Access group.
 	//
 	// This member is required.
 	VerifiedAccessGroupId *string
@@ -44,7 +44,7 @@ type GetVerifiedAccessGroupPolicyInput struct {
 
 type GetVerifiedAccessGroupPolicyOutput struct {
 
-	// The Amazon Web Services Verified Access policy document.
+	// The Verified Access policy document.
 	PolicyDocument *string
 
 	// The status of the Verified Access policy.
@@ -105,6 +105,9 @@ func (c *Client) addOperationGetVerifiedAccessGroupPolicyMiddlewares(stack *midd
 		return err
 	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opGetVerifiedAccessGroupPolicy(options.Region), middleware.Before); err != nil {
+		return err
+	}
+	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {

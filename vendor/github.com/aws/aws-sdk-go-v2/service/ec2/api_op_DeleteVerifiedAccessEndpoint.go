@@ -30,7 +30,7 @@ func (c *Client) DeleteVerifiedAccessEndpoint(ctx context.Context, params *Delet
 
 type DeleteVerifiedAccessEndpointInput struct {
 
-	// The ID of the Amazon Web Services Verified Access endpoint.
+	// The ID of the Verified Access endpoint.
 	//
 	// This member is required.
 	VerifiedAccessEndpointId *string
@@ -51,7 +51,7 @@ type DeleteVerifiedAccessEndpointInput struct {
 
 type DeleteVerifiedAccessEndpointOutput struct {
 
-	// The ID of the Amazon Web Services Verified Access endpoint.
+	// The ID of the Verified Access endpoint.
 	VerifiedAccessEndpoint *types.VerifiedAccessEndpoint
 
 	// Metadata pertaining to the operation's result.
@@ -112,6 +112,9 @@ func (c *Client) addOperationDeleteVerifiedAccessEndpointMiddlewares(stack *midd
 		return err
 	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opDeleteVerifiedAccessEndpoint(options.Region), middleware.Before); err != nil {
+		return err
+	}
+	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {

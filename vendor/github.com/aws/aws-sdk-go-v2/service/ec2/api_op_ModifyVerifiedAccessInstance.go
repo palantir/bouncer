@@ -12,7 +12,8 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Modifies the configuration of the specified Verified Access instance.
+// Modifies the configuration of the specified Amazon Web Services Verified Access
+// instance.
 func (c *Client) ModifyVerifiedAccessInstance(ctx context.Context, params *ModifyVerifiedAccessInstanceInput, optFns ...func(*Options)) (*ModifyVerifiedAccessInstanceOutput, error) {
 	if params == nil {
 		params = &ModifyVerifiedAccessInstanceInput{}
@@ -30,7 +31,7 @@ func (c *Client) ModifyVerifiedAccessInstance(ctx context.Context, params *Modif
 
 type ModifyVerifiedAccessInstanceInput struct {
 
-	// The ID of the Amazon Web Services Verified Access instance.
+	// The ID of the Verified Access instance.
 	//
 	// This member is required.
 	VerifiedAccessInstanceId *string
@@ -40,7 +41,7 @@ type ModifyVerifiedAccessInstanceInput struct {
 	// .
 	ClientToken *string
 
-	// A description for the Amazon Web Services Verified Access instance.
+	// A description for the Verified Access instance.
 	Description *string
 
 	// Checks whether you have the required permissions for the action, without
@@ -54,7 +55,7 @@ type ModifyVerifiedAccessInstanceInput struct {
 
 type ModifyVerifiedAccessInstanceOutput struct {
 
-	// The ID of the Amazon Web Services Verified Access instance.
+	// The ID of the Verified Access instance.
 	VerifiedAccessInstance *types.VerifiedAccessInstance
 
 	// Metadata pertaining to the operation's result.
@@ -115,6 +116,9 @@ func (c *Client) addOperationModifyVerifiedAccessInstanceMiddlewares(stack *midd
 		return err
 	}
 	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opModifyVerifiedAccessInstance(options.Region), middleware.Before); err != nil {
+		return err
+	}
+	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
 		return err
 	}
 	if err = addRequestIDRetrieverMiddleware(stack); err != nil {
