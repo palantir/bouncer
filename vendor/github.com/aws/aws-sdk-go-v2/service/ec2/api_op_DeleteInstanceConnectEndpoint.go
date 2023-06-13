@@ -11,35 +11,28 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// This action is deprecated. Moves an Elastic IP address from the EC2-Classic
-// platform to the EC2-VPC platform. The Elastic IP address must be allocated to
-// your account for more than 24 hours, and it must not be associated with an
-// instance. After the Elastic IP address is moved, it is no longer available for
-// use in the EC2-Classic platform, unless you move it back using the
-// RestoreAddressToClassic request. You cannot move an Elastic IP address that was
-// originally allocated for use in the EC2-VPC platform to the EC2-Classic
-// platform.
-func (c *Client) MoveAddressToVpc(ctx context.Context, params *MoveAddressToVpcInput, optFns ...func(*Options)) (*MoveAddressToVpcOutput, error) {
+// Deletes the specified EC2 Instance Connect Endpoint.
+func (c *Client) DeleteInstanceConnectEndpoint(ctx context.Context, params *DeleteInstanceConnectEndpointInput, optFns ...func(*Options)) (*DeleteInstanceConnectEndpointOutput, error) {
 	if params == nil {
-		params = &MoveAddressToVpcInput{}
+		params = &DeleteInstanceConnectEndpointInput{}
 	}
 
-	result, metadata, err := c.invokeOperation(ctx, "MoveAddressToVpc", params, optFns, c.addOperationMoveAddressToVpcMiddlewares)
+	result, metadata, err := c.invokeOperation(ctx, "DeleteInstanceConnectEndpoint", params, optFns, c.addOperationDeleteInstanceConnectEndpointMiddlewares)
 	if err != nil {
 		return nil, err
 	}
 
-	out := result.(*MoveAddressToVpcOutput)
+	out := result.(*DeleteInstanceConnectEndpointOutput)
 	out.ResultMetadata = metadata
 	return out, nil
 }
 
-type MoveAddressToVpcInput struct {
+type DeleteInstanceConnectEndpointInput struct {
 
-	// The Elastic IP address.
+	// The ID of the EC2 Instance Connect Endpoint to delete.
 	//
 	// This member is required.
-	PublicIp *string
+	InstanceConnectEndpointId *string
 
 	// Checks whether you have the required permissions for the action, without
 	// actually making the request, and provides an error response. If you have the
@@ -50,13 +43,10 @@ type MoveAddressToVpcInput struct {
 	noSmithyDocumentSerde
 }
 
-type MoveAddressToVpcOutput struct {
+type DeleteInstanceConnectEndpointOutput struct {
 
-	// The allocation ID for the Elastic IP address.
-	AllocationId *string
-
-	// The status of the move of the IP address.
-	Status types.Status
+	// Information about the EC2 Instance Connect Endpoint.
+	InstanceConnectEndpoint *types.Ec2InstanceConnectEndpoint
 
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -64,12 +54,12 @@ type MoveAddressToVpcOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (c *Client) addOperationMoveAddressToVpcMiddlewares(stack *middleware.Stack, options Options) (err error) {
-	err = stack.Serialize.Add(&awsEc2query_serializeOpMoveAddressToVpc{}, middleware.After)
+func (c *Client) addOperationDeleteInstanceConnectEndpointMiddlewares(stack *middleware.Stack, options Options) (err error) {
+	err = stack.Serialize.Add(&awsEc2query_serializeOpDeleteInstanceConnectEndpoint{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	err = stack.Deserialize.Add(&awsEc2query_deserializeOpMoveAddressToVpc{}, middleware.After)
+	err = stack.Deserialize.Add(&awsEc2query_deserializeOpDeleteInstanceConnectEndpoint{}, middleware.After)
 	if err != nil {
 		return err
 	}
@@ -109,10 +99,10 @@ func (c *Client) addOperationMoveAddressToVpcMiddlewares(stack *middleware.Stack
 	if err = smithyhttp.AddCloseResponseBodyMiddleware(stack); err != nil {
 		return err
 	}
-	if err = addOpMoveAddressToVpcValidationMiddleware(stack); err != nil {
+	if err = addOpDeleteInstanceConnectEndpointValidationMiddleware(stack); err != nil {
 		return err
 	}
-	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opMoveAddressToVpc(options.Region), middleware.Before); err != nil {
+	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opDeleteInstanceConnectEndpoint(options.Region), middleware.Before); err != nil {
 		return err
 	}
 	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
@@ -130,11 +120,11 @@ func (c *Client) addOperationMoveAddressToVpcMiddlewares(stack *middleware.Stack
 	return nil
 }
 
-func newServiceMetadataMiddleware_opMoveAddressToVpc(region string) *awsmiddleware.RegisterServiceMetadata {
+func newServiceMetadataMiddleware_opDeleteInstanceConnectEndpoint(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
 		SigningName:   "ec2",
-		OperationName: "MoveAddressToVpc",
+		OperationName: "DeleteInstanceConnectEndpoint",
 	}
 }
