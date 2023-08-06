@@ -1,3 +1,16 @@
+# v1.110.0 (2023-08-03)
+
+* **Feature**: This release adds new parameter isPrimaryIPv6 to  allow assigning an IPv6 address as a primary IPv6 address to a network interface which cannot be changed to give equivalent functionality available for network interfaces with primary IPv4 address.
+
+# v1.109.1 (2023-08-01)
+
+* No change notes available for this release.
+
+# v1.109.0 (2023-07-31)
+
+* **Feature**: Adds support for smithy-modeled endpoint resolution. A new rules-based endpoint resolution will be added to the SDK which will supercede and deprecate existing endpoint resolution. Specifically, EndpointResolver will be deprecated while BaseEndpoint and EndpointResolverV2 will take its place. For more information, please see the Endpoints section in our Developer Guide.
+* **Dependency Update**: Updated to the latest SDK module versions
+
 # v1.108.1 (2023-07-28)
 
 * **Dependency Update**: Updated to the latest SDK module versions
