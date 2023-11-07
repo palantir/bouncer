@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.22.1
-	github.com/aws/aws-sdk-go-v2/config v1.22.0
+	github.com/aws/aws-sdk-go-v2/config v1.22.1
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.34.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.130.0
 	github.com/pkg/errors v0.9.1
