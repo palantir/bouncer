@@ -12,43 +12,26 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Advertises an IPv4 or IPv6 address range that is provisioned for use with your
-// Amazon Web Services resources through bring your own IP addresses (BYOIP). You
-// can perform this operation at most once every 10 seconds, even if you specify
-// different address ranges each time. We recommend that you stop advertising the
-// BYOIP CIDR from other locations when you advertise it from Amazon Web Services.
-// To minimize down time, you can configure your Amazon Web Services resources to
-// use an address from a BYOIP CIDR before it is advertised, and then
-// simultaneously stop advertising it from the current location and start
-// advertising it through Amazon Web Services. It can take a few minutes before
-// traffic to the specified addresses starts routing to Amazon Web Services because
-// of BGP propagation delays. To stop advertising the BYOIP CIDR, use
-// WithdrawByoipCidr .
-func (c *Client) AdvertiseByoipCidr(ctx context.Context, params *AdvertiseByoipCidrInput, optFns ...func(*Options)) (*AdvertiseByoipCidrOutput, error) {
+// Describes your Autonomous System Numbers (ASNs), their provisioning statuses,
+// and the BYOIP CIDRs with which they are associated. For more information, see
+// Tutorial: Bring your ASN to IPAM (https://docs.aws.amazon.com/vpc/latest/ipam/tutorials-byoasn.html)
+// in the Amazon VPC IPAM guide.
+func (c *Client) DescribeIpamByoasn(ctx context.Context, params *DescribeIpamByoasnInput, optFns ...func(*Options)) (*DescribeIpamByoasnOutput, error) {
 	if params == nil {
-		params = &AdvertiseByoipCidrInput{}
+		params = &DescribeIpamByoasnInput{}
 	}
 
-	result, metadata, err := c.invokeOperation(ctx, "AdvertiseByoipCidr", params, optFns, c.addOperationAdvertiseByoipCidrMiddlewares)
+	result, metadata, err := c.invokeOperation(ctx, "DescribeIpamByoasn", params, optFns, c.addOperationDescribeIpamByoasnMiddlewares)
 	if err != nil {
 		return nil, err
 	}
 
-	out := result.(*AdvertiseByoipCidrOutput)
+	out := result.(*DescribeIpamByoasnOutput)
 	out.ResultMetadata = metadata
 	return out, nil
 }
 
-type AdvertiseByoipCidrInput struct {
-
-	// The address range, in CIDR notation. This must be the exact range that you
-	// provisioned. You can't advertise only a portion of the provisioned range.
-	//
-	// This member is required.
-	Cidr *string
-
-	// The public 2-byte or 4-byte ASN that you want to advertise.
-	Asn *string
+type DescribeIpamByoasnInput struct {
 
 	// Checks whether you have the required permissions for the action, without
 	// actually making the request, and provides an error response. If you have the
@@ -56,13 +39,24 @@ type AdvertiseByoipCidrInput struct {
 	// UnauthorizedOperation .
 	DryRun *bool
 
+	// The maximum number of results to return with a single call. To retrieve the
+	// remaining results, make another call with the returned nextToken value.
+	MaxResults *int32
+
+	// The token for the next page of results.
+	NextToken *string
+
 	noSmithyDocumentSerde
 }
 
-type AdvertiseByoipCidrOutput struct {
+type DescribeIpamByoasnOutput struct {
 
-	// Information about the address range.
-	ByoipCidr *types.ByoipCidr
+	// ASN and BYOIP CIDR associations.
+	Byoasns []types.Byoasn
+
+	// The token to use to retrieve the next page of results. This value is null when
+	// there are no more results to return.
+	NextToken *string
 
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -70,19 +64,19 @@ type AdvertiseByoipCidrOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (c *Client) addOperationAdvertiseByoipCidrMiddlewares(stack *middleware.Stack, options Options) (err error) {
+func (c *Client) addOperationDescribeIpamByoasnMiddlewares(stack *middleware.Stack, options Options) (err error) {
 	if err := stack.Serialize.Add(&setOperationInputMiddleware{}, middleware.After); err != nil {
 		return err
 	}
-	err = stack.Serialize.Add(&awsEc2query_serializeOpAdvertiseByoipCidr{}, middleware.After)
+	err = stack.Serialize.Add(&awsEc2query_serializeOpDescribeIpamByoasn{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	err = stack.Deserialize.Add(&awsEc2query_deserializeOpAdvertiseByoipCidr{}, middleware.After)
+	err = stack.Deserialize.Add(&awsEc2query_deserializeOpDescribeIpamByoasn{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	if err := addProtocolFinalizerMiddlewares(stack, options, "AdvertiseByoipCidr"); err != nil {
+	if err := addProtocolFinalizerMiddlewares(stack, options, "DescribeIpamByoasn"); err != nil {
 		return fmt.Errorf("add protocol finalizers: %v", err)
 	}
 
@@ -125,10 +119,7 @@ func (c *Client) addOperationAdvertiseByoipCidrMiddlewares(stack *middleware.Sta
 	if err = addSetLegacyContextSigningOptionsMiddleware(stack); err != nil {
 		return err
 	}
-	if err = addOpAdvertiseByoipCidrValidationMiddleware(stack); err != nil {
-		return err
-	}
-	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opAdvertiseByoipCidr(options.Region), middleware.Before); err != nil {
+	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opDescribeIpamByoasn(options.Region), middleware.Before); err != nil {
 		return err
 	}
 	if err = awsmiddleware.AddRecursionDetection(stack); err != nil {
@@ -149,10 +140,10 @@ func (c *Client) addOperationAdvertiseByoipCidrMiddlewares(stack *middleware.Sta
 	return nil
 }
 
-func newServiceMetadataMiddleware_opAdvertiseByoipCidr(region string) *awsmiddleware.RegisterServiceMetadata {
+func newServiceMetadataMiddleware_opDescribeIpamByoasn(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
-		OperationName: "AdvertiseByoipCidr",
+		OperationName: "DescribeIpamByoasn",
 	}
 }
