@@ -946,6 +946,19 @@ type ByoipCidr struct {
 	// The description of the address range.
 	Description *string
 
+	// If you have Local Zones (https://docs.aws.amazon.com/local-zones/latest/ug/how-local-zones-work.html)
+	// enabled, you can choose a network border group for Local Zones when you
+	// provision and advertise a BYOIPv4 CIDR. Choose the network border group
+	// carefully as the EIP and the Amazon Web Services resource it is associated with
+	// must reside in the same network border group. You can provision BYOIP address
+	// ranges to and advertise them in the following Local Zone network border groups:
+	//   - us-east-1-dfw-2
+	//   - us-west-2-lax-1
+	//   - us-west-2-phx-2
+	// You cannot provision or advertise BYOIPv6 address ranges in Local Zones at this
+	// time.
+	NetworkBorderGroup *string
+
 	// The state of the address pool.
 	State ByoipCidrState
 
@@ -3236,6 +3249,9 @@ type EbsInfo struct {
 // Describes a parameter used to set up an EBS volume in a block device mapping.
 type EbsInstanceBlockDevice struct {
 
+	// The ARN of the Amazon ECS or Fargate task to which the volume is attached.
+	AssociatedResource *string
+
 	// The time stamp when the attachment initiated.
 	AttachTime *time.Time
 
@@ -3247,6 +3263,10 @@ type EbsInstanceBlockDevice struct {
 
 	// The ID of the EBS volume.
 	VolumeId *string
+
+	// The ID of the Amazon Web Services account that owns the volume. This parameter
+	// is returned only for volumes that are attached to Fargate tasks.
+	VolumeOwnerId *string
 
 	noSmithyDocumentSerde
 }
@@ -6238,19 +6258,18 @@ type InstanceMetadataOptionsRequest struct {
 	// Possible values: Integers from 1 to 64
 	HttpPutResponseHopLimit *int32
 
-	// IMDSv2 uses token-backed sessions. Set the use of HTTP tokens to optional (in
-	// other words, set the use of IMDSv2 to optional ) or required (in other words,
-	// set the use of IMDSv2 to required ).
-	//   - optional - When IMDSv2 is optional, you can choose to retrieve instance
-	//   metadata with or without a session token in your request. If you retrieve the
-	//   IAM role credentials without a token, the IMDSv1 role credentials are returned.
-	//   If you retrieve the IAM role credentials using a valid session token, the IMDSv2
-	//   role credentials are returned.
-	//   - required - When IMDSv2 is required, you must send a session token with any
-	//   instance metadata retrieval requests. In this state, retrieving the IAM role
+	// Indicates whether IMDSv2 is required.
+	//   - optional - IMDSv2 is optional. You can choose whether to send a session
+	//   token in your instance metadata retrieval requests. If you retrieve IAM role
+	//   credentials without a session token, you receive the IMDSv1 role credentials. If
+	//   you retrieve IAM role credentials using a valid session token, you receive the
+	//   IMDSv2 role credentials.
+	//   - required - IMDSv2 is required. You must send a session token in your
+	//   instance metadata retrieval requests. With this option, retrieving the IAM role
 	//   credentials always returns IMDSv2 credentials; IMDSv1 credentials are not
 	//   available.
-	// Default: optional
+	// Default: If the value of ImdsSupport for the Amazon Machine Image (AMI) for
+	// your instance is v2.0 , the default is required .
 	HttpTokens HttpTokensState
 
 	// Set to enabled to allow access to instance tags from the instance metadata. Set
@@ -6278,19 +6297,16 @@ type InstanceMetadataOptionsResponse struct {
 	// Possible values: Integers from 1 to 64
 	HttpPutResponseHopLimit *int32
 
-	// IMDSv2 uses token-backed sessions. Indicates whether the use of HTTP tokens is
-	// optional (in other words, indicates whether the use of IMDSv2 is optional ) or
-	// required (in other words, indicates whether the use of IMDSv2 is required ).
-	//   - optional - When IMDSv2 is optional, you can choose to retrieve instance
-	//   metadata with or without a session token in your request. If you retrieve the
-	//   IAM role credentials without a token, the IMDSv1 role credentials are returned.
-	//   If you retrieve the IAM role credentials using a valid session token, the IMDSv2
-	//   role credentials are returned.
-	//   - required - When IMDSv2 is required, you must send a session token with any
-	//   instance metadata retrieval requests. In this state, retrieving the IAM role
+	// Indicates whether IMDSv2 is required.
+	//   - optional - IMDSv2 is optional. You can choose whether to send a session
+	//   token in your instance metadata retrieval requests. If you retrieve IAM role
+	//   credentials without a session token, you receive the IMDSv1 role credentials. If
+	//   you retrieve IAM role credentials using a valid session token, you receive the
+	//   IMDSv2 role credentials.
+	//   - required - IMDSv2 is required. You must send a session token in your
+	//   instance metadata retrieval requests. With this option, retrieving the IAM role
 	//   credentials always returns IMDSv2 credentials; IMDSv1 credentials are not
 	//   available.
-	// Default: optional
 	HttpTokens HttpTokensState
 
 	// Indicates whether access to instance tags from the instance metadata is enabled
@@ -6451,7 +6467,11 @@ type InstanceNetworkInterfaceSpecification struct {
 	// a VPC. The public IP address can only be assigned to a network interface for
 	// eth0, and can only be assigned to a new network interface, not an existing one.
 	// You cannot specify more than one network interface in the request. If launching
-	// into a default subnet, the default value is true .
+	// into a default subnet, the default value is true . Starting on February 1, 2024,
+	// Amazon Web Services will charge for all public IPv4 addresses, including public
+	// IPv4 addresses associated with running instances and Elastic IP addresses. For
+	// more information, see the Public IPv4 Address tab on the Amazon VPC pricing page (http://aws.amazon.com/vpc/pricing/)
+	// .
 	AssociatePublicIpAddress *bool
 
 	// A security group connection tracking specification that enables you to set the
@@ -6615,25 +6635,29 @@ type InstanceRequirements struct {
 
 	// Indicates whether instance types must have accelerators by specific
 	// manufacturers.
-	//   - For instance types with NVIDIA devices, specify nvidia .
-	//   - For instance types with AMD devices, specify amd .
 	//   - For instance types with Amazon Web Services devices, specify
 	//   amazon-web-services .
+	//   - For instance types with AMD devices, specify amd .
+	//   - For instance types with Habana devices, specify habana .
+	//   - For instance types with NVIDIA devices, specify nvidia .
 	//   - For instance types with Xilinx devices, specify xilinx .
 	// Default: Any manufacturer
 	AcceleratorManufacturers []AcceleratorManufacturer
 
 	// The accelerators that must be on the instance type.
+	//   - For instance types with NVIDIA A10G GPUs, specify a10g .
 	//   - For instance types with NVIDIA A100 GPUs, specify a100 .
-	//   - For instance types with NVIDIA V100 GPUs, specify v100 .
-	//   - For instance types with NVIDIA K80 GPUs, specify k80 .
-	//   - For instance types with NVIDIA T4 GPUs, specify t4 .
-	//   - For instance types with NVIDIA M60 GPUs, specify m60 .
-	//   - For instance types with AMD Radeon Pro V520 GPUs, specify radeon-pro-v520 .
-	//   - For instance types with Xilinx VU9P FPGAs, specify vu9p .
+	//   - For instance types with NVIDIA H100 GPUs, specify h100 .
 	//   - For instance types with Amazon Web Services Inferentia chips, specify
 	//   inferentia .
 	//   - For instance types with NVIDIA GRID K520 GPUs, specify k520 .
+	//   - For instance types with NVIDIA K80 GPUs, specify k80 .
+	//   - For instance types with NVIDIA M60 GPUs, specify m60 .
+	//   - For instance types with AMD Radeon Pro V520 GPUs, specify radeon-pro-v520 .
+	//   - For instance types with NVIDIA T4 GPUs, specify t4 .
+	//   - For instance types with NVIDIA T4G GPUs, specify t4g .
+	//   - For instance types with Xilinx VU9P FPGAs, specify vu9p .
+	//   - For instance types with NVIDIA V100 GPUs, specify v100 .
 	// Default: Any accelerator
 	AcceleratorNames []AcceleratorName
 
@@ -6830,25 +6854,29 @@ type InstanceRequirementsRequest struct {
 
 	// Indicates whether instance types must have accelerators by specific
 	// manufacturers.
-	//   - For instance types with NVIDIA devices, specify nvidia .
-	//   - For instance types with AMD devices, specify amd .
 	//   - For instance types with Amazon Web Services devices, specify
 	//   amazon-web-services .
+	//   - For instance types with AMD devices, specify amd .
+	//   - For instance types with Habana devices, specify habana .
+	//   - For instance types with NVIDIA devices, specify nvidia .
 	//   - For instance types with Xilinx devices, specify xilinx .
 	// Default: Any manufacturer
 	AcceleratorManufacturers []AcceleratorManufacturer
 
 	// The accelerators that must be on the instance type.
+	//   - For instance types with NVIDIA A10G GPUs, specify a10g .
 	//   - For instance types with NVIDIA A100 GPUs, specify a100 .
-	//   - For instance types with NVIDIA V100 GPUs, specify v100 .
-	//   - For instance types with NVIDIA K80 GPUs, specify k80 .
-	//   - For instance types with NVIDIA T4 GPUs, specify t4 .
-	//   - For instance types with NVIDIA M60 GPUs, specify m60 .
-	//   - For instance types with AMD Radeon Pro V520 GPUs, specify radeon-pro-v520 .
-	//   - For instance types with Xilinx VU9P FPGAs, specify vu9p .
+	//   - For instance types with NVIDIA H100 GPUs, specify h100 .
 	//   - For instance types with Amazon Web Services Inferentia chips, specify
 	//   inferentia .
 	//   - For instance types with NVIDIA GRID K520 GPUs, specify k520 .
+	//   - For instance types with NVIDIA K80 GPUs, specify k80 .
+	//   - For instance types with NVIDIA M60 GPUs, specify m60 .
+	//   - For instance types with AMD Radeon Pro V520 GPUs, specify radeon-pro-v520 .
+	//   - For instance types with NVIDIA T4 GPUs, specify t4 .
+	//   - For instance types with NVIDIA T4G GPUs, specify t4g .
+	//   - For instance types with Xilinx VU9P FPGAs, specify vu9p .
+	//   - For instance types with NVIDIA V100 GPUs, specify v100 .
 	// Default: Any accelerator
 	AcceleratorNames []AcceleratorName
 
@@ -8980,15 +9008,16 @@ type LaunchTemplateInstanceMetadataOptions struct {
 	// Possible values: Integers from 1 to 64
 	HttpPutResponseHopLimit *int32
 
-	// Indicates whether IMDSv2 is optional or required . optional - When IMDSv2 is
-	// optional, you can choose to retrieve instance metadata with or without a session
-	// token in your request. If you retrieve the IAM role credentials without a token,
-	// the IMDSv1 role credentials are returned. If you retrieve the IAM role
-	// credentials using a valid session token, the IMDSv2 role credentials are
-	// returned. required - When IMDSv2 is required, you must send a session token
-	// with any instance metadata retrieval requests. In this state, retrieving the IAM
-	// role credentials always returns IMDSv2 credentials; IMDSv1 credentials are not
-	// available. Default: optional
+	// Indicates whether IMDSv2 is required.
+	//   - optional - IMDSv2 is optional. You can choose whether to send a session
+	//   token in your instance metadata retrieval requests. If you retrieve IAM role
+	//   credentials without a session token, you receive the IMDSv1 role credentials. If
+	//   you retrieve IAM role credentials using a valid session token, you receive the
+	//   IMDSv2 role credentials.
+	//   - required - IMDSv2 is required. You must send a session token in your
+	//   instance metadata retrieval requests. With this option, retrieving the IAM role
+	//   credentials always returns IMDSv2 credentials; IMDSv1 credentials are not
+	//   available.
 	HttpTokens LaunchTemplateHttpTokensState
 
 	// Set to enabled to allow access to instance tags from the instance metadata. Set
@@ -9025,19 +9054,18 @@ type LaunchTemplateInstanceMetadataOptionsRequest struct {
 	// Possible values: Integers from 1 to 64
 	HttpPutResponseHopLimit *int32
 
-	// IMDSv2 uses token-backed sessions. Set the use of HTTP tokens to optional (in
-	// other words, set the use of IMDSv2 to optional ) or required (in other words,
-	// set the use of IMDSv2 to required ).
-	//   - optional - When IMDSv2 is optional, you can choose to retrieve instance
-	//   metadata with or without a session token in your request. If you retrieve the
-	//   IAM role credentials without a token, the IMDSv1 role credentials are returned.
-	//   If you retrieve the IAM role credentials using a valid session token, the IMDSv2
-	//   role credentials are returned.
-	//   - required - When IMDSv2 is required, you must send a session token with any
-	//   instance metadata retrieval requests. In this state, retrieving the IAM role
+	// Indicates whether IMDSv2 is required.
+	//   - optional - IMDSv2 is optional. You can choose whether to send a session
+	//   token in your instance metadata retrieval requests. If you retrieve IAM role
+	//   credentials without a session token, you receive the IMDSv1 role credentials. If
+	//   you retrieve IAM role credentials using a valid session token, you receive the
+	//   IMDSv2 role credentials.
+	//   - required - IMDSv2 is required. You must send a session token in your
+	//   instance metadata retrieval requests. With this option, retrieving the IAM role
 	//   credentials always returns IMDSv2 credentials; IMDSv1 credentials are not
 	//   available.
-	// Default: optional
+	// Default: If the value of ImdsSupport for the Amazon Machine Image (AMI) for
+	// your instance is v2.0 , the default is required .
 	HttpTokens LaunchTemplateHttpTokensState
 
 	// Set to enabled to allow access to instance tags from the instance metadata. Set
@@ -9060,7 +9088,11 @@ type LaunchTemplateInstanceNetworkInterfaceSpecification struct {
 	AssociateCarrierIpAddress *bool
 
 	// Indicates whether to associate a public IPv4 address with eth0 for a new
-	// network interface.
+	// network interface. Starting on February 1, 2024, Amazon Web Services will charge
+	// for all public IPv4 addresses, including public IPv4 addresses associated with
+	// running instances and Elastic IP addresses. For more information, see the Public
+	// IPv4 Address tab on the Amazon VPC pricing page (http://aws.amazon.com/vpc/pricing/)
+	// .
 	AssociatePublicIpAddress *bool
 
 	// A security group connection tracking specification that enables you to set the
@@ -9148,6 +9180,10 @@ type LaunchTemplateInstanceNetworkInterfaceSpecificationRequest struct {
 	AssociateCarrierIpAddress *bool
 
 	// Associates a public IPv4 address with eth0 for a new network interface.
+	// Starting on February 1, 2024, Amazon Web Services will charge for all public
+	// IPv4 addresses, including public IPv4 addresses associated with running
+	// instances and Elastic IP addresses. For more information, see the Public IPv4
+	// Address tab on the Amazon VPC pricing page (http://aws.amazon.com/vpc/pricing/) .
 	AssociatePublicIpAddress *bool
 
 	// A security group connection tracking specification that enables you to set the
@@ -11928,6 +11964,9 @@ type PrivateIpAddressSpecification struct {
 // Describes the processor used by the instance type.
 type ProcessorInfo struct {
 
+	// The manufacturer of the processor.
+	Manufacturer *string
+
 	// The architectures supported by the instance type.
 	SupportedArchitectures []ArchitectureType
 
@@ -12443,16 +12482,8 @@ type RequestLaunchTemplateData struct {
 	// group IDs instead.
 	SecurityGroups []string
 
-	// The tags to apply to the resources that are created during instance launch. You
-	// can specify tags for the following resources only:
-	//   - Instances
-	//   - Volumes
-	//   - Elastic graphics
-	//   - Spot Instance requests
-	//   - Network interfaces
-	// To tag a resource after it has been created, see CreateTags (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateTags.html)
-	// . To tag the launch template itself, you must use the TagSpecification (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_CreateLaunchTemplate.html)
-	// parameter.
+	// The tags to apply to the resources that are created during instance launch.
+	// These tags are not applied to the launch template.
 	TagSpecifications []LaunchTemplateTagSpecificationRequest
 
 	// The user data to make available to the instance. You must provide
@@ -13568,7 +13599,11 @@ type ScheduledInstancesNetworkInterface struct {
 	// VPC. The public IPv4 address can only be assigned to a network interface for
 	// eth0, and can only be assigned to a new network interface, not an existing one.
 	// You cannot specify more than one network interface in the request. If launching
-	// into a default subnet, the default value is true .
+	// into a default subnet, the default value is true . Starting on February 1, 2024,
+	// Amazon Web Services will charge for all public IPv4 addresses, including public
+	// IPv4 addresses associated with running instances and Elastic IP addresses. For
+	// more information, see the Public IPv4 Address tab on the Amazon VPC pricing page (http://aws.amazon.com/vpc/pricing/)
+	// .
 	AssociatePublicIpAddress *bool
 
 	// Indicates whether to delete the interface when the instance is terminated.
@@ -14651,8 +14686,8 @@ type SpotFleetRequestConfigData struct {
 	// .
 	TagSpecifications []TagSpecification
 
-	// The unit for the target capacity. TargetCapacityUnitType can only be specified
-	// when InstanceRequirements is specified. Default: units (translates to number of
+	// The unit for the target capacity. You can specify this parameter only when
+	// using attribute-based instance type selection. Default: units (the number of
 	// instances)
 	TargetCapacityUnitType TargetCapacityUnitType
 
@@ -15175,8 +15210,8 @@ type StateReason struct {
 	//   - Server.SpotInstanceTermination : The instance was terminated because the
 	//   number of Spot requests with a maximum price equal to or higher than the Spot
 	//   price exceeded available capacity or because of an increase in the Spot price.
-	//   - Client.InstanceInitiatedShutdown : The instance was shut down using the
-	//   shutdown -h command from the instance.
+	//   - Client.InstanceInitiatedShutdown : The instance was shut down from the
+	//   operating system of the instance.
 	//   - Client.InstanceTerminated : The instance was terminated or rebooted during
 	//   AMI creation.
 	//   - Client.InternalError : A client error caused the instance to terminate
@@ -15516,7 +15551,7 @@ type TagSpecification struct {
 // .
 type TargetCapacitySpecification struct {
 
-	// The default TotalTargetCapacity , which is either Spot or On-Demand .
+	// The default target capacity type.
 	DefaultTargetCapacityType DefaultTargetCapacityType
 
 	// The number of On-Demand units to request. If you specify a target capacity for
@@ -15527,12 +15562,10 @@ type TargetCapacitySpecification struct {
 	// for On-Demand units, you cannot specify a target capacity for Spot units.
 	SpotTargetCapacity *int32
 
-	// The unit for the target capacity. TargetCapacityUnitType can only be specified
-	// when InstanceRequirements is specified. Default: units (translates to number of
-	// instances)
+	// The unit for the target capacity.
 	TargetCapacityUnitType TargetCapacityUnitType
 
-	// The number of units to request, filled using DefaultTargetCapacityType .
+	// The number of units to request, filled the default target capacity type.
 	TotalTargetCapacity *int32
 
 	noSmithyDocumentSerde
@@ -15548,18 +15581,18 @@ type TargetCapacitySpecification struct {
 // set a maximum price per hour for the On-Demand Instances and Spot Instances in
 // your request, EC2 Fleet will launch instances until it reaches the maximum
 // amount that you're willing to pay. When the maximum amount you're willing to pay
-// is reached, the fleet stops launching instances even if it hasn’t met the target
+// is reached, the fleet stops launching instances even if it hasn't met the target
 // capacity. The MaxTotalPrice parameters are located in OnDemandOptionsRequest (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_OnDemandOptionsRequest)
 // and SpotOptionsRequest (https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_SpotOptionsRequest)
 // .
 type TargetCapacitySpecificationRequest struct {
 
-	// The number of units to request, filled using DefaultTargetCapacityType .
+	// The number of units to request, filled using the default target capacity type.
 	//
 	// This member is required.
 	TotalTargetCapacity *int32
 
-	// The default TotalTargetCapacity , which is either Spot or On-Demand .
+	// The default target capacity type.
 	DefaultTargetCapacityType DefaultTargetCapacityType
 
 	// The number of On-Demand units to request.
@@ -15568,8 +15601,8 @@ type TargetCapacitySpecificationRequest struct {
 	// The number of Spot units to request.
 	SpotTargetCapacity *int32
 
-	// The unit for the target capacity. TargetCapacityUnitType can only be specified
-	// when InstanceRequirements is specified. Default: units (translates to number of
+	// The unit for the target capacity. You can specify this parameter only when
+	// using attributed-based instance type selection. Default: units (the number of
 	// instances)
 	TargetCapacityUnitType TargetCapacityUnitType
 
@@ -17671,17 +17704,27 @@ type Volume struct {
 // Describes volume attachment details.
 type VolumeAttachment struct {
 
+	// The ARN of the Amazon ECS or Fargate task to which the volume is attached.
+	AssociatedResource *string
+
 	// The time stamp when the attachment initiated.
 	AttachTime *time.Time
 
 	// Indicates whether the EBS volume is deleted on instance termination.
 	DeleteOnTermination *bool
 
-	// The device name.
+	// The device name. If the volume is attached to a Fargate task, this parameter
+	// returns null .
 	Device *string
 
-	// The ID of the instance.
+	// The ID of the instance. If the volume is attached to a Fargate task, this
+	// parameter returns null .
 	InstanceId *string
+
+	// The service principal of Amazon Web Services service that owns the underlying
+	// instance to which the volume is attached. This parameter is returned only for
+	// volumes that are attached to Fargate tasks.
+	InstanceOwningService *string
 
 	// The attachment state of the volume.
 	State VolumeAttachmentState
