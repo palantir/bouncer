@@ -56,7 +56,7 @@ github.com/aws/aws-sdk-go-v2/internal/ini
 github.com/aws/aws-sdk-go-v2/service/autoscaling
 github.com/aws/aws-sdk-go-v2/service/autoscaling/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/autoscaling/types
-# github.com/aws/aws-sdk-go-v2/service/ec2 v1.164.0
+# github.com/aws/aws-sdk-go-v2/service/ec2 v1.164.1
 ## explicit; go 1.20
 github.com/aws/aws-sdk-go-v2/service/ec2
 github.com/aws/aws-sdk-go-v2/service/ec2/internal/endpoints
@@ -181,7 +181,7 @@ github.com/spf13/afero/mem
 # github.com/spf13/cast v1.6.0
 ## explicit; go 1.19
 github.com/spf13/cast
-# github.com/spf13/cobra v1.8.0
+# github.com/spf13/cobra v1.8.1
 ## explicit; go 1.15
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
