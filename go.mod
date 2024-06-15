@@ -6,10 +6,10 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.27.2
 	github.com/aws/aws-sdk-go-v2/config v1.27.18
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.40.11
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.164.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.164.1
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	gopkg.in/go-playground/validator.v9 v9.31.0
