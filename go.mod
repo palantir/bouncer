@@ -1,6 +1,6 @@
 module github.com/palantir/bouncer
 
-go 1.21
+go 1.22.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.30.5
