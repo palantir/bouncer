@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/aws/aws-sdk-go-v2 v1.32.3
 	github.com/aws/aws-sdk-go-v2/config v1.28.1
-	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.46.1
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.47.0
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.187.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
