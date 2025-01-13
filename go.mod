@@ -6,7 +6,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.32.8
 	github.com/aws/aws-sdk-go-v2/config v1.28.10
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.51.4
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.198.3
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.199.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.8.1
