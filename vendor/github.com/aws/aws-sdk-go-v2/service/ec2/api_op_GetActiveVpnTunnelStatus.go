@@ -11,68 +11,48 @@ import (
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Modifies the options for a VPN tunnel in an Amazon Web Services Site-to-Site
-// VPN connection. You can modify multiple options for a tunnel in a single
-// request, but you can only modify one tunnel at a time. For more information, see
-// [Site-to-Site VPN tunnel options for your Site-to-Site VPN connection]in the Amazon Web Services Site-to-Site VPN User Guide.
-//
-// [Site-to-Site VPN tunnel options for your Site-to-Site VPN connection]: https://docs.aws.amazon.com/vpn/latest/s2svpn/VPNTunnels.html
-func (c *Client) ModifyVpnTunnelOptions(ctx context.Context, params *ModifyVpnTunnelOptionsInput, optFns ...func(*Options)) (*ModifyVpnTunnelOptionsOutput, error) {
+// Returns the currently negotiated security parameters for an active VPN tunnel,
+// including IKE version, DH groups, encryption algorithms, and integrity
+// algorithms.
+func (c *Client) GetActiveVpnTunnelStatus(ctx context.Context, params *GetActiveVpnTunnelStatusInput, optFns ...func(*Options)) (*GetActiveVpnTunnelStatusOutput, error) {
 	if params == nil {
-		params = &ModifyVpnTunnelOptionsInput{}
+		params = &GetActiveVpnTunnelStatusInput{}
 	}
 
-	result, metadata, err := c.invokeOperation(ctx, "ModifyVpnTunnelOptions", params, optFns, c.addOperationModifyVpnTunnelOptionsMiddlewares)
+	result, metadata, err := c.invokeOperation(ctx, "GetActiveVpnTunnelStatus", params, optFns, c.addOperationGetActiveVpnTunnelStatusMiddlewares)
 	if err != nil {
 		return nil, err
 	}
 
-	out := result.(*ModifyVpnTunnelOptionsOutput)
+	out := result.(*GetActiveVpnTunnelStatusOutput)
 	out.ResultMetadata = metadata
 	return out, nil
 }
 
-type ModifyVpnTunnelOptionsInput struct {
+type GetActiveVpnTunnelStatusInput struct {
 
-	// The tunnel options to modify.
-	//
-	// This member is required.
-	TunnelOptions *types.ModifyVpnTunnelOptionsSpecification
-
-	// The ID of the Amazon Web Services Site-to-Site VPN connection.
+	// The ID of the VPN connection for which to retrieve the active tunnel status.
 	//
 	// This member is required.
 	VpnConnectionId *string
 
-	// The external IP address of the VPN tunnel.
+	// The external IP address of the VPN tunnel for which to retrieve the active
+	// status.
 	//
 	// This member is required.
 	VpnTunnelOutsideIpAddress *string
 
 	// Checks whether you have the required permissions for the action, without
-	// actually making the request, and provides an error response. If you have the
-	// required permissions, the error response is DryRunOperation . Otherwise, it is
-	// UnauthorizedOperation .
+	// actually making the request.
 	DryRun *bool
-
-	// Specifies the storage mode for the pre-shared key (PSK). Valid values are
-	// Standard (stored in Site-to-Site VPN service) or SecretsManager (stored in
-	// Amazon Web Services Secrets Manager).
-	PreSharedKeyStorage *string
-
-	// Choose whether or not to trigger immediate tunnel replacement. This is only
-	// applicable when turning on or off EnableTunnelLifecycleControl .
-	//
-	// Valid values: True | False
-	SkipTunnelReplacement *bool
 
 	noSmithyDocumentSerde
 }
 
-type ModifyVpnTunnelOptionsOutput struct {
+type GetActiveVpnTunnelStatusOutput struct {
 
-	// Information about the VPN connection.
-	VpnConnection *types.VpnConnection
+	// Information about the current security configuration of the VPN tunnel.
+	ActiveVpnTunnelStatus *types.ActiveVpnTunnelStatus
 
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
@@ -80,19 +60,19 @@ type ModifyVpnTunnelOptionsOutput struct {
 	noSmithyDocumentSerde
 }
 
-func (c *Client) addOperationModifyVpnTunnelOptionsMiddlewares(stack *middleware.Stack, options Options) (err error) {
+func (c *Client) addOperationGetActiveVpnTunnelStatusMiddlewares(stack *middleware.Stack, options Options) (err error) {
 	if err := stack.Serialize.Add(&setOperationInputMiddleware{}, middleware.After); err != nil {
 		return err
 	}
-	err = stack.Serialize.Add(&awsEc2query_serializeOpModifyVpnTunnelOptions{}, middleware.After)
+	err = stack.Serialize.Add(&awsEc2query_serializeOpGetActiveVpnTunnelStatus{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	err = stack.Deserialize.Add(&awsEc2query_deserializeOpModifyVpnTunnelOptions{}, middleware.After)
+	err = stack.Deserialize.Add(&awsEc2query_deserializeOpGetActiveVpnTunnelStatus{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	if err := addProtocolFinalizerMiddlewares(stack, options, "ModifyVpnTunnelOptions"); err != nil {
+	if err := addProtocolFinalizerMiddlewares(stack, options, "GetActiveVpnTunnelStatus"); err != nil {
 		return fmt.Errorf("add protocol finalizers: %v", err)
 	}
 
@@ -147,10 +127,10 @@ func (c *Client) addOperationModifyVpnTunnelOptionsMiddlewares(stack *middleware
 	if err = addCredentialSource(stack, options); err != nil {
 		return err
 	}
-	if err = addOpModifyVpnTunnelOptionsValidationMiddleware(stack); err != nil {
+	if err = addOpGetActiveVpnTunnelStatusValidationMiddleware(stack); err != nil {
 		return err
 	}
-	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opModifyVpnTunnelOptions(options.Region), middleware.Before); err != nil {
+	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opGetActiveVpnTunnelStatus(options.Region), middleware.Before); err != nil {
 		return err
 	}
 	if err = addRecursionDetection(stack); err != nil {
@@ -183,10 +163,10 @@ func (c *Client) addOperationModifyVpnTunnelOptionsMiddlewares(stack *middleware
 	return nil
 }
 
-func newServiceMetadataMiddleware_opModifyVpnTunnelOptions(region string) *awsmiddleware.RegisterServiceMetadata {
+func newServiceMetadataMiddleware_opGetActiveVpnTunnelStatus(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
-		OperationName: "ModifyVpnTunnelOptions",
+		OperationName: "GetActiveVpnTunnelStatus",
 	}
 }
