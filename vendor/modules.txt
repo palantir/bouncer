@@ -25,7 +25,7 @@ github.com/aws/aws-sdk-go-v2/internal/shareddefaults
 github.com/aws/aws-sdk-go-v2/internal/strings
 github.com/aws/aws-sdk-go-v2/internal/sync/singleflight
 github.com/aws/aws-sdk-go-v2/internal/timeconv
-# github.com/aws/aws-sdk-go-v2/config v1.29.14
+# github.com/aws/aws-sdk-go-v2/config v1.29.15
 ## explicit; go 1.22
 github.com/aws/aws-sdk-go-v2/config
 # github.com/aws/aws-sdk-go-v2/credentials v1.17.68
@@ -55,7 +55,7 @@ github.com/aws/aws-sdk-go-v2/internal/ini
 github.com/aws/aws-sdk-go-v2/service/autoscaling
 github.com/aws/aws-sdk-go-v2/service/autoscaling/internal/endpoints
 github.com/aws/aws-sdk-go-v2/service/autoscaling/types
-# github.com/aws/aws-sdk-go-v2/service/ec2 v1.224.0
+# github.com/aws/aws-sdk-go-v2/service/ec2 v1.224.1
 ## explicit; go 1.22
 github.com/aws/aws-sdk-go-v2/service/ec2
 github.com/aws/aws-sdk-go-v2/service/ec2/internal/endpoints
