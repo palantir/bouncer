@@ -127,9 +127,10 @@ github.com/go-viper/mapstructure/v2/internal/errors
 # github.com/inconshreveable/mousetrap v1.1.0
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
-# github.com/leodido/go-urn v1.2.1
-## explicit; go 1.13
+# github.com/leodido/go-urn v1.4.0
+## explicit; go 1.18
 github.com/leodido/go-urn
+github.com/leodido/go-urn/scim/schema
 # github.com/pelletier/go-toml/v2 v2.2.3
 ## explicit; go 1.21.0
 github.com/pelletier/go-toml/v2
