@@ -185,8 +185,8 @@ github.com/stretchr/testify/assert/yaml
 # github.com/subosito/gotenv v1.6.0
 ## explicit; go 1.18
 github.com/subosito/gotenv
-# go.uber.org/atomic v1.9.0
-## explicit; go 1.13
+# go.uber.org/atomic v1.11.0
+## explicit; go 1.18
 go.uber.org/atomic
 # go.uber.org/multierr v1.9.0
 ## explicit; go 1.19
