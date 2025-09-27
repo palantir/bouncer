@@ -113,13 +113,6 @@ github.com/davecgh/go-spew/spew
 ## explicit; go 1.17
 github.com/fsnotify/fsnotify
 github.com/fsnotify/fsnotify/internal
-# github.com/go-playground/locales v0.14.1
-## explicit; go 1.17
-github.com/go-playground/locales
-github.com/go-playground/locales/currency
-# github.com/go-playground/universal-translator v0.18.1
-## explicit; go 1.18
-github.com/go-playground/universal-translator
 # github.com/go-viper/mapstructure/v2 v2.4.0
 ## explicit; go 1.18
 github.com/go-viper/mapstructure/v2
@@ -127,10 +120,6 @@ github.com/go-viper/mapstructure/v2/internal/errors
 # github.com/inconshreveable/mousetrap v1.1.0
 ## explicit; go 1.18
 github.com/inconshreveable/mousetrap
-# github.com/leodido/go-urn v1.4.0
-## explicit; go 1.18
-github.com/leodido/go-urn
-github.com/leodido/go-urn/scim/schema
 # github.com/pelletier/go-toml/v2 v2.2.4
 ## explicit; go 1.21.0
 github.com/pelletier/go-toml/v2
@@ -200,11 +189,6 @@ golang.org/x/text/transform
 golang.org/x/text/unicode/norm
 # gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 ## explicit; go 1.11
-# gopkg.in/go-playground/assert.v1 v1.2.1
-## explicit
-# gopkg.in/go-playground/validator.v9 v9.31.0
-## explicit
-gopkg.in/go-playground/validator.v9
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
