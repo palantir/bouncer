@@ -24,13 +24,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	validator "gopkg.in/go-playground/validator.v9"
 )
 
 var (
 	version     = "unspecified"
 	versionFlag bool
-	validate    *validator.Validate
 )
 
 const killswitchVar = "BOUNCER_KILLSWITCH"
@@ -68,7 +66,6 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	validate = validator.New()
 
 	RootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable Verbose debugging output")
 	err := viper.BindPFlag("verbose", RootCmd.PersistentFlags().Lookup("verbose"))
