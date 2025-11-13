@@ -6,70 +6,71 @@ import (
 	"context"
 	"fmt"
 	awsmiddleware "github.com/aws/aws-sdk-go-v2/aws/middleware"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/smithy-go/middleware"
 	smithyhttp "github.com/aws/smithy-go/transport/http"
 )
 
-// Creates a static route associated with a VPN connection between an existing
-// virtual private gateway and a VPN customer gateway. The static route allows
-// traffic to be routed from the virtual private gateway to the VPN customer
-// gateway.
+// Retrieves the ancestry chain of the specified AMI, tracing its lineage back to
+// the root AMI. For more information, see [AMI ancestry]in Amazon EC2 User Guide.
 //
-// For more information, see [Amazon Web Services Site-to-Site VPN] in the Amazon Web Services Site-to-Site VPN User
-// Guide.
-//
-// [Amazon Web Services Site-to-Site VPN]: https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html
-func (c *Client) CreateVpnConnectionRoute(ctx context.Context, params *CreateVpnConnectionRouteInput, optFns ...func(*Options)) (*CreateVpnConnectionRouteOutput, error) {
+// [AMI ancestry]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ami-ancestry.html
+func (c *Client) GetImageAncestry(ctx context.Context, params *GetImageAncestryInput, optFns ...func(*Options)) (*GetImageAncestryOutput, error) {
 	if params == nil {
-		params = &CreateVpnConnectionRouteInput{}
+		params = &GetImageAncestryInput{}
 	}
 
-	result, metadata, err := c.invokeOperation(ctx, "CreateVpnConnectionRoute", params, optFns, c.addOperationCreateVpnConnectionRouteMiddlewares)
+	result, metadata, err := c.invokeOperation(ctx, "GetImageAncestry", params, optFns, c.addOperationGetImageAncestryMiddlewares)
 	if err != nil {
 		return nil, err
 	}
 
-	out := result.(*CreateVpnConnectionRouteOutput)
+	out := result.(*GetImageAncestryOutput)
 	out.ResultMetadata = metadata
 	return out, nil
 }
 
-// Contains the parameters for CreateVpnConnectionRoute.
-type CreateVpnConnectionRouteInput struct {
+type GetImageAncestryInput struct {
 
-	// The CIDR block associated with the local subnet of the customer network.
+	// The ID of the AMI whose ancestry you want to trace.
 	//
 	// This member is required.
-	DestinationCidrBlock *string
+	ImageId *string
 
-	// The ID of the VPN connection.
-	//
-	// This member is required.
-	VpnConnectionId *string
+	// Checks whether you have the required permissions for the action, without
+	// actually making the request, and provides an error response. If you have the
+	// required permissions, the error response is DryRunOperation . Otherwise, it is
+	// UnauthorizedOperation .
+	DryRun *bool
 
 	noSmithyDocumentSerde
 }
 
-type CreateVpnConnectionRouteOutput struct {
+type GetImageAncestryOutput struct {
+
+	// A list of entries in the AMI ancestry chain, from the specified AMI to the root
+	// AMI.
+	ImageAncestryEntries []types.ImageAncestryEntry
+
 	// Metadata pertaining to the operation's result.
 	ResultMetadata middleware.Metadata
 
 	noSmithyDocumentSerde
 }
 
-func (c *Client) addOperationCreateVpnConnectionRouteMiddlewares(stack *middleware.Stack, options Options) (err error) {
+func (c *Client) addOperationGetImageAncestryMiddlewares(stack *middleware.Stack, options Options) (err error) {
 	if err := stack.Serialize.Add(&setOperationInputMiddleware{}, middleware.After); err != nil {
 		return err
 	}
-	err = stack.Serialize.Add(&awsEc2query_serializeOpCreateVpnConnectionRoute{}, middleware.After)
+	err = stack.Serialize.Add(&awsEc2query_serializeOpGetImageAncestry{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	err = stack.Deserialize.Add(&awsEc2query_deserializeOpCreateVpnConnectionRoute{}, middleware.After)
+	err = stack.Deserialize.Add(&awsEc2query_deserializeOpGetImageAncestry{}, middleware.After)
 	if err != nil {
 		return err
 	}
-	if err := addProtocolFinalizerMiddlewares(stack, options, "CreateVpnConnectionRoute"); err != nil {
+	if err := addProtocolFinalizerMiddlewares(stack, options, "GetImageAncestry"); err != nil {
 		return fmt.Errorf("add protocol finalizers: %v", err)
 	}
 
@@ -124,10 +125,10 @@ func (c *Client) addOperationCreateVpnConnectionRouteMiddlewares(stack *middlewa
 	if err = addCredentialSource(stack, options); err != nil {
 		return err
 	}
-	if err = addOpCreateVpnConnectionRouteValidationMiddleware(stack); err != nil {
+	if err = addOpGetImageAncestryValidationMiddleware(stack); err != nil {
 		return err
 	}
-	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opCreateVpnConnectionRoute(options.Region), middleware.Before); err != nil {
+	if err = stack.Initialize.Add(newServiceMetadataMiddleware_opGetImageAncestry(options.Region), middleware.Before); err != nil {
 		return err
 	}
 	if err = addRecursionDetection(stack); err != nil {
@@ -157,10 +158,10 @@ func (c *Client) addOperationCreateVpnConnectionRouteMiddlewares(stack *middlewa
 	return nil
 }
 
-func newServiceMetadataMiddleware_opCreateVpnConnectionRoute(region string) *awsmiddleware.RegisterServiceMetadata {
+func newServiceMetadataMiddleware_opGetImageAncestry(region string) *awsmiddleware.RegisterServiceMetadata {
 	return &awsmiddleware.RegisterServiceMetadata{
 		Region:        region,
 		ServiceID:     ServiceID,
-		OperationName: "CreateVpnConnectionRoute",
+		OperationName: "GetImageAncestry",
 	}
 }
