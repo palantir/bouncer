@@ -5063,6 +5063,12 @@ const (
 	InstanceTypeX8iMetal48xl       InstanceType = "x8i.metal-48xl"
 	InstanceTypeX8iMetal96xl       InstanceType = "x8i.metal-96xl"
 	InstanceTypeMacM4maxMetal      InstanceType = "mac-m4max.metal"
+	InstanceTypeG7e2xlarge         InstanceType = "g7e.2xlarge"
+	InstanceTypeG7e4xlarge         InstanceType = "g7e.4xlarge"
+	InstanceTypeG7e8xlarge         InstanceType = "g7e.8xlarge"
+	InstanceTypeG7e12xlarge        InstanceType = "g7e.12xlarge"
+	InstanceTypeG7e24xlarge        InstanceType = "g7e.24xlarge"
+	InstanceTypeG7e48xlarge        InstanceType = "g7e.48xlarge"
 )
 
 // Values returns all known values for InstanceType. Note that this can be
@@ -6237,6 +6243,12 @@ func (InstanceType) Values() []InstanceType {
 		"x8i.metal-48xl",
 		"x8i.metal-96xl",
 		"mac-m4max.metal",
+		"g7e.2xlarge",
+		"g7e.4xlarge",
+		"g7e.8xlarge",
+		"g7e.12xlarge",
+		"g7e.24xlarge",
+		"g7e.48xlarge",
 	}
 }
 
