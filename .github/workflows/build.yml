@@ -83,7 +83,7 @@ jobs:
       run: ./godelw dist
 
     - name: Archive distribution
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: dist
         path: |
