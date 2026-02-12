@@ -1,3 +1,7 @@
+# v1.287.0 (2026-02-11)
+
+* **Feature**: R8i instances powered by custom Intel Xeon 6 processors available only on AWS with sustained all-core 3.9 GHz turbo frequency
+
 # v1.286.0 (2026-02-10)
 
 * **Feature**: Amazon Secondary Networks is a networking feature that provides high-performance, low-latency connectivity for specialized workloads.
