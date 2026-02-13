@@ -8389,6 +8389,26 @@ func (NatGatewayState) Values() []NatGatewayState {
 	}
 }
 
+type NestedVirtualizationSpecification string
+
+// Enum values for NestedVirtualizationSpecification
+const (
+	NestedVirtualizationSpecificationEnabled  NestedVirtualizationSpecification = "enabled"
+	NestedVirtualizationSpecificationDisabled NestedVirtualizationSpecification = "disabled"
+)
+
+// Values returns all known values for NestedVirtualizationSpecification. Note
+// that this can be expanded in the future, and so it is only as up to date as the
+// client.
+//
+// The ordering of this slice is not guaranteed to be stable across updates.
+func (NestedVirtualizationSpecification) Values() []NestedVirtualizationSpecification {
+	return []NestedVirtualizationSpecification{
+		"enabled",
+		"disabled",
+	}
+}
+
 type NetworkInterfaceAttribute string
 
 // Enum values for NetworkInterfaceAttribute
@@ -10857,7 +10877,8 @@ type SupportedAdditionalProcessorFeature string
 
 // Enum values for SupportedAdditionalProcessorFeature
 const (
-	SupportedAdditionalProcessorFeatureAmdSevSnp SupportedAdditionalProcessorFeature = "amd-sev-snp"
+	SupportedAdditionalProcessorFeatureAmdSevSnp            SupportedAdditionalProcessorFeature = "amd-sev-snp"
+	SupportedAdditionalProcessorFeatureNestedVirtualization SupportedAdditionalProcessorFeature = "nested-virtualization"
 )
 
 // Values returns all known values for SupportedAdditionalProcessorFeature. Note
@@ -10868,6 +10889,7 @@ const (
 func (SupportedAdditionalProcessorFeature) Values() []SupportedAdditionalProcessorFeature {
 	return []SupportedAdditionalProcessorFeature{
 		"amd-sev-snp",
+		"nested-virtualization",
 	}
 }
 
