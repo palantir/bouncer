@@ -1,3 +1,7 @@
+# v1.288.0 (2026-02-12)
+
+* **Feature**: Launching nested virtualization. This feature allows you to run nested VMs inside virtual (non-bare metal) EC2 instances.
+
 # v1.287.0 (2026-02-11)
 
 * **Feature**: R8i instances powered by custom Intel Xeon 6 processors available only on AWS with sustained all-core 3.9 GHz turbo frequency

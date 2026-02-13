@@ -3219,6 +3219,9 @@ type CpuOptions struct {
 	// The number of CPU cores for the instance.
 	CoreCount *int32
 
+	// Indicates whether the instance is enabled for nested virtualization.
+	NestedVirtualization NestedVirtualizationSpecification
+
 	// The number of threads per CPU core.
 	ThreadsPerCore *int32
 
@@ -3238,6 +3241,12 @@ type CpuOptionsRequest struct {
 
 	// The number of CPU cores for the instance.
 	CoreCount *int32
+
+	// Indicates whether to enable the instance for nested virtualization. Nested
+	// virtualization is supported only on 8th generation Intel-based instance types
+	// (c8i, m8i, r8i, and their flex variants). When nested virtualization is enabled,
+	// Virtual Secure Mode (VSM) is automatically disabled for the instance.
+	NestedVirtualization NestedVirtualizationSpecification
 
 	// The number of threads per CPU core. To disable multithreading for the instance,
 	// specify a value of 1 . Otherwise, specify the default value of 2 .
@@ -12892,6 +12901,9 @@ type LaunchTemplateCpuOptions struct {
 	// The number of CPU cores for the instance.
 	CoreCount *int32
 
+	// Indicates whether the instance is enabled for nested virtualization.
+	NestedVirtualization NestedVirtualizationSpecification
+
 	// The number of threads per CPU core.
 	ThreadsPerCore *int32
 
@@ -12911,6 +12923,12 @@ type LaunchTemplateCpuOptionsRequest struct {
 
 	// The number of CPU cores for the instance.
 	CoreCount *int32
+
+	// Indicates whether to enable the instance for nested virtualization. Nested
+	// virtualization is supported only on 8th generation Intel-based instance types
+	// (c8i, m8i, r8i, and their flex variants). When nested virtualization is enabled,
+	// Virtual Secure Mode (VSM) is automatically disabled for the instance.
+	NestedVirtualization NestedVirtualizationSpecification
 
 	// The number of threads per CPU core. To disable multithreading for the instance,
 	// specify a value of 1 . Otherwise, specify the default value of 2 .
