@@ -859,6 +859,10 @@ type AuthorizationRule struct {
 // Describes Availability Zones, Local Zones, and Wavelength Zones.
 type AvailabilityZone struct {
 
+	// The geography information for the Availability Zone or Local Zone. The
+	// geography is returned as a list.
+	Geography []AvailabilityZoneGeography
+
 	// The long name of the Availability Zone group, Local Zone group, or Wavelength
 	// Zone group.
 	GroupLongName *string
@@ -899,6 +903,10 @@ type AvailabilityZone struct {
 	// The state of the Availability Zone, Local Zone, or Wavelength Zone. The
 	// possible values are available , unavailable , and constrained .
 	State AvailabilityZoneState
+
+	// The sub-geography information for the Availability Zone or Local Zone. The
+	// sub-geography is returned as a list.
+	SubGeography []AvailabilityZoneSubGeography
 
 	// The ID of the Availability Zone, Local Zone, or Wavelength Zone.
 	ZoneId *string
@@ -954,11 +962,29 @@ type AvailabilityZoneAddress struct {
 	noSmithyDocumentSerde
 }
 
+// Describes the geography information for an Availability Zone or Local Zone.
+type AvailabilityZoneGeography struct {
+
+	// The name of the geography, for example, United States of America .
+	Name *string
+
+	noSmithyDocumentSerde
+}
+
 // Describes a message about an Availability Zone, Local Zone, or Wavelength Zone.
 type AvailabilityZoneMessage struct {
 
 	// The message about the Availability Zone, Local Zone, or Wavelength Zone.
 	Message *string
+
+	noSmithyDocumentSerde
+}
+
+// Describes the sub-geography information for an Availability Zone or Local Zone.
+type AvailabilityZoneSubGeography struct {
+
+	// The name of the sub-geography, for example, Oregon.
+	Name *string
 
 	noSmithyDocumentSerde
 }
@@ -17542,6 +17568,9 @@ type Region struct {
 	// The Region service endpoint.
 	Endpoint *string
 
+	// The geography information for the Region. The geography is returned as a list.
+	Geography []RegionGeography
+
 	// The Region opt-in status. The possible values are opt-in-not-required , opted-in
 	// , and not-opted-in .
 	OptInStatus *string
@@ -17565,6 +17594,15 @@ type RegionalSummary struct {
 
 	// The Amazon Web Services Region.
 	RegionName *string
+
+	noSmithyDocumentSerde
+}
+
+// Describes the geography information for a Region.
+type RegionGeography struct {
+
+	// The name of the geography, for example, United States of America .
+	Name *string
 
 	noSmithyDocumentSerde
 }
