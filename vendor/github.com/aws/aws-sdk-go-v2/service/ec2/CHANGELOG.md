@@ -1,3 +1,7 @@
+# v1.290.0 (2026-02-17)
+
+* **Feature**: Add Operator field to CreatePlacementGroup and DescribePlacementGroup APIs.
+
 # v1.289.1 (2026-02-16)
 
 * **Documentation**: Documentation updates for EC2 Secondary Networks
