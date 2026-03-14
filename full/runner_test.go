@@ -26,7 +26,7 @@ import (
 func asgSliceTestConstructor(len int) []*bouncer.ASG {
 	var asgs []*bouncer.ASG
 
-	for i := 0; i < len; i++ {
+	for i := range len {
 		name := fmt.Sprintf("asg-%v", i)
 		asgs = append(asgs, &bouncer.ASG{
 			ASG: &at.AutoScalingGroup{
