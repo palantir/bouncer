@@ -106,13 +106,6 @@ func (r *Runner) ValidatePrereqs(ctx context.Context) error {
 	return nil
 }
 
-func min(a, b int32) int32 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // Run has the meat of the batch job
 func (r *Runner) Run() error {
 	var newDesiredCapacity int32
