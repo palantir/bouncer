@@ -80,6 +80,11 @@ type CreateAutoScalingGroupInput struct {
 	// The instance capacity distribution across Availability Zones.
 	AvailabilityZoneDistribution *types.AvailabilityZoneDistribution
 
+	//  A list of Availability Zone IDs where the Auto Scaling group can launch
+	// instances. You cannot specify both AvailabilityZones and AvailabilityZoneIds in
+	// the same request.
+	AvailabilityZoneIds []string
+
 	//  The policy for Availability Zone impairment.
 	AvailabilityZoneImpairmentPolicy *types.AvailabilityZoneImpairmentPolicy
 

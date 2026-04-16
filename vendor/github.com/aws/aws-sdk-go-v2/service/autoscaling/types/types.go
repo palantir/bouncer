@@ -174,6 +174,9 @@ type AutoScalingGroup struct {
 	// Scaling group.
 	AvailabilityZoneDistribution *AvailabilityZoneDistribution
 
+	//  The Availability Zone IDs where the Auto Scaling group can launch instances.
+	AvailabilityZoneIds []string
+
 	// The Availability Zone impairment policy for the Auto Scaling group.
 	AvailabilityZoneImpairmentPolicy *AvailabilityZoneImpairmentPolicy
 
@@ -331,6 +334,9 @@ type AutoScalingInstanceDetails struct {
 	//
 	// This member is required.
 	ProtectedFromScaleIn *bool
+
+	//  The Availability Zone ID where the instance is located.
+	AvailabilityZoneId *string
 
 	//  The ID of the Amazon Machine Image (AMI) associated with the instance. This
 	// field shows the current AMI ID of the instance's root volume. It may differ from
@@ -930,6 +936,9 @@ type Instance struct {
 	//
 	// This member is required.
 	ProtectedFromScaleIn *bool
+
+	//  The Availability Zone ID where the instance was launched.
+	AvailabilityZoneId *string
 
 	//  The ID of the Amazon Machine Image (AMI) used for the instance's current root
 	// volume. This value reflects the most recent AMI applied to the instance,
