@@ -1,3 +1,7 @@
+# v1.66.0 (2026-04-16)
+
+* **Feature**: This release adds support for specifying Availability Zone IDs as an alternative to Availability Zone names when creating or updating Auto Scaling groups.
+
 # v1.65.0 (2026-03-30)
 
 * **Feature**: Adds support for new instance lifecycle states introduced by the instance lifecycle policy and replace root volume features.
