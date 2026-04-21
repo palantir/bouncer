@@ -2896,6 +2896,9 @@ type ClientVpnEndpoint struct {
 	// IPv4 and IPv6 addressing.
 	TrafficIpAddressType TrafficIpAddressType
 
+	// The Transit Gateway configuration for the Client VPN endpoint.
+	TransitGatewayConfiguration *TransitGatewayConfigurationDescribeEndpointStructure
+
 	// The transport protocol used by the Client VPN endpoint.
 	TransportProtocol TransportProtocol
 
@@ -2940,6 +2943,10 @@ type ClientVpnEndpointStatus struct {
 	//
 	//   - deleted - The Client VPN endpoint has been deleted. The Client VPN endpoint
 	//   cannot accept connections.
+	//
+	//   - pending - The Client VPN endpoint has been created with a Transit Gateway
+	//   configuration and is waiting for the Transit Gateway attachment to be accepted.
+	//   The Client VPN endpoint cannot accept connections.
 	Code ClientVpnEndpointStatusCode
 
 	// A message about the status of the Client VPN endpoint.
@@ -2971,6 +2978,10 @@ type ClientVpnRoute struct {
 
 	// The ID of the subnet through which traffic is routed.
 	TargetSubnet *string
+
+	// The ID of the Transit Gateway attachment, if the route targets a Transit
+	// Gateway.
+	TransitGatewayAttachmentId *string
 
 	// The route type.
 	Type *string
@@ -22524,6 +22535,14 @@ type TargetNetwork struct {
 	// The ID of the association.
 	AssociationId *string
 
+	// The Availability Zone IDs for the target network association, if the Client VPN
+	// endpoint uses a Transit Gateway.
+	AvailabilityZoneIds []string
+
+	// The Availability Zone names for the target network association, if the Client
+	// VPN endpoint uses a Transit Gateway.
+	AvailabilityZones []string
+
 	// The ID of the Client VPN endpoint with which the target network is associated.
 	ClientVpnEndpointId *string
 
@@ -22917,6 +22936,67 @@ type TransitGatewayAttachmentPropagation struct {
 
 	// The ID of the propagation route table.
 	TransitGatewayRouteTableId *string
+
+	noSmithyDocumentSerde
+}
+
+// Describes a Transit Gateway attachment for a Client VPN endpoint.
+type TransitGatewayClientVpnAttachment struct {
+
+	// The ID of the Client VPN endpoint.
+	ClientVpnEndpointId *string
+
+	// The ID of the Amazon Web Services account that owns the Client VPN endpoint.
+	ClientVpnOwnerId *string
+
+	// The date and time the Transit Gateway attachment was created.
+	CreationTime *string
+
+	// The state of the Transit Gateway attachment.
+	State TransitGatewayAttachmentStatusType
+
+	// The ID of the Transit Gateway attachment.
+	TransitGatewayAttachmentId *string
+
+	// The ID of the Transit Gateway.
+	TransitGatewayId *string
+
+	noSmithyDocumentSerde
+}
+
+// Describes the Transit Gateway configuration for a Client VPN endpoint.
+type TransitGatewayConfigurationDescribeEndpointStructure struct {
+
+	// The Availability Zone IDs for the Transit Gateway association.
+	AvailabilityZoneIds []string
+
+	// The Availability Zone names for the Transit Gateway association.
+	AvailabilityZones []string
+
+	// The ID of the Transit Gateway attachment.
+	TransitGatewayAttachmentId *string
+
+	// The ID of the Transit Gateway.
+	TransitGatewayId *string
+
+	noSmithyDocumentSerde
+}
+
+// The Transit Gateway configuration for a Client VPN endpoint.
+type TransitGatewayConfigurationInputStructure struct {
+
+	// The Availability Zone IDs for the Transit Gateway association. You can specify
+	// up to the maximum number of Availability Zones supported by the Transit Gateway.
+	// You cannot specify both AvailabilityZones and AvailabilityZoneIds .
+	AvailabilityZoneIds []string
+
+	// The Availability Zone names for the Transit Gateway association. You can
+	// specify up to the maximum number of Availability Zones supported by the Transit
+	// Gateway. You cannot specify both AvailabilityZones and AvailabilityZoneIds .
+	AvailabilityZones []string
+
+	// The ID of the Transit Gateway to associate with the Client VPN endpoint.
+	TransitGatewayId *string
 
 	noSmithyDocumentSerde
 }
