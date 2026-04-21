@@ -1,3 +1,7 @@
+# v1.298.0 (2026-04-20)
+
+* **Feature**: Added Transit Gateway Integration into AWS Client VPN.
+
 # v1.297.1 (2026-04-17)
 
 * **Dependency Update**: Bump smithy-go to 1.25.0 to support endpointBdd trait
