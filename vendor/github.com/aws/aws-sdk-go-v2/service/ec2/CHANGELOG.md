@@ -1,3 +1,7 @@
+# v1.299.0 (2026-04-22)
+
+* **Feature**: Managed resource visibility settings control whether resources that AWS services provision on your behalf within your AWS account appear in your Amazon console views and API list operations.
+
 # v1.298.0 (2026-04-20)
 
 * **Feature**: Added Transit Gateway Integration into AWS Client VPN.

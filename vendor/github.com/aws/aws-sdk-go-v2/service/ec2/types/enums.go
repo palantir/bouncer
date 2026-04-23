@@ -8144,6 +8144,26 @@ func (ManagedBy) Values() []ManagedBy {
 	}
 }
 
+type ManagedResourceDefaultVisibility string
+
+// Enum values for ManagedResourceDefaultVisibility
+const (
+	ManagedResourceDefaultVisibilityHidden  ManagedResourceDefaultVisibility = "hidden"
+	ManagedResourceDefaultVisibilityVisible ManagedResourceDefaultVisibility = "visible"
+)
+
+// Values returns all known values for ManagedResourceDefaultVisibility. Note that
+// this can be expanded in the future, and so it is only as up to date as the
+// client.
+//
+// The ordering of this slice is not guaranteed to be stable across updates.
+func (ManagedResourceDefaultVisibility) Values() []ManagedResourceDefaultVisibility {
+	return []ManagedResourceDefaultVisibility{
+		"hidden",
+		"visible",
+	}
+}
+
 type MarketType string
 
 // Enum values for MarketType

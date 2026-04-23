@@ -14771,6 +14771,18 @@ type ManagedPrefixList struct {
 	noSmithyDocumentSerde
 }
 
+// Describes the managed resource visibility settings for the account.
+type ManagedResourceVisibilitySettings struct {
+
+	// The default visibility setting for managed resources. A value of hidden
+	// indicates that managed resources are not included in Describe operation
+	// responses by default. A value of visible indicates that managed resources are
+	// included by default.
+	DefaultVisibility ManagedResourceDefaultVisibility
+
+	noSmithyDocumentSerde
+}
+
 // Describes the media accelerators for the instance type.
 type MediaAcceleratorInfo struct {
 
@@ -16536,6 +16548,10 @@ type OperatorRequest struct {
 // Describes whether the resource is managed by a service provider and, if so,
 // describes the service provider that manages it.
 type OperatorResponse struct {
+
+	// If true , the resource is hidden by default based on the managed resource
+	// visibility settings for the account.
+	HiddenByDefault *bool
 
 	// If true , the resource is managed by a service provider.
 	Managed *bool
@@ -25004,6 +25020,10 @@ type VolumeModification struct {
 	// The current modification state.
 	ModificationState VolumeModificationState
 
+	// Describes whether the resource is managed by a service provider and, if so,
+	// describes the service provider that manages it.
+	Operator *OperatorResponse
+
 	// The original IOPS rate of the volume.
 	OriginalIops *int32
 
@@ -25221,6 +25241,9 @@ type VolumeStatusItem struct {
 	//
 	// [Initialize Amazon EBS volumes]: https://docs.aws.amazon.com/ebs/latest/userguide/initalize-volume.html
 	InitializationStatusDetails *InitializationStatusDetails
+
+	// The service provider that manages the resource.
+	Operator *OperatorResponse
 
 	// The Amazon Resource Name (ARN) of the Outpost.
 	OutpostArn *string

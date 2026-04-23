@@ -39708,6 +39708,76 @@ func (m *awsEc2query_serializeOpGetManagedPrefixListEntries) HandleSerialize(ctx
 	return next.HandleSerialize(ctx, in)
 }
 
+type awsEc2query_serializeOpGetManagedResourceVisibility struct {
+}
+
+func (*awsEc2query_serializeOpGetManagedResourceVisibility) ID() string {
+	return "OperationSerializer"
+}
+
+func (m *awsEc2query_serializeOpGetManagedResourceVisibility) HandleSerialize(ctx context.Context, in middleware.SerializeInput, next middleware.SerializeHandler) (
+	out middleware.SerializeOutput, metadata middleware.Metadata, err error,
+) {
+	_, span := tracing.StartSpan(ctx, "OperationSerializer")
+	endTimer := startMetricTimer(ctx, "client.call.serialization_duration")
+	defer endTimer()
+	defer span.End()
+	request, ok := in.Request.(*smithyhttp.Request)
+	if !ok {
+		return out, metadata, &smithy.SerializationError{Err: fmt.Errorf("unknown transport type %T", in.Request)}
+	}
+
+	input, ok := in.Parameters.(*GetManagedResourceVisibilityInput)
+	_ = input
+	if !ok {
+		return out, metadata, &smithy.SerializationError{Err: fmt.Errorf("unknown input parameters type %T", in.Parameters)}
+	}
+
+	operationPath := "/"
+	if len(request.Request.URL.Path) == 0 {
+		request.Request.URL.Path = operationPath
+	} else {
+		request.Request.URL.Path = path.Join(request.Request.URL.Path, operationPath)
+		if request.Request.URL.Path != "/" && operationPath[len(operationPath)-1] == '/' {
+			request.Request.URL.Path += "/"
+		}
+	}
+	request.Request.Method = "POST"
+	httpBindingEncoder, err := httpbinding.NewEncoder(request.URL.Path, request.URL.RawQuery, request.Header)
+	if err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+	httpBindingEncoder.SetHeader("Content-Type").String("application/x-www-form-urlencoded")
+
+	bodyWriter := bytes.NewBuffer(nil)
+	bodyEncoder := query.NewEncoder(bodyWriter)
+	body := bodyEncoder.Object()
+	body.Key("Action").String("GetManagedResourceVisibility")
+	body.Key("Version").String("2016-11-15")
+
+	if err := awsEc2query_serializeOpDocumentGetManagedResourceVisibilityInput(input, bodyEncoder.Value); err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+
+	err = bodyEncoder.Encode()
+	if err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+
+	if request, err = request.SetStream(bytes.NewReader(bodyWriter.Bytes())); err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+
+	if request.Request, err = httpBindingEncoder.Encode(request.Request); err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+	in.Request = request
+
+	endTimer()
+	span.End()
+	return next.HandleSerialize(ctx, in)
+}
+
 type awsEc2query_serializeOpGetNetworkInsightsAccessScopeAnalysisFindings struct {
 }
 
@@ -44796,6 +44866,76 @@ func (m *awsEc2query_serializeOpModifyManagedPrefixList) HandleSerialize(ctx con
 	body.Key("Version").String("2016-11-15")
 
 	if err := awsEc2query_serializeOpDocumentModifyManagedPrefixListInput(input, bodyEncoder.Value); err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+
+	err = bodyEncoder.Encode()
+	if err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+
+	if request, err = request.SetStream(bytes.NewReader(bodyWriter.Bytes())); err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+
+	if request.Request, err = httpBindingEncoder.Encode(request.Request); err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+	in.Request = request
+
+	endTimer()
+	span.End()
+	return next.HandleSerialize(ctx, in)
+}
+
+type awsEc2query_serializeOpModifyManagedResourceVisibility struct {
+}
+
+func (*awsEc2query_serializeOpModifyManagedResourceVisibility) ID() string {
+	return "OperationSerializer"
+}
+
+func (m *awsEc2query_serializeOpModifyManagedResourceVisibility) HandleSerialize(ctx context.Context, in middleware.SerializeInput, next middleware.SerializeHandler) (
+	out middleware.SerializeOutput, metadata middleware.Metadata, err error,
+) {
+	_, span := tracing.StartSpan(ctx, "OperationSerializer")
+	endTimer := startMetricTimer(ctx, "client.call.serialization_duration")
+	defer endTimer()
+	defer span.End()
+	request, ok := in.Request.(*smithyhttp.Request)
+	if !ok {
+		return out, metadata, &smithy.SerializationError{Err: fmt.Errorf("unknown transport type %T", in.Request)}
+	}
+
+	input, ok := in.Parameters.(*ModifyManagedResourceVisibilityInput)
+	_ = input
+	if !ok {
+		return out, metadata, &smithy.SerializationError{Err: fmt.Errorf("unknown input parameters type %T", in.Parameters)}
+	}
+
+	operationPath := "/"
+	if len(request.Request.URL.Path) == 0 {
+		request.Request.URL.Path = operationPath
+	} else {
+		request.Request.URL.Path = path.Join(request.Request.URL.Path, operationPath)
+		if request.Request.URL.Path != "/" && operationPath[len(operationPath)-1] == '/' {
+			request.Request.URL.Path += "/"
+		}
+	}
+	request.Request.Method = "POST"
+	httpBindingEncoder, err := httpbinding.NewEncoder(request.URL.Path, request.URL.RawQuery, request.Header)
+	if err != nil {
+		return out, metadata, &smithy.SerializationError{Err: err}
+	}
+	httpBindingEncoder.SetHeader("Content-Type").String("application/x-www-form-urlencoded")
+
+	bodyWriter := bytes.NewBuffer(nil)
+	bodyEncoder := query.NewEncoder(bodyWriter)
+	body := bodyEncoder.Object()
+	body.Key("Action").String("ModifyManagedResourceVisibility")
+	body.Key("Version").String("2016-11-15")
+
+	if err := awsEc2query_serializeOpDocumentModifyManagedResourceVisibilityInput(input, bodyEncoder.Value); err != nil {
 		return out, metadata, &smithy.SerializationError{Err: err}
 	}
 
@@ -75851,6 +75991,11 @@ func awsEc2query_serializeOpDocumentDescribeInstancesInput(v *DescribeInstancesI
 		}
 	}
 
+	if v.IncludeManagedResources != nil {
+		objectKey := object.Key("IncludeManagedResources")
+		objectKey.Boolean(*v.IncludeManagedResources)
+	}
+
 	if v.InstanceIds != nil {
 		objectKey := object.FlatKey("InstanceId")
 		if err := awsEc2query_serializeDocumentInstanceIdStringList(v.InstanceIds, objectKey); err != nil {
@@ -75972,6 +76117,11 @@ func awsEc2query_serializeOpDocumentDescribeInstanceStatusInput(v *DescribeInsta
 	if v.IncludeAllInstances != nil {
 		objectKey := object.Key("IncludeAllInstances")
 		objectKey.Boolean(*v.IncludeAllInstances)
+	}
+
+	if v.IncludeManagedResources != nil {
+		objectKey := object.Key("IncludeManagedResources")
+		objectKey.Boolean(*v.IncludeManagedResources)
 	}
 
 	if v.InstanceIds != nil {
@@ -76584,6 +76734,11 @@ func awsEc2query_serializeOpDocumentDescribeLaunchTemplatesInput(v *DescribeLaun
 		}
 	}
 
+	if v.IncludeManagedResources != nil {
+		objectKey := object.Key("IncludeManagedResources")
+		objectKey.Boolean(*v.IncludeManagedResources)
+	}
+
 	if v.LaunchTemplateIds != nil {
 		objectKey := object.FlatKey("LaunchTemplateId")
 		if err := awsEc2query_serializeDocumentLaunchTemplateIdStringList(v.LaunchTemplateIds, objectKey); err != nil {
@@ -76625,6 +76780,11 @@ func awsEc2query_serializeOpDocumentDescribeLaunchTemplateVersionsInput(v *Descr
 		if err := awsEc2query_serializeDocumentFilterList(v.Filters, objectKey); err != nil {
 			return err
 		}
+	}
+
+	if v.IncludeManagedResources != nil {
+		objectKey := object.Key("IncludeManagedResources")
+		objectKey.Boolean(*v.IncludeManagedResources)
 	}
 
 	if v.LaunchTemplateId != nil {
@@ -77376,6 +77536,11 @@ func awsEc2query_serializeOpDocumentDescribeNetworkInterfacesInput(v *DescribeNe
 		if err := awsEc2query_serializeDocumentFilterList(v.Filters, objectKey); err != nil {
 			return err
 		}
+	}
+
+	if v.IncludeManagedResources != nil {
+		objectKey := object.Key("IncludeManagedResources")
+		objectKey.Boolean(*v.IncludeManagedResources)
 	}
 
 	if v.MaxResults != nil {
@@ -79565,6 +79730,11 @@ func awsEc2query_serializeOpDocumentDescribeVolumesInput(v *DescribeVolumesInput
 		}
 	}
 
+	if v.IncludeManagedResources != nil {
+		objectKey := object.Key("IncludeManagedResources")
+		objectKey.Boolean(*v.IncludeManagedResources)
+	}
+
 	if v.MaxResults != nil {
 		objectKey := object.Key("MaxResults")
 		objectKey.Integer(*v.MaxResults)
@@ -79635,6 +79805,11 @@ func awsEc2query_serializeOpDocumentDescribeVolumeStatusInput(v *DescribeVolumeS
 		if err := awsEc2query_serializeDocumentFilterList(v.Filters, objectKey); err != nil {
 			return err
 		}
+	}
+
+	if v.IncludeManagedResources != nil {
+		objectKey := object.Key("IncludeManagedResources")
+		objectKey.Boolean(*v.IncludeManagedResources)
 	}
 
 	if v.MaxResults != nil {
@@ -82950,6 +83125,18 @@ func awsEc2query_serializeOpDocumentGetManagedPrefixListEntriesInput(v *GetManag
 	return nil
 }
 
+func awsEc2query_serializeOpDocumentGetManagedResourceVisibilityInput(v *GetManagedResourceVisibilityInput, value query.Value) error {
+	object := value.Object()
+	_ = object
+
+	if v.DryRun != nil {
+		objectKey := object.Key("DryRun")
+		objectKey.Boolean(*v.DryRun)
+	}
+
+	return nil
+}
+
 func awsEc2query_serializeOpDocumentGetNetworkInsightsAccessScopeAnalysisFindingsInput(v *GetNetworkInsightsAccessScopeAnalysisFindingsInput, value query.Value) error {
 	object := value.Object()
 	_ = object
@@ -85557,6 +85744,23 @@ func awsEc2query_serializeOpDocumentModifyManagedPrefixListInput(v *ModifyManage
 		if err := awsEc2query_serializeDocumentRemovePrefixListEntries(v.RemoveEntries, objectKey); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func awsEc2query_serializeOpDocumentModifyManagedResourceVisibilityInput(v *ModifyManagedResourceVisibilityInput, value query.Value) error {
+	object := value.Object()
+	_ = object
+
+	if len(v.DefaultVisibility) > 0 {
+		objectKey := object.Key("DefaultVisibility")
+		objectKey.String(string(v.DefaultVisibility))
+	}
+
+	if v.DryRun != nil {
+		objectKey := object.Key("DryRun")
+		objectKey.Boolean(*v.DryRun)
 	}
 
 	return nil
