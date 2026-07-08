@@ -1,3 +1,7 @@
+# v1.313.0 (2026-07-07)
+
+* **Feature**: This launch surfaces the public SSM parameter associated with public AMIs in the AMI metadata.
+
 # v1.312.0 (2026-07-06)
 
 * **Feature**: Add request serialization snapshot tests.

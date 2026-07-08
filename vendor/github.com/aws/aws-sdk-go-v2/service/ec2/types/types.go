@@ -7764,6 +7764,10 @@ type Image struct {
 	// explicit launch permissions.
 	Public *bool
 
+	// The name of the public Systems Manager parameter that resolves to this AMI,
+	// under the aws/service/ namespace.
+	PublicSsmParameterName *string
+
 	// The RAM disk associated with the image, if any. Only applicable for machine
 	// images.
 	RamdiskId *string
