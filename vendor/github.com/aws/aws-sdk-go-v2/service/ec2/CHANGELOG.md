@@ -1,3 +1,7 @@
+# v1.314.0 (2026-07-08)
+
+* **Feature**: Replace Root Volume now supports a VolumeId parameter. This allows the customer to pass in a pre-prepared volume as the target root volume for an RRV workflow.
+
 # v1.313.0 (2026-07-07)
 
 * **Feature**: This launch surfaces the public SSM parameter associated with public AMIs in the AMI metadata.
