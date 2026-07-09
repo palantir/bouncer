@@ -70584,6 +70584,11 @@ func awsEc2query_serializeOpDocumentCreateReplaceRootVolumeTaskInput(v *CreateRe
 		}
 	}
 
+	if v.VolumeId != nil {
+		objectKey := object.Key("VolumeId")
+		objectKey.String(*v.VolumeId)
+	}
+
 	if v.VolumeInitializationRate != nil {
 		objectKey := object.Key("VolumeInitializationRate")
 		objectKey.Long(*v.VolumeInitializationRate)
