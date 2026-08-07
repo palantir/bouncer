@@ -7,8 +7,8 @@ toolchain go1.26.5
 require (
 	github.com/aws/aws-sdk-go-v2 v1.43.4
 	github.com/aws/aws-sdk-go-v2/config v1.32.35
-	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.70.4
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.319.1
+	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.71.0
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.320.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
