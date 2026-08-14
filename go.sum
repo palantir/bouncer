@@ -12,8 +12,8 @@ github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.36 h1:A4N2f4YPcST0v+dWtX
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.36/go.mod h1:B/Qr859uxWUEfZeGotK5KAEoof4Q9YWgNtPSwV6jcyk=
 github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.37 h1:oyd3ke4V9AhKcRR7rRgxk1VyI+DjK2CBQtbxh3OkdaA=
 github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.37/go.mod h1:aA9D7SqfG9IC1b7FLD7Iyc8Q4JN0a8gHhNjN4zPlIaI=
-github.com/aws/aws-sdk-go-v2/service/autoscaling v1.71.1 h1:DpVyqheZBS9LX1iuY1JHzbXCBjyQQV3acQSgiXJmZhM=
-github.com/aws/aws-sdk-go-v2/service/autoscaling v1.71.1/go.mod h1:CttKcJwdqoiKLmmfPTTDj3DoBGhwEKzl/1YNQgNjxjg=
+github.com/aws/aws-sdk-go-v2/service/autoscaling v1.72.0 h1:mf/fEohgDVAdn88jaJjw5Q706jvuImdNOeDo9GWo0+g=
+github.com/aws/aws-sdk-go-v2/service/autoscaling v1.72.0/go.mod h1:CttKcJwdqoiKLmmfPTTDj3DoBGhwEKzl/1YNQgNjxjg=
 github.com/aws/aws-sdk-go-v2/service/ec2 v1.321.1 h1:rywWzHJUn9975OI1crMvzPzCPnwm1n5yVmU0HDc/izE=
 github.com/aws/aws-sdk-go-v2/service/ec2 v1.321.1/go.mod h1:r6DvSY3Gc51qW84EFQ175rEriqyz9cIOU9zxAGSnb7A=
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.16 h1:iE4NGbvqUZnHDqddQAauZzCILYtFjOHwRM5MOOKLB5A=
